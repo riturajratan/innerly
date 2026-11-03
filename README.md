@@ -1,5 +1,7 @@
 # Innerly
 
+Live site: https://www.riturajratan.com/innerly/
+
 A static, browser-local personality reflection experience. The assessment has 45 original questions, five dimensions, a short report, and a full report opened by a button. No payment is collected. The full report is free for now; a future $1 checkout would require a payment provider and server-side access control.
 
 ## Run locally
@@ -33,3 +35,7 @@ Chart checks: `node --test tests/charts.test.mjs`.
 ## GitHub Pages deployment
 
 The Pages workflow runs the checks and deploys `dist/` after a push to `main`. It can also be run manually from the repository's Actions tab. Repository Settings → Pages uses GitHub Actions as the publishing source. The public site does not require ChatGPT sign-in.
+
+## Quick assessment navigation
+
+Use Last question to jump directly to question 45, or Questions to choose any saved question. Answered questions are marked in the picker. When all 45 answers are present, Go to results opens the report from any question. Filling the last unanswered question also finishes automatically, even when that question is in the middle of the assessment.
