@@ -29,3 +29,7 @@ Report logic checks: `node --test tests/report.test.mjs`.
 Full reports include Bar, Pie, and Line tabs alongside the profile map and activity donut. Bars use independent category scores. Pie slices count the five categories in left/mixed/right interpretation bands; they are not percentages of a person. Line points come only from compatible saved assessments up to the viewed report, with at most eight points. A first assessment renders a single point, without an invented trend. Graph selection is linked to category suggestions, and printing expands all chart panels.
 
 Chart checks: `node --test tests/charts.test.mjs`.
+
+## GitHub Pages deployment
+
+The Pages workflow runs the checks and deploys `dist/` after a push to `main`. It can also be run manually from the repository's Actions tab. Repository Settings → Pages uses GitHub Actions as the publishing source. The public site does not require ChatGPT sign-in.
