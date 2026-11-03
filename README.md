@@ -39,3 +39,7 @@ The Pages workflow runs the checks and deploys `dist/` after a push to `main`. I
 ## Quick assessment navigation
 
 Use Last question to jump directly to question 45, or Questions to choose any saved question. Answered questions are marked in the picker. When all 45 answers are present, Go to results opens the report from any question. Filling the last unanswered question also finishes automatically, even when that question is in the middle of the assessment.
+
+## Calm progress companion
+
+A small seed-to-flower SVG companion appears above each question. Its growth depends only on completed questions, not which responses were chosen. The persistent illustration uses gentle breathing and sway while the question screen remains still. The motion toggle is saved locally, and reduced-motion device preferences disable animation and transitions. The companion adds no audio, timers, streaks, or answer grading.
