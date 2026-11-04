@@ -43,3 +43,7 @@ Use Last question to jump directly to question 45, or Questions to choose any sa
 ## Calm progress companion
 
 A small seed-to-flower SVG companion appears above each question. Its growth depends only on completed questions, not which responses were chosen. The persistent illustration uses gentle breathing and sway while the question screen remains still. The motion toggle is saved locally, and reduced-motion device preferences disable animation and transitions. The companion adds no audio, timers, streaks, or answer grading.
+
+## Reflection journey
+
+The question companion now follows a curved five-chapter path: Start, Settle in, Explore, Reflect, and Discover. The traveler moves according to completed-answer count. Chapters unlock at 0, 11, 22, 33, and 45 completed answers; unlocked checkpoints revisit their question sections without changing answers. The final chapter opens completed results. Motion pause and reduced-motion preferences also cover the path and traveler.
