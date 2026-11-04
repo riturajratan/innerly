@@ -176,7 +176,20 @@ No payment needed. Your full report is free for now.|भुगतान की �
 Save or email summary|सारांश सेव या ईमेल करें
 A small step for today|आज के लिए एक छोटा कदम
 Assessment answers, unfinished progress, reports, language, motion and text-size preferences are stored in this browser. No account is needed. There is no server collection of your responses. Downloading a card does not post it anywhere. The optional email draft opens your own email app; you decide whether to send it.|जवाब, अधूरी प्रगति, रिपोर्ट, भाषा, गति और अक्षरों की पसंद इस ब्राउज़र में सेव हैं। खाते की ज़रूरत नहीं। जवाब सर्वर पर इकट्ठे नहीं किए जाते। कार्ड डाउनलोड करने से कहीं पोस्ट नहीं होता। वैकल्पिक ईमेल ड्राफ्ट आपके ईमेल ऐप में खुलता है; भेजना आप तय करते हैं।`;
-const extra=`One small thought at a time.|एक बार में एक छोटी सोच।
+const extra=`YOUR PERSONALITY EXPLORER|आपके व्यक्तित्व की खोज
+A clearer picture of you.|खुद को और साफ़ समझें।
+Choose a category. Explore a graph. Take one small step.|श्रेणी चुनें। ग्राफ़ समझें। एक छोटा कदम उठाएँ।
+Profile map|व्यक्तित्व का नक्शा
+Tap a point to explore a different dimension.|किसी दूसरे पहलू को जानने के लिए उसका बिंदु चुनें।
+See all scores as a table|सभी स्कोर तालिका में देखें
+Category|श्रेणी
+Your preference|आपकी पसंद
+Explore your graphs|अपने ग्राफ़ समझें
+Your category insight|आपकी चुनी श्रेणी की समझ
+Earliest shown|दिखाया गया पहला स्कोर
+Latest shown|दिखाया गया नया स्कोर
+Change in points|अंकों का बदलाव
+One small thought at a time.|एक बार में एक छोटी सोच।
 Find your gentle rhythm.|अपनी सहज गति पाएँ।
 Let curiosity lead the way.|जिज्ञासा को आगे बढ़ने दें।
 Notice your own patterns.|अपने तौर-तरीके पहचानें।

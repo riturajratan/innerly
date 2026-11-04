@@ -9,7 +9,7 @@ export function historySeries(reports,current,category,limit=8){
  if(!Number.isInteger(category)||category<0||category>4||!Number.isInteger(limit)||limit<1)throw new Error('Invalid history selection.');
  const currentTime=Date.parse(current.date),byId=new Map();
  for(const report of [...reports,current])if(report.version===VERSION&&typeof report.id==='string'&&Number.isFinite(Date.parse(report.date))&&Date.parse(report.date)<=currentTime&&Array.isArray(report.scores)&&report.scores.length===5&&Array.from(report.scores).every(s=>Number.isFinite(s)&&s>=0&&s<=100))byId.set(report.id,report);
- return [...byId.values()].sort((a,b)=>Date.parse(a.date)-Date.parse(b.date)).slice(-limit).map(r=>({id:r.id,date:r.date,score:r.scores[category]}));
+ return [...byId.values()].sort((a,b)=>Date.parse(a.date)-Date.parse(b.date)||(a.id===current.id?1:b.id===current.id?-1:a.id.localeCompare(b.id))).slice(-limit).map(r=>({id:r.id,date:r.date,score:r.scores[category]}));
 }
 export function wedgePath(start,end,cx=140,cy=140,radius=110){
  if(end<=start)return '';
@@ -17,3 +17,6 @@ export function wedgePath(start,end,cx=140,cy=140,radius=110){
  if(end-start>=359.999)return `M ${cx} ${cy-radius} A ${radius} ${radius} 0 1 1 ${cx} ${cy+radius} A ${radius} ${radius} 0 1 1 ${cx} ${cy-radius} Z`;
  const a=p(start),b=p(end);return `M ${cx} ${cy} L ${a[0]} ${a[1]} A ${radius} ${radius} 0 ${end-start>180?1:0} 1 ${b[0]} ${b[1]} Z`;
 }
+
+// Comparison follows exactly the real points displayed, including the chart's history limit.
+export function historyChange(series){if(!Array.isArray(series)||series.length<2)return{available:false};const first=series[0],latest=series.at(-1);return{available:true,first,latest,delta:latest.score-first.score};}

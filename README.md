@@ -28,7 +28,7 @@ Report logic checks: `node --test tests/report.test.mjs`.
 
 ## Chart gallery
 
-Full reports include Bar, Pie, and Line tabs alongside the profile map and activity donut. Bars use independent category scores. Pie slices count the five categories in left/mixed/right interpretation bands; they are not percentages of a person. Line points come only from compatible saved assessments up to the viewed report, with at most eight points. A first assessment renders a single point, without an invented trend. Graph selection is linked to category suggestions, and printing expands all chart panels.
+Full reports include Profile map, Bar, Pie, and Line tabs in one explorer, with the activity donut in the action plan below. Bars use independent category scores. Pie slices count the five categories in left/mixed/right interpretation bands; they are not percentages of a person. Line points come only from compatible saved assessments up to the viewed report, with at most eight points. A first assessment renders a single point, without an invented trend. Graph selection is linked to category suggestions, and printing expands all chart panels.
 
 Chart checks: `node --test tests/charts.test.mjs`.
 
@@ -57,3 +57,9 @@ Completion now shows a report preparation illustration with steps tied to actual
 The optional email form creates a `mailto:` draft containing the summary in the visitor's own email app. Visitors review and send it themselves. Innerly does not send messages, collect email addresses, promise delivery, or synchronize reports across devices. Automatic report email needs a backend and transactional email provider. Future $1 one-time payment and server-verified report access are not implemented.
 
 Run all checks: `node --check dist/app.js` and `node --test tests/*.test.mjs`.
+
+## Linked graph dashboard
+
+Five category cards select a dimension across the map, bar, pie, and line views. Its score, interpretation, strength, and suggested activity update together; the explanation sits beside the active graph on desktop and below it on mobile. The map includes an expandable exact-score table. Chart tabs support arrow keys and Home/End. Category selection preserves focus in pie controls and the history selector. Switching English/Hindi retains the selected category and graph view.
+
+With two or more compatible saved assessments, the line view shows first displayed score, latest displayed score, and signed point change. This compares only the displayed history window and does not call an increase an improvement. Reports sharing a timestamp keep the viewed assessment as the last point. No example scores or simulated history are used in actual reports.
