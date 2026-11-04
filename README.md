@@ -14,7 +14,7 @@ From this directory: `python3 -m http.server 4173 --bind 127.0.0.1 --directory d
 
 ## Experience
 
-Default body text is 18px, with a persistent 21px larger-text mode, large answer controls, keyboard-operable radios, and no time limit. Selecting an answer briefly highlights its soft choice color, then advances automatically after 350ms; Previous and Next arrow buttons allow browsing without selecting or changing an answer. Selecting an answer still advances automatically. Reports require all 45 answers; a reminder links back to the first unanswered question. Pending progression is cancelled when navigating away. The quiz shell, question heading, and five radio controls are kept mounted between questions. The prompt and answer space are measured off-screen per viewport, text size, and question format; question fade animations are disabled. Drafts, completed profiles, text size, and action checklists are kept in local storage. Previous short-assessment reports remain readable. No responses are sent to a backend.
+Default body text is 20px, with a persistent 23px larger-text mode, large answer controls, keyboard-operable radios, and no time limit. Selecting an answer briefly highlights its soft choice color, then advances automatically after 350ms; Previous and Next arrow buttons allow browsing without selecting or changing an answer. Selecting an answer still advances automatically. Reports require all 45 answers; a reminder links back to the first unanswered question. Pending progression is cancelled when navigating away. The quiz shell, question heading, and five radio controls are kept mounted between questions. The prompt and answer space are measured off-screen per viewport, text size, and question format; question fade animations are disabled. Drafts, completed profiles, text size, and action checklists are kept in local storage. Previous short-assessment reports remain readable. No responses are sent to a backend.
 
 The five 0–100 dimension scores describe preferences, not an overall personality grade. The questionnaire and interpretation thresholds are original and unvalidated. Do not present them as a diagnosis, validated psychometric measure, or basis for eligibility decisions.
 
@@ -47,3 +47,13 @@ A small seed-to-flower SVG companion appears above each question. Its growth dep
 ## Reflection journey
 
 The question companion now follows a curved five-chapter path: Start, Settle in, Explore, Reflect, and Discover. The traveler moves according to completed-answer count. Chapters unlock at 0, 11, 22, 33, and 45 completed answers; unlocked checkpoints revisit their question sections without changing answers. The final chapter opens completed results. Motion pause and reduced-motion preferences also cover the path and traveler.
+
+## Discovery V2 and languages
+
+The illustrated homepage leads to the existing original 45-question assessment. English and Hindi cover questions, all scenario choices, category interpretations, suggestions, chart controls, accessible labels, and summary exports. Language priority is a supported `?lang=en` or `?lang=hi` URL, a saved manual choice, browser language order, then English. Switching language preserves answer positions and scoring. Explicit user choice updates the shareable language URL. Hindi translations should receive a fluent-speaker editorial review before expanding the questionnaire or claiming validated measurement across languages.
+
+Completion now shows a report preparation illustration with steps tied to actual scoring, graph preparation, and local saving. There is no simulated countdown. Continue opens an optional save screen; Skip immediately opens the useful free summary. Full report remains free, with a concise explanation of what is included.
+
+The optional email form creates a `mailto:` draft containing the summary in the visitor's own email app. Visitors review and send it themselves. Innerly does not send messages, collect email addresses, promise delivery, or synchronize reports across devices. Automatic report email needs a backend and transactional email provider. Future $1 one-time payment and server-verified report access are not implemented.
+
+Run all checks: `node --check dist/app.js` and `node --test tests/*.test.mjs`.
