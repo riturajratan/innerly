@@ -51,7 +51,7 @@ Start|शुरुआत
 Settle in|सहज हों
 Explore|खोजें
 Reflect|मनन करें
-Discover|खुद को जानें
+Discover|जानें
 A quiet moment, just for you.|यह शांत पल आपके लिए है।
 One small answer at a time.|एक बार में एक छोटा जवाब।
 Notice what feels natural to you.|ध्यान दें कि आपको क्या सहज लगता है।
