@@ -1,4 +1,5 @@
-export function assessmentStatus(answers,total=45){
+import {QUESTION_COUNT} from './model.mjs';
+export function assessmentStatus(answers,total=QUESTION_COUNT){
  const values=Array.from({length:total},(_,i)=>answers?.[i]);
  const isAnswer=value=>Number.isInteger(value)&&value>=0&&value<=4;
  const answered=values.filter(isAnswer).length;

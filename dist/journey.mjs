@@ -1,13 +1,14 @@
+import {QUESTION_COUNT} from './model.mjs';
 import {assessmentStatus} from './navigation.mjs';
 export const journeyStops=[
  {name:'Start',threshold:0,question:0,caption:'One small thought at a time.'},
- {name:'Settle in',threshold:11,question:11,caption:'Find your gentle rhythm.'},
- {name:'Explore',threshold:22,question:22,caption:'Let curiosity lead the way.'},
- {name:'Reflect',threshold:33,question:33,caption:'Notice your own patterns.'},
- {name:'Discover',threshold:45,question:44,caption:'Your reflections are ready.'}
+ {name:'Settle in',threshold:9,question:9,caption:'Find your gentle rhythm.'},
+ {name:'Explore',threshold:18,question:18,caption:'Let curiosity lead the way.'},
+ {name:'Reflect',threshold:27,question:27,caption:'Notice your own patterns.'},
+ {name:'Discover',threshold:QUESTION_COUNT,question:QUESTION_COUNT-1,caption:'Your reflections are ready.'}
 ];
 export function journeyState(answers){
- const {answered}=assessmentStatus(answers),progress=answered/45;
+ const {answered}=assessmentStatus(answers),progress=answered/QUESTION_COUNT;
  const activeIndex=journeyStops.reduce((current,stop,i)=>answered>=stop.threshold?i:current,0);
  const segment=Math.min(3,Math.floor(progress*4)),t=progress*4-segment;
  return {answered,progress,activeIndex,x:10+progress*80,y:55+(segment%2===0?-1:1)*30*t*(1-t),stops:journeyStops.map((stop,i)=>({...stop,index:i,available:answered>=stop.threshold,current:i===activeIndex,passed:i<activeIndex}))};

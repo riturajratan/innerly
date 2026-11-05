@@ -2,64 +2,56 @@
 
 Live site: https://www.riturajratan.com/innerly/
 
-A static, browser-local personality reflection experience. The assessment has 45 original questions, five dimensions, a short report, and a full report opened by a button. No payment is collected. The full report is free for now; a future $1 checkout would require a payment provider and server-side access control.
+A static, browser-local personality reflection experience. The active assessment now uses the **36 statements supplied by the user**, with light English grammar edits. The previous 45-question set is removed from the active questionnaire. Short summary and full report are free; no payment is collected.
 
-## Run locally
+## Run and verify
 
-From this directory: `python3 -m http.server 4173 --bind 127.0.0.1 --directory dist`.
+Run `python3 -m http.server 4173 --bind 127.0.0.1 --directory dist` from this directory.
 
-## Check scoring
+Checks: `node --check dist/app.js` and `node --test tests/*.test.mjs`.
 
-`node --test tests/model.test.mjs`
+GitHub Pages deploys `dist/` after checks on each push to `main`. There is no account or ChatGPT sign-in requirement.
 
-## Experience
+## Question languages
 
-Default body text is 20px, with a persistent 23px larger-text mode, large answer controls, keyboard-operable radios, and no time limit. Selecting an answer briefly highlights its soft choice color, then advances automatically after 350ms; Previous and Next arrow buttons allow browsing without selecting or changing an answer. Selecting an answer still advances automatically. Reports require all 45 answers; a reminder links back to the first unanswered question. Pending progression is cancelled when navigating away. The quiz shell, question heading, and five radio controls are kept mounted between questions. The prompt and answer space are measured off-screen per viewport, text size, and question format; question fade animations are disabled. Drafts, completed profiles, text size, and action checklists are kept in local storage. Previous short-assessment reports remain readable. No responses are sent to a backend.
+All 36 statements and all five agreement choices are bundled in 20 languages: English, Hindi, Mandarin Chinese (Simplified), Spanish, French, Arabic, Bengali, Portuguese, Russian, Urdu, Indonesian, German, Japanese, Marathi, Telugu, Turkish, Tamil, Vietnamese, Korean, and Italian. This is a practical set of widely used languages, not a claimed statistical ranking of total or native speakers.
 
-The five 0–100 dimension scores describe preferences, not an overall personality grade. The questionnaire and interpretation thresholds are original and unvalidated. Do not present them as a diagnosis, validated psychometric measure, or basis for eligibility decisions.
+Question language follows a supported `?lang=` URL, saved manual preference, browser language order, then English. Regional codes match the corresponding supported language. A manual language change preserves all answer positions and scoring metadata. Arabic and Urdu use right-to-left layout. Main assessment controls, response choices, progress text and journey labels are localized; some secondary help/privacy copy remains English outside Hindi.
 
-The PDF button opens the browser print dialog. The summary card downloads an SVG and does not publish it.
+**Detailed reports remain English/Hindi.** This scope is disclosed on the homepage in every question language and repeated above results. Entering report views selects English unless Hindi is active, and the report language selector offers English/Hindi. Returning to the questionnaire restores the question language. No translation API, external translation request, or API key is needed. Translations are working editorial drafts and need fluent-speaker review before any claims of validated cross-cultural measurement.
 
-## Interactive full report
+## Exploratory scoring
 
-The full report has a clickable profile map, five selectable preference graphs, category-specific explanations and suggestions, and a saved activity plan with a completion chart. Plan completion measures activities marked as tried; it does not claim personality improvement. Recommendations use each category's own interpretation band. Additional details are expandable. Print temporarily expands all categories so the PDF includes the entire report.
+Five independent scores summarize 33 of the supplied statements:
 
-Report logic checks: `node --test tests/report.test.mjs`.
+| Category | Items (one-based) | Reversed items | Count |
+| --- | --- | --- | --- |
+| Social style: reserved → outward | 1, 5, 9, 13, 17, 32, 33 | 9, 13, 32, 33 | 7 |
+| Information style: details → ideas/patterns | 2, 6, 10, 18, 22, 25 | 2, 6, 18, 22, 25 | 6 |
+| Planning style: improvisation → structure | 4, 8, 12, 14, 16, 20, 24, 29 | 12, 29 | 8 |
+| Decision priorities: people/values → logic/efficiency | 3, 7, 11, 15, 19, 21, 23 | 11, 19, 21 | 7 |
+| Decision pace: deliberation → quicker action | 26, 27, 28, 30, 31 | 26, 30, 31 | 5 |
 
-## Chart gallery
+Responses are 0–4; reversed items use `4 - response`. Each category divides its sum by its own `count × 4` and rounds to 0–100. Scores below 40 lean left, 40–60 are mixed, and above 60 lean right. These are illustrative, unvalidated bands. The uneven item counts and polarity balance come from the supplied set; there is no claim of psychometric equivalence, MBTI/64-type matching, population rarity, diagnosis, or an overall quality grade.
 
-Full reports include Profile map, Bar, Pie, and Line tabs in one explorer, with the activity donut in the action plan below. Bars use independent category scores. Pie slices count the five categories in left/mixed/right interpretation bands; they are not percentages of a person. Line points come only from compatible saved assessments up to the viewed report, with at most eight points. A first assessment renders a single point, without an invented trend. Graph selection is linked to category suggestions, and printing expands all chart panels.
+Items 34–36 (calm self-description, noticing emotions, and neglecting one's own feelings) are displayed as **three separate selected responses** in the report. They are not combined into a score or added to unrelated dimensions. All 36 responses are required before a report is generated.
 
-Chart checks: `node --test tests/charts.test.mjs`.
+## Data compatibility
 
-## GitHub Pages deployment
+`personality-36-v1` identifies the new model. Previous `personality-45-v1` reports remain saved and open as clearly labeled read-only earlier reports, with their original category labels and interpretations. Old scores never enter new assessment history charts. Previous unfinished answers are archived locally and are not silently reinterpreted as the new questions. Earlier short-assessment records under `innerly-v1` remain viewable.
 
-The Pages workflow runs the checks and deploys `dist/` after a push to `main`. It can also be run manually from the repository's Actions tab. Repository Settings → Pages uses GitHub Actions as the publishing source. The public site does not require ChatGPT sign-in.
+The local storage key stays `innerly-personality-v2`. Answers, unfinished progress, reports, text size, motion preference, question language, and action plans stay in this browser. No response collection backend exists.
 
-## Quick assessment navigation
+## Interaction and reports
 
-Use Last question to jump directly to question 45, or Questions to choose any saved question. Answered questions are marked in the picker. When all 45 answers are present, Go to results opens the report from any question. Filling the last unanswered question also finishes automatically, even when that question is in the middle of the assessment.
+Default body type is 20px with persistent 23px larger-text mode. Answer controls are keyboard operable; selection advances after 350ms. Previous/Next arrows browse without changing answers. A 36-question picker, Last question shortcut and completed-results shortcut avoid repeated Next clicks. The question shell and radios stay mounted, with measured prompt/answer spacing and no question fade animation.
 
-## Calm progress companion
+A five-chapter plant journey unlocks at 0, 9, 18, 27 and 36 completed answers. Growth depends on completion, not response values. Motion pause and reduced-motion settings are supported. On mobile, longer-language checkpoint labels collapse to accessible numbered stops while the current chapter remains visible.
 
-A small seed-to-flower SVG companion appears above each question. Its growth depends only on completed questions, not which responses were chosen. The persistent illustration uses gentle breathing and sway while the question screen remains still. The motion toggle is saved locally, and reduced-motion device preferences disable animation and transitions. The companion adds no audio, timers, streaks, or answer grading.
+Completion shows actual scoring, graph preparation and local-save steps, without a simulated countdown. An optional email form opens a user-reviewed `mailto:` summary draft in their own mail app; it does not send or collect addresses. Skip opens the report immediately.
 
-## Reflection journey
+The report explorer links five category cards to Profile map, Bar, Pie and Line tabs, explanations, strengths and small suggested activities. Pie slices count category bands, not parts of a person. Line points use actual compatible saved reports only, up to eight; one report renders one point. Comparison shows the first displayed score, latest displayed score and signed point change without calling an increase improvement. Action-plan donut tracks activities marked as tried, not personality improvement.
 
-The question companion now follows a curved five-chapter path: Start, Settle in, Explore, Reflect, and Discover. The traveler moves according to completed-answer count. Chapters unlock at 0, 11, 22, 33, and 45 completed answers; unlocked checkpoints revisit their question sections without changing answers. The final chapter opens completed results. Motion pause and reduced-motion preferences also cover the path and traveler.
+Graphs, tabs, exact-score table and category actions are keyboard accessible. Language changes retain the selected category and graph tab in report views. PDF uses browser print and temporarily expands all graph panels and details. Summary card downloads an SVG and does not publish it.
 
-## Discovery V2 and languages
-
-The illustrated homepage leads to the existing original 45-question assessment. English and Hindi cover questions, all scenario choices, category interpretations, suggestions, chart controls, accessible labels, and summary exports. Language priority is a supported `?lang=en` or `?lang=hi` URL, a saved manual choice, browser language order, then English. Switching language preserves answer positions and scoring. Explicit user choice updates the shareable language URL. Hindi translations should receive a fluent-speaker editorial review before expanding the questionnaire or claiming validated measurement across languages.
-
-Completion now shows a report preparation illustration with steps tied to actual scoring, graph preparation, and local saving. There is no simulated countdown. Continue opens an optional save screen; Skip immediately opens the useful free summary. Full report remains free, with a concise explanation of what is included.
-
-The optional email form creates a `mailto:` draft containing the summary in the visitor's own email app. Visitors review and send it themselves. Innerly does not send messages, collect email addresses, promise delivery, or synchronize reports across devices. Automatic report email needs a backend and transactional email provider. Future $1 one-time payment and server-verified report access are not implemented.
-
-Run all checks: `node --check dist/app.js` and `node --test tests/*.test.mjs`.
-
-## Linked graph dashboard
-
-Five category cards select a dimension across the map, bar, pie, and line views. Its score, interpretation, strength, and suggested activity update together; the explanation sits beside the active graph on desktop and below it on mobile. The map includes an expandable exact-score table. Chart tabs support arrow keys and Home/End. Category selection preserves focus in pie controls and the history selector. Switching English/Hindi retains the selected category and graph view.
-
-With two or more compatible saved assessments, the line view shows first displayed score, latest displayed score, and signed point change. This compares only the displayed history window and does not call an increase an improvement. Reports sharing a timestamp keep the viewed assessment as the last point. No example scores or simulated history are used in actual reports.
+Automatic email delivery and future $1 one-time report access require a backend/provider integration and are not implemented.

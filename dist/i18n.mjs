@@ -1,6 +1,7 @@
-export function resolveLocale({url='',saved='',languages=[]}={}){let explicit='';try{explicit=new URL(url,'https://innerly.example').searchParams.get('lang')||''}catch{}const supported=value=>['en','hi'].includes(value);if(supported(explicit))return explicit;if(supported(saved))return saved;for(const language of languages){const base=String(language).toLowerCase().split('-')[0];if(supported(base))return base}return 'en'}
+import {languages,questionLocales,canonicalLanguage} from './languages.mjs';
+export function resolveLocale({url='',saved='',languages:preferred=[]}={}){let explicit='';try{explicit=new URL(url,'https://innerly.example').searchParams.get('lang')||''}catch{}for(const candidate of [explicit,saved,...preferred]){const supported=canonicalLanguage(candidate);if(supported)return supported}return 'en'}
 export let locale='en';
-export function setLocale(value){locale=value==='hi'?'hi':'en'}
+export function setLocale(value){locale=canonicalLanguage(value)||'en'}
 const pairs=`Skip to content|मुख्य भाग पर जाएँ
 Explore|खोजें
 My reports|मेरी रिपोर्ट
@@ -17,8 +18,8 @@ Personality Test|व्यक्तित्व टेस्ट
 A little closer to yourself.|खुद को थोड़ा और जानें।
 SELF-DISCOVERY, AT YOUR PACE|खुद को जानें, अपनी गति से
 Discover how you think, connect, and respond to everyday life.|जानें कि आप कैसे सोचते हैं, लोगों से जुड़ते हैं और रोज़मर्रा की बातों पर प्रतिक्रिया देते हैं।
-45 questions|45 सवाल
-8–12 minutes|8–12 मिनट
+36 questions|36 सवाल
+6–9 minutes|6–9 मिनट
 Start test|टेस्ट शुरू करें
 Continue test|टेस्ट जारी रखें
 Start again|फिर से शुरू करें
@@ -32,7 +33,7 @@ Find your next step|अगला कदम खोजें
 Turn your insights into small actions.|अपनी समझ को छोटे कामों में बदलें।
 Your pace. No right or wrong answers.|आपकी अपनी गति। कोई सही या गलत जवाब नहीं।
 Question|सवाल
-of 45|/ 45
+of 36|/ 36
 Save & take a break|सेव करें और विराम लें
 Assessment completed|टेस्ट की प्रगति
 Questions|सवाल
@@ -124,7 +125,7 @@ Score|स्कोर
 YOUR PERSONAL SPACE|आपकी अपनी जगह
 Your saved reports.|आपकी सेव की हुई रिपोर्ट।
 Saved on this browser. Return whenever you like.|इस ब्राउज़र में सेव हैं। जब चाहें वापस आएँ।
-45-QUESTION PERSONALITY REFLECTION|व्यक्तित्व को समझने के 45 सवाल
+36-QUESTION PERSONALITY REFLECTION|व्यक्तित्व को समझने के 36 सवाल
 View report|रिपोर्ट देखें
 Your first discovery is waiting.|खुद को जानने की शुरुआत करें।
 Complete the assessment to see your personality graphs and report here.|यहाँ अपने ग्राफ़ और रिपोर्ट देखने के लिए टेस्ट पूरा करें।
@@ -176,7 +177,20 @@ No payment needed. Your full report is free for now.|भुगतान की �
 Save or email summary|सारांश सेव या ईमेल करें
 A small step for today|आज के लिए एक छोटा कदम
 Assessment answers, unfinished progress, reports, language, motion and text-size preferences are stored in this browser. No account is needed. There is no server collection of your responses. Downloading a card does not post it anywhere. The optional email draft opens your own email app; you decide whether to send it.|जवाब, अधूरी प्रगति, रिपोर्ट, भाषा, गति और अक्षरों की पसंद इस ब्राउज़र में सेव हैं। खाते की ज़रूरत नहीं। जवाब सर्वर पर इकट्ठे नहीं किए जाते। कार्ड डाउनलोड करने से कहीं पोस्ट नहीं होता। वैकल्पिक ईमेल ड्राफ्ट आपके ईमेल ऐप में खुलता है; भेजना आप तय करते हैं।`;
-const extra=`YOUR PERSONALITY EXPLORER|आपके व्यक्तित्व की खोज
+const extra=`This is an unvalidated self-reflection questionnaire based on the supplied statements.|यह दिए गए कथनों पर आधारित, खुद को समझने की असत्यापित प्रश्नावली है।
+The questionnaire has changed. Your previous reports are still available in My reports.|प्रश्नावली बदल गई है। आपकी पिछली रिपोर्ट मेरी रिपोर्ट में उपलब्ध हैं।
+Your responses, in context|संदर्भ में आपके जवाब
+These three responses are shown as you selected them. They are not combined into a personality score.|ये तीन जवाब आपकी चुनी प्रतिक्रिया के रूप में दिखते हैं। इन्हें मिलाकर व्यक्तित्व का स्कोर नहीं बनाया जाता।
+Calm self-description|शांत स्वभाव का वर्णन
+Noticing emotions|भावनाएँ पहचानना
+Making room for your feelings|अपनी भावनाओं के लिए जगह
+Earlier 45-question report|पहले की 45 सवालों वाली रिपोर्ट
+This report uses the previous questionnaire. Its scores cannot be compared with the new 36-question report.|यह रिपोर्ट पिछली प्रश्नावली की है। इसके स्कोर की तुलना नए 36 सवालों वाले टेस्ट से नहीं कर सकते।
+Earlier unfinished answers are archived on this browser. Start the new questionnaire to continue.|पहले के अधूरे जवाब इस ब्राउज़र में सुरक्षित हैं। आगे बढ़ने के लिए नई प्रश्नावली शुरू करें।
+Each category averages its own scored items: social style 7, information style 6, planning style 8, decision priorities 7, and decision pace 5. Responses use 0–4, with reverse-worded items reversed. The average is divided by 4 and shown from 0 to 100.|हर श्रेणी अपने सवालों का औसत लेती है: सामाजिक ढंग 7, जानकारी 6, योजना 8, फैसले की प्राथमिकताएँ 7 और फैसले की गति 5। जवाबों को 0–4 अंक मिलते हैं; उलटे कथनों के अंक उलटे होते हैं। औसत को 4 से भाग देकर 0–100 के पैमाने पर दिखाते हैं।
+The final three items are separate reflections about calmness, noticing emotions, and making room for your own feelings. They do not contribute to the five scores.|आखिरी तीन सवाल शांत स्वभाव, भावनाएँ पहचानने और अपनी भावनाओं के लिए जगह बनाने के अलग विचार हैं। ये पाँच स्कोर में नहीं जुड़ते।
+This questionnaire and its translations have not been clinically validated.|इस प्रश्नावली और इसके अनुवादों का क्लिनिकल सत्यापन नहीं हुआ है।
+YOUR PERSONALITY EXPLORER|आपके व्यक्तित्व की खोज
 A clearer picture of you.|खुद को और साफ़ समझें।
 Choose a category. Explore a graph. Take one small step.|श्रेणी चुनें। ग्राफ़ समझें। एक छोटा कदम उठाएँ।
 Profile map|व्यक्तित्व का नक्शा
@@ -237,17 +251,17 @@ const patterns=[
  [/^(.+): (\d+) of 5 \((\d+)%\)$/, (name,n,p)=>`${t(name)}: 5 में ${n} (${p}%)`],
  [/^(.+): (\d+) out of 100$/, (date,n)=>`${date}: 100 में ${n}`],
  [/^(.+) · Previous 12-question exercise$/,date=>`${date} · पहले का 12 सवालों वाला अभ्यास`],
- [/^(\d+) of 45 answered\. Continue where you left off\.$/,n=>`${n} / 45 जवाब दिए। जहाँ छोड़ा था, वहीं से जारी रखें।`],
- [/^(\d+) of 45 answered\. Your answers stay saved\.$/,n=>`${n} / 45 जवाब दिए। आपके जवाब सेव रहेंगे।`],
+ [/^(\d+) of 36 answered\. Continue where you left off\.$/,n=>`${n} / 36 जवाब दिए। जहाँ छोड़ा था, वहीं से जारी रखें।`],
+ [/^(\d+) of 36 answered\. Your answers stay saved\.$/,n=>`${n} / 36 जवाब दिए। आपके जवाब सेव रहेंगे।`],
  [/^Your journey · (.+)$/,name=>`आपकी यात्रा · ${t(name)}`],
- [/^(.+) · Based on your 45 answers$/,date=>`${date} · आपके 45 जवाबों पर आधारित`],
+ [/^(.+) · Based on your 36 answers$/,date=>`${date} · आपके 36 जवाबों पर आधारित`],
  [/^Your latest (\d+) saved assessments, oldest to newest\. A change is not automatically an improvement\.$/,n=>`आपके पिछले ${n} सेव टेस्ट, पुराने से नए क्रम में। बदलाव का मतलब ज़रूरी नहीं कि सुधार हो।`],
  [/^(\d+) of 5 · (\d+)%$/,(n,p)=>`${n} / 5 · ${p}%`],
  [/^(\d+) of (\d+) steps tried\.$/,(n,total)=>`${total} में से ${n} कदम आज़माए।`],
  [/^(\d+) of (\d+) selected activities tried$/,(n,total)=>`चुनी ${total} गतिविधियों में से ${n} आज़माईं`],
  [/^— (\d+) categor(?:y|ies)$/,n=>`— ${n} श्रेणियाँ`],
  [/^This will replace the (\d+) answers in your unfinished assessment\. Your completed reports will stay saved\.$/,n=>`इससे अधूरे टेस्ट के ${n} जवाब बदल जाएँगे। पूरी रिपोर्ट सेव रहेंगी।`],
- [/^(\d+) of 45 questions still needs? an answer before we can create your report\.$/,n=>`रिपोर्ट बनाने से पहले ${n} / 45 सवालों के जवाब देने बाकी हैं।`],
+ [/^(\d+) of 36 questions still needs? an answer before we can create your report\.$/,n=>`रिपोर्ट बनाने से पहले ${n} / 36 सवालों के जवाब देने बाकी हैं।`],
  [/^Question (\d+), (unanswered|answered)(, current question)?$/,(n,status,current)=>`सवाल ${n}, ${status==='answered'?'जवाब दिया':'जवाब बाकी'}${current?', मौजूदा सवाल':''}`],
  [/^Go to question (\d+)$/,n=>`सवाल ${n} पर जाएँ`],
  [/^Opens after (\d+) answers$/,n=>`${n} जवाबों के बाद खुलेगा`],
@@ -256,10 +270,11 @@ const patterns=[
  [/^Remove (.+) activity from my plan$/,name=>`मेरी योजना से ${name} की गतिविधि हटाएँ`],
  [/^(.+), (current chapter|revisit this chapter|ahead on your journey)$/,(name,status)=>`${t(name)}, ${status==='current chapter'?'मौजूदा चरण':status==='revisit this chapter'?'इस चरण पर लौटें':'आगे का चरण'}`],
  [/^(.+): (\d+) out of 100\. Lower scores lean toward (.+), higher scores toward (.+)\.$/,(name,n,low,high)=>`${name}: 100 में ${n}। कम स्कोर ${low} और अधिक स्कोर ${high} की पसंद दिखाता है।`],
- [/^Progress plant: (.+)\. (\d+) of 45 questions answered\.$/,(name,n)=>`प्रगति का पौधा: ${t(name)}। 45 में ${n} जवाब दिए।`],
+ [/^Progress plant: (.+)\. (\d+) of 36 questions answered\.$/,(name,n)=>`प्रगति का पौधा: ${t(name)}। 36 में ${n} जवाब दिए।`],
  [/^(.+): (\d+) of 5 categories, (\d+) percent$/,(name,n,p)=>`${t(name)}: 5 में ${n} श्रेणियाँ, ${p} प्रतिशत`]
 ];
-export function t(value){if(locale!=='hi')return value;const source=String(value),text=source.trim();let translated=dictionary[text];if(!translated){for(const [pattern,replace] of patterns){const match=text.match(pattern);if(match){translated=replace(...match.slice(1));break}}}return translated?source.replace(text,translated):source}
+export function t(value){if(locale!=='hi'){const source=String(value),text=source.trim(),pack=questionLocales[locale];let translated=pack?.ui?.[text];if(pack?.stages){let match;if((match=text.match(/^Your journey · (.+)$/))){const index=['Start','Settle in','Explore','Reflect','Discover'].indexOf(match[1]);translated=pack.stages[index]||text}else if((match=text.match(/^(\d+) of 36 answered\./)))translated=`${match[1]} / 36 · ${pack.states[3]}`;else if((match=text.match(/^Question (\d+), (unanswered|answered)(, current question)?$/)))translated=`${pack.ui.Question} ${match[1]} · ${pack.states[match[2]==='answered'?0:1]}`;else if((match=text.match(/^This will replace the (\d+) answers/)))translated=pack.states[4];else if(text.startsWith('✓ Answered'))translated=`✓ ${pack.states[0]} · ○ ${pack.states[1]}`;else if((match=text.match(/^(\d+) of 36 questions still needs? an answer/)))translated=`${pack.ui.Questions}: ${match[1]} ${pack.states[1]}`;else if((match=text.match(/^Progress plant: .+\. (\d+) of 36 questions answered\.$/)))translated=`${pack.ui.Question}: ${match[1]} / 36`;else if((match=text.match(/^Go to question (\d+)$/)))translated=`${pack.ui.Question} ${match[1]}`;else if((match=text.match(/^Opens after (\d+) answers$/)))translated=`${pack.ui.Questions}: ${match[1]}`;else if((match=text.match(/^(.+), (current chapter|revisit this chapter|ahead on your journey)$/)))translated=pack.ui[match[1]]||match[1]}
+ return translated?source.replace(text,translated):source}const source=String(value),text=source.trim();let translated=dictionary[text];if(!translated){for(const [pattern,replace] of patterns){const match=text.match(pattern);if(match){translated=replace(...match.slice(1));break}}}return translated?source.replace(text,translated):source}
 // Translate text and accessible labels in place, preserving mounted controls and focus.
 // A per-node source cache also allows changing language without reloading the page.
 export function installPageTranslation(root=document.body){const cache=new WeakMap();let observer;
