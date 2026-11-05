@@ -8,3 +8,6 @@ export function assessmentStatus(answers,total=QUESTION_COUNT){
 export const PAGE_SIZE=5;
 export function questionPage(index,total=QUESTION_COUNT,size=PAGE_SIZE){if(!Number.isInteger(index)||!Number.isInteger(total)||!Number.isInteger(size)||total<1||size<1||index<0||index>=total)throw new Error('Invalid question page.');const start=Math.floor(index/size)*size,end=Math.min(start+size,total);return{start,end,indices:Array.from({length:end-start},(_,i)=>start+i),number:Math.floor(start/size)+1,total:Math.ceil(total/size),previous:start>0?Math.max(0,start-size):null,next:end<total?end:null}}
 export function pageStatus(answers,index){const page=questionPage(index),isAnswer=value=>Number.isInteger(value)&&value>=0&&value<=4,answered=page.indices.filter(i=>isAnswer(answers?.[i])).length;return{...page,answered,remaining:page.indices.length-answered,complete:answered===page.indices.length}}
+
+// Continue forward through unanswered questions, then return to any skipped ones.
+export function nextUnanswered(answers,from,total=QUESTION_COUNT){questionPage(from,total);for(let offset=1;offset<=total;offset++){const i=(from+offset)%total,value=answers?.[i];if(!Number.isInteger(value)||value<0||value>4)return i}return null}
