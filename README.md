@@ -32,7 +32,7 @@ Five independent scores summarize 33 of the supplied statements:
 | Decision priorities: people/values → logic/efficiency | 3, 7, 11, 15, 19, 21, 23 | 11, 19, 21 | 7 |
 | Decision pace: deliberation → quicker action | 26, 27, 28, 30, 31 | 26, 30, 31 | 5 |
 
-Responses are 0–4; reversed items use `4 - response`. Each category divides its sum by its own `count × 4` and rounds to 0–100. Scores below 40 lean left, 40–60 are mixed, and above 60 lean right. These are illustrative, unvalidated bands. The uneven item counts and polarity balance come from the supplied set; there is no claim of psychometric equivalence, MBTI/64-type matching, population rarity, diagnosis, or an overall quality grade.
+The displayed response positions are 1–5, internally scored 0–4; reversed items use `4 - response`. Each category divides its sum by its own `count × 4` and rounds to 0–100. Scores below 40 lean left, 40–60 are mixed, and above 60 lean right. These are illustrative, unvalidated bands. The uneven item counts and polarity balance come from the supplied set; there is no claim of psychometric equivalence, MBTI/64-type matching, population rarity, diagnosis, or an overall quality grade.
 
 Items 34–36 (calm self-description, noticing emotions, and neglecting one's own feelings) are displayed as **three separate selected responses** in the report. They are not combined into a score or added to unrelated dimensions. All 36 responses are required before a report is generated.
 
@@ -44,9 +44,9 @@ The local storage key stays `innerly-personality-v2`. Answers, unfinished progre
 
 ## Interaction and reports
 
-Default body type is 20px with persistent 23px larger-text mode. Answer controls are keyboard operable; selection advances after 350ms. Previous/Next arrows browse without changing answers. A 36-question picker, Last question shortcut and completed-results shortcut avoid repeated Next clicks. The question shell and radios stay mounted, with measured prompt/answer spacing and no question fade animation.
+Default body type is 20px with persistent 23px larger-text mode. The assessment displays five questions per page (seven pages of five and a final page of one). Each question has its own keyboard-operable five-point radio group, visible scale endpoints, neutral midpoint, and full selected-response label. Choosing an answer saves it without moving the page, scrolling, or replacing its controls. The Next button advances to the next group; Previous restores the prior group with its answers. Manual page browsing can skip unanswered items, but a report still requires all 36 answers. A 36-question picker jumps to the relevant page and focuses the requested question. A compact progress companion and bottom Previous/Next controls keep navigation close. Drafts from the earlier single-question layout resume on the corresponding five-question page.
 
-A five-chapter plant journey unlocks at 0, 9, 18, 27 and 36 completed answers. Growth depends on completion, not response values. Motion pause and reduced-motion settings are supported. On mobile, longer-language checkpoint labels collapse to accessible numbered stops while the current chapter remains visible.
+A five-chapter plant journey unlocks at 0, 9, 18, 27 and 36 completed answers. Growth depends on completion, not response values. Motion pause and reduced-motion settings are supported. On five-question pages, checkpoint labels collapse to accessible numbered stops while the current chapter remains visible.
 
 Completion shows actual scoring, graph preparation and local-save steps, without a simulated countdown. An optional email form opens a user-reviewed `mailto:` summary draft in their own mail app; it does not send or collect addresses. Skip opens the report immediately.
 
