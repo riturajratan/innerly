@@ -1,5 +1,5 @@
 import {normalizeDatabase} from './storage.mjs';
-import {languages,reportNote,batchCopy} from './languages.mjs';
+import {languages,reportNote,batchCopy} from './languages.mjs?v=guided-1';
 import {archivedTraits,ARCHIVED_VERSION} from './archived-report.mjs';
 import {resolveLocale,setLocale,t,installPageTranslation,locale} from './i18n.mjs';
 import {localizeModel} from './locale-model.mjs';
@@ -7,7 +7,7 @@ import {landscape,preparationMarkup,emailDraft} from './experience.mjs';
 import {VERSION,QUESTION_COUNT,contextAnswers,traits,questions,agreement,scoreAnswers,band,profileFor,validDraft} from './model.mjs';
 import {categoryInsight,selectedActions,planProgress} from './report.mjs';
 import {leanGroups,historySeries,historyChange,wedgePath} from './charts.mjs';
-import {assessmentStatus,questionPage,pageStatus,nextUnanswered} from './navigation.mjs';
+import {assessmentStatus,questionPage,pageStatus,nextUnanswered} from './navigation.mjs?v=guided-1';
 import {growthState,companionMarkup} from './companion.mjs';
 import {journeyState,journeyTrailMarkup} from './journey.mjs';
 let preferredLanguage='';try{preferredLanguage=localStorage.getItem('innerly-language')||''}catch{}
