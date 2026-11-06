@@ -57,3 +57,5 @@ Graphs, tabs, exact-score table and category actions are keyboard accessible. La
 Automatic email delivery and future $1 one-time report access require a backend/provider integration and are not implemented.
 
 After preparation, a report-ready preview introduces the actual profile and a softened graph preview, with prominent free full-report and PDF actions. Skip for now opens the summary. Unopened reports in history return to the preview; expanded reports open normally. Email remains an optional action within the report. No payment, subscription, rarity claim, or artificial type code is shown. PDF uses the browser print dialog and includes the full report.
+
+Navigation refinement: progress stays in a compact top bar; Previous/Next are non-sticky optional page controls after the questions. Answering a previously unanswered item guides forward; editing an existing response stays in place. Completing all answers makes the footer Next action open results directly. The shared visual theme uses white surfaces, cool blue accents and restrained borders across assessment and report preview.
