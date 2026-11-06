@@ -55,3 +55,5 @@ The report explorer links five category cards to Profile map, Bar, Pie and Line 
 Graphs, tabs, exact-score table and category actions are keyboard accessible. Language changes retain the selected category and graph tab in report views. PDF uses browser print and temporarily expands all graph panels and details. Summary card downloads an SVG and does not publish it.
 
 Automatic email delivery and future $1 one-time report access require a backend/provider integration and are not implemented.
+
+After preparation, a report-ready preview introduces the actual profile and a softened graph preview, with prominent free full-report and PDF actions. Skip for now opens the summary. Unopened reports in history return to the preview; expanded reports open normally. Email remains an optional action within the report. No payment, subscription, rarity claim, or artificial type code is shown. PDF uses the browser print dialog and includes the full report.
