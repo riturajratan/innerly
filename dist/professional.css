@@ -529,16 +529,16 @@ select:focus-visible {
 }
 /* Keep the assessment and report in the same restrained palette. */
 body.taking-test {
-  background: #f6f9fb;
+  background: #fff;
 }
 .quiz-statusbar {
-  background: #f6f9fbf5;
+  background: #fff;
 }
 .batch-question.is-current {
   border-color: #8aafc4;
 }
 .batch-question.is-answered:not(.is-current) {
-  background: #fafcfd;
+  background: #fff;
 }
 .thinking-navigation button[aria-selected="true"] {
   background: #eef6fb;
