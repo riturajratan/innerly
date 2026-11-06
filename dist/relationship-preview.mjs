@@ -1,3 +1,4 @@
+import {conversationSceneMarkup, bindConversationDemo} from "./conversation-preview.mjs?v=conversation-1";
 const topics = {
   communication: {
     en: ['Talking things through', 'Think first', 'Talk it through', 'Leave a little thinking time before returning to the conversation.', 'Try asking what each person needs before assuming you want the same thing.'],
@@ -32,20 +33,24 @@ function panelMarkup(topic, language) {
 
 export function relationshipSectionMarkup(language = 'en') {
   const hi = language === 'hi';
-  return `<section class="home-relationships" id="relationship-explorer"><div class="relationship-story"><p class="eyebrow">${hi ? 'एक-दूसरे को थोड़ा बेहतर समझें' : 'A LITTLE MORE UNDERSTANDING. A LITTLE MORE CONNECTION.'}</p><h2>${hi ? 'अलग पसंद।<br>समझने का एक नया तरीका।' : 'Different ways of being.<br>More ways to connect.'}</h2><p>${hi ? 'कभी एक को शांत समय चाहिए, दूसरे को बातचीत। अपनी पसंद समझना, एक-दूसरे की ज़रूरतें समझने की शुरुआत हो सकती है।' : 'One person wants a quiet evening. Another wants to talk it all through. Understanding your preferences can open a better conversation.'}</p><img src="assets/innerly-relationship-conversation.webp" width="1536" height="1024" alt="" loading="lazy" decoding="async"><button class="text-button" data-start-intent="relationships">${hi ? 'रिश्तों के नज़रिए से खुद को समझें' : 'Explore your relationship patterns'} <span aria-hidden="true">→</span></button></div><div class="relationship-lab"><div class="relationship-lab-heading"><span class="example-badge">${hi ? 'काल्पनिक उदाहरण' : 'INTERACTIVE EXAMPLE'}</span><h3>${hi ? 'दो पसंदों को साथ देखें' : 'Two perspectives. One conversation.'}</h3><p>${hi ? 'एक विषय चुनें, फिर sliders बदलकर देखें।' : 'Pick a moment. Move the sliders. See another perspective.'}</p></div><div class="relationship-topics" role="group" aria-label="${hi ? 'रिश्तों का एक उदाहरण चुनें' : 'Choose a relationship example'}">${Object.entries(topics).map(([key, entry]) => `<button data-rel-topic="${key}" aria-pressed="${key === 'communication'}"><span aria-hidden="true">${entry.icon}</span>${entry[hi ? 'hi' : 'en'][0]}</button>`).join('')}</div><div data-rel-panel>${panelMarkup('communication', language)}</div><p class="relationship-disclaimer">${hi ? 'ये काल्पनिक पसंद हैं, आपके नतीजे या compatibility score नहीं। किसी की पसंद बेहतर या खराब नहीं है।' : 'Fictional preferences, not your results or a compatibility score. Neither end is better.'}</p></div></section>`;
+  return `<section class="home-relationships" id="relationship-explorer"><div class="relationship-story"><p class="eyebrow">${hi ? 'एक-दूसरे को थोड़ा बेहतर समझें' : 'A LITTLE MORE UNDERSTANDING. A LITTLE MORE CONNECTION.'}</p><h2>${hi ? 'अलग पसंद।<br>समझने का एक नया तरीका।' : 'Different ways of being.<br>More ways to connect.'}</h2><p>${hi ? 'कभी एक को शांत समय चाहिए, दूसरे को बातचीत। अपनी पसंद समझना, एक-दूसरे की ज़रूरतें समझने की शुरुआत हो सकती है।' : 'One person wants a quiet evening. Another wants to talk it all through. Understanding your preferences can open a better conversation.'}</p>${conversationSceneMarkup(language)}<button class="text-button" data-start-intent="relationships">${hi ? 'रिश्तों के नज़रिए से खुद को समझें' : 'Explore your relationship patterns'} <span aria-hidden="true">→</span></button></div><div class="relationship-lab"><div class="relationship-lab-heading"><span class="example-badge">${hi ? 'काल्पनिक उदाहरण' : 'INTERACTIVE EXAMPLE'}</span><h3>${hi ? 'दो पसंदों को साथ देखें' : 'Two perspectives. One conversation.'}</h3><p>${hi ? 'एक विषय चुनें, फिर sliders बदलकर देखें।' : 'Pick a moment. Move the sliders. See another perspective.'}</p></div><div class="relationship-topics" role="group" aria-label="${hi ? 'रिश्तों का एक उदाहरण चुनें' : 'Choose a relationship example'}">${Object.entries(topics).map(([key, entry]) => `<button data-rel-topic="${key}" aria-pressed="${key === 'communication'}"><span aria-hidden="true">${entry.icon}</span>${entry[hi ? 'hi' : 'en'][0]}</button>`).join('')}</div><div data-rel-panel>${panelMarkup('communication', language)}</div><p class="relationship-disclaimer">${hi ? 'ये काल्पनिक पसंद हैं, आपके नतीजे या compatibility score नहीं। किसी की पसंद बेहतर या खराब नहीं है।' : 'Fictional preferences, not your results or a compatibility score. Neither end is better.'}</p></div></section>`;
 }
 
 export function bindRelationshipDemo(root, language = 'en') {
   if (!root) return;
+  bindConversationDemo(root.querySelector('[data-conversation-demo]'), language);
   let topic = 'communication';
   const bindSliders = () => {
     const sliders = [...root.querySelectorAll('[data-rel-range]')];
     const update = () => {
       const example = relationshipExample(topic, ...sliders.map(input => Number(input.value)), language);
-      example.values.forEach((value, i) => { root.querySelector(`[data-rel-marker="${i}"]`).style.left = `${value}%`; });
+      example.values.forEach((value, i) => {
+        root.querySelector(`[data-rel-marker="${i}"]`).style.left = `${value}%`;
+      });
       root.querySelector('[data-rel-insight]').textContent = example.insight;
     };
     sliders.forEach(slider => slider.addEventListener('input', update));
+    update();
   };
   root.querySelectorAll('[data-rel-topic]').forEach(button => button.addEventListener('click', () => {
     topic = button.dataset.relTopic;

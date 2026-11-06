@@ -10,7 +10,7 @@ test('relationship examples stay hypothetical and offer distinct everyday prompt
     const section = relationshipSectionMarkup(language);
     assert.match(section, language === 'hi' ? /काल्पनिक पसंद/ : /Fictional preferences/);
     assert.match(section, /data-start-intent="relationships"/);
-    assert.equal((section.match(/type="range"/g) || []).length, 2);
+    assert.equal((section.match(/type="range"/g) || []).length, 3);
     assert.doesNotMatch(section, /match rate|\d+% compatible|soulmate/);
   }
 });

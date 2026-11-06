@@ -1,5 +1,17 @@
 # Innerly editorial artwork
 
+## Social sharing image
+
+Production asset: `dist/assets/innerly-social-cover.png` (1200 × 630). Original image created with built-in image generation and resized for sharing, with no content alteration. Source: `/Users/riturajratan/.codex/generated_images/01a18109-9fb3-7a73-b585-d5adc3c62961/exec-9d88e460-2bd6-4766-a07b-b0571ad70021.png`.
+
+Exact prompt:
+
+Use case: ads-marketing. Asset type: social sharing / Open Graph cover for Innerly adult personality self-reflection website. Create a finished elegant landscape brand card, 1.91:1 aspect ratio (1200 by 630 composition). Pure warm white background, refined navy #193b53 typography, soft sky blue and muted gold accents. Exact visible text: small brand at upper left 'innerly.'; large headline on left 'Understand yourself.' then 'Unlock your potential.'; small supporting line 'Self-awareness · Relationships · Work style'. Right side: beautiful restrained editorial gouache illustration of two diverse adults in their thirties chatting, subtle small abstract 5-point preference diagram as a tasteful graphical element. Text perfectly spelled, clean modern readable sans serif, generous margins, mature sophisticated feeling, uncluttered professional composition. All text and faces inside central 80% to allow social crops. No UI screenshots, no buttons, no ratings, no statistics, no medical claims, no photographs, no 3D. This is original brand artwork.
+
+## Supplied reviewer avatar
+
+`dist/assets/sanjay-gupta.jpg` is the 96 × 96 image explicitly supplied by the user at `https://trueparse.ai/_next/image?url=%2Fcustomers%2Fsanjay-gupta.jpg&w=96&q=75`. Stored locally without editing. Its use does not verify or authenticate the sample review copy. Section-level sample disclosure remains visible.
+
 ## Relationship conversation
 
 Production asset: `dist/assets/innerly-relationship-conversation.webp` (1536 × 1024, approximately 220 KB). Generated with the built-in `image_gen.imagegen` tool on 6 November 2026, then converted to WebP at quality 84. This is decorative conceptual artwork, not a testimonial or named customer.
