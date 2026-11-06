@@ -93,14 +93,16 @@ test("short screens fall back to reading-first positioning and viewport edges ne
 });
 
 test("homepage states real questionnaire scope and offers start or resume without invented popularity", () => {
-  const home = discoveryHomeMarkup({
-    reportLanguageNote:
-      "Questions in 20 languages. Detailed reports in English and Hindi.",
-  });
+  const home = discoveryHomeMarkup({});
   assert.equal((home.match(/<h1>/g) || []).length, 1);
   assert.match(home, /data-action="start"/);
-  assert.match(home, /Questions in 20 languages/);
-  assert.match(home, /Detailed reports in English & Hindi/);
+  assert.match(home, /minutes, at your own pace/);
+  for (const language of ["en", "hi"]) {
+    assert.doesNotMatch(
+      discoveryHomeMarkup({ language }),
+      /hero-language-summary|home-language-section|data-choose-language|question languages|भाषा|languages are supported|Detailed reports in English/,
+    );
+  }
   assert.equal((home.match(/data-social-example=/g) || []).length, 3);
   assert.match(home, /innerly-editorial-people.webp/);
   assert.doesNotMatch(home, /95%|210M|5-star|4\.9|Total tests taken/);

@@ -925,28 +925,6 @@ body.taking-test {
   font-size: 14px;
   margin-top: 14px;
 }
-.hero-language-summary {
-  order: 6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-top: 12px;
-}
-.hero-language-summary .text-button {
-  font-size: 14px;
-  line-height: 1.6;
-  padding: 3px 0;
-  color: #356d8d;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-.hero-language-summary > span {
-  color: #687b88;
-  font-size: 13px;
-  line-height: 1.6;
-}
 .editorial-home #explore-preview {
   order: 7;
   font-size: 14px;
@@ -1145,14 +1123,6 @@ body.taking-test {
     max-width: 310px;
     font-size: 12px;
   }
-  .hero-language-summary {
-    gap: 4px;
-    flex-direction: column;
-    margin-top: 9px;
-  }
-  .hero-language-summary > span {
-    font-size: 12px;
-  }
   .editorial-home .professional-landscape {
     margin-top: 22px;
   }
@@ -1217,5 +1187,4 @@ body.taking-test {
   }
 }
 
-.editorial-home .hero-language-summary .text-button,
 .editorial-home .potential-grid .text-button { min-height: 44px; }

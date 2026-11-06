@@ -1,5 +1,5 @@
 import {languages,questionLocales,canonicalLanguage} from './languages.mjs';
-export function resolveLocale({url='',saved='',languages:preferred=[]}={}){let explicit='';try{explicit=new URL(url,'https://innerly.example').searchParams.get('lang')||''}catch{}for(const candidate of [explicit,saved,...preferred]){const supported=canonicalLanguage(candidate);if(supported)return supported}return 'en'}
+export function resolveLocale({url='',saved='',languages:preferred=[],deviceLocale=''}={}){let explicit='';try{explicit=new URL(url,'https://innerly.example').searchParams.get('lang')||''}catch{}for(const candidate of [explicit,saved,...(Array.isArray(preferred)?preferred:[]),deviceLocale]){const supported=canonicalLanguage(candidate);if(supported)return supported}return 'en'}
 export let locale='en';
 export function setLocale(value){locale=canonicalLanguage(value)||'en'}
 const pairs=`Skip to content|मुख्य भाग पर जाएँ
