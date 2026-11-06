@@ -11,3 +11,5 @@ export function pageStatus(answers,index){const page=questionPage(index),isAnswe
 
 // Continue forward through unanswered questions, then return to any skipped ones.
 export function nextUnanswered(answers,from,total=QUESTION_COUNT){questionPage(from,total);for(let offset=1;offset<=total;offset++){const i=(from+offset)%total,value=answers?.[i];if(!Number.isInteger(value)||value<0||value>4)return i}return null}
+
+export function nextGuidedQuestion(answers,from){const page=questionPage(from);for(let offset=1;offset<=page.indices.length;offset++){const i=page.start+(from-page.start+offset)%page.indices.length,value=answers?.[i];if(!Number.isInteger(value)||value<0||value>4)return i}return nextUnanswered(answers,from)}

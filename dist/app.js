@@ -8,7 +8,7 @@ import {landscape,preparationMarkup,emailDraft} from './experience.mjs';
 import {VERSION,QUESTION_COUNT,contextAnswers,traits,questions,agreement,scoreAnswers,band,profileFor,validDraft} from './model.mjs';
 import {categoryInsight,selectedActions,planProgress} from './report.mjs';
 import {leanGroups,historySeries,historyChange,wedgePath} from './charts.mjs';
-import {assessmentStatus,questionPage,pageStatus,nextUnanswered} from './navigation.mjs?v=guided-1';
+import {assessmentStatus,questionPage,pageStatus,nextGuidedQuestion} from './navigation.mjs?v=auto-batch-1';
 import {growthState,companionMarkup} from './companion.mjs';
 import {journeyState,journeyTrailMarkup} from './journey.mjs';
 let preferredLanguage='';try{preferredLanguage=localStorage.getItem('innerly-language')||''}catch{}
@@ -30,14 +30,16 @@ function home(focus=true){setView('home');const draft=db.draft,done=draft?draft.
 function confirmStartOver(){if(!db.draft){start(false);return}showDialog('Start a fresh assessment?',`<p>This will replace the ${db.draft.answers.filter(a=>a!==null).length} answers in your unfinished assessment. Your completed reports will stay saved.</p><div class="dialog-actions"><button class="secondary" data-dialog-close>Keep my place</button><button class="primary" id="restart-confirm">Start again</button></div>`);$('#restart-confirm').onclick=()=>{$('#info').close();start(false)}}
 function start(resume){if(resume&&validDraft(db.draft)){answers=[...db.draft.answers];index=db.draft.index}else{answers=Array(QUESTION_COUNT).fill(null);index=0;db.draft={version:VERSION,answers:[...answers],index};save()}quiz()}
 function persistDraft(){db.draft={version:VERSION,answers:[...answers],index};return save()}
-let guidedScrollTimer=null;
-function cancelGuidedScroll(){clearTimeout(guidedScrollTimer);guidedScrollTimer=null}
+let guidedScrollTimer=null,guidedScrollKind=null;
+function cancelGuidedScroll(){clearTimeout(guidedScrollTimer);guidedScrollTimer=null;guidedScrollKind=null}
 function scrollBehavior(){return gentleMotionPreference.matches||db.motionPaused?'instant':'smooth'}
 function revealQuestion(target){const offset=$('.quiz-statusbar')?.getBoundingClientRect().height||0;window.scrollTo({top:Math.max(0,window.scrollY+target.getBoundingClientRect().top-offset-24),behavior:scrollBehavior()})}
-function scheduleGuidedScroll(from){cancelGuidedScroll();guidedScrollTimer=setTimeout(()=>{guidedScrollTimer=null;if(view!=='quiz'||index!==from||$('#info').open)return;const destination=nextUnanswered(answers,from);if(destination===null){const button=questionPage(from).next===null?$('#next'):$('#ready-results');button.focus({preventScroll:true});button.scrollIntoView({block:'center',behavior:scrollBehavior()});return}const samePage=questionPage(from).start===questionPage(destination).start;index=destination;persistDraft();if(!samePage){quiz({guided:true});return}const target=$(`#question-title-${destination}`);target.focus({preventScroll:true});revealQuestion(target)},450)}
-// Explicit navigation or scrolling always takes precedence over a pending move.
-for(const eventName of ['wheel','touchstart','pointerdown'])document.addEventListener(eventName,cancelGuidedScroll,{passive:true});
-document.addEventListener('keydown',event=>{if(['Tab','Escape','PageUp','PageDown','Home','End','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))cancelGuidedScroll()});
+function scheduleGuidedScroll(from){cancelGuidedScroll();const sourcePage=questionPage(from).start,isComplete=pageStatus(answers,from).complete;guidedScrollKind=isComplete?'page':'question';guidedScrollTimer=setTimeout(()=>{guidedScrollTimer=null;guidedScrollKind=null;if(view!=='quiz'||questionPage(index).start!==sourcePage||(!isComplete&&index!==from)||$('#info').open)return;const destination=nextGuidedQuestion(answers,from);if(destination===null){const button=questionPage(from).next===null?$('#next'):$('#ready-results');button.focus({preventScroll:true});button.scrollIntoView({block:'center',behavior:scrollBehavior()});return}const samePage=sourcePage===questionPage(destination).start;index=destination;persistDraft();if(!samePage){quiz({guided:true});return}const target=$(`#question-title-${destination}`);target.focus({preventScroll:true});revealQuestion(target)},isComplete?220:450)}
+// Ordinary pointer/scroll/Tab activity must not lose a just-completed page transition.
+// Explicit navigation and further answer edits still cancel the pending move.
+function cancelQuestionScroll(){if(guidedScrollKind!=='page')cancelGuidedScroll()}
+for(const eventName of ['wheel','touchstart','pointerdown'])document.addEventListener(eventName,cancelQuestionScroll,{passive:true});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')cancelGuidedScroll();else if(['Tab','PageUp','PageDown','Home','End','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))cancelQuestionScroll()});
 let batchRenderKey='';
 function batchQuestionMarkup(questionIndex){const question=questions[questionIndex],value=answers[questionIndex];return `<section class="batch-question" data-question-index="${questionIndex}" id="question-${questionIndex}"><h2 tabindex="-1" id="question-title-${questionIndex}"><span class="batch-question-number">${questionIndex+1}.</span> ${escape(question.text)}</h2><fieldset class="batch-scale" aria-labelledby="question-title-${questionIndex}"><legend class="sr-only">${escape(question.text)}</legend><div class="batch-scale-labels" aria-hidden="true"><span>${escape(agreement[0])}</span><span>${escape(batchCopy(locale).neutral)}</span><span>${escape(agreement[4])}</span></div><div class="batch-options">${agreement.map((label,choice)=>`<label class="batch-option" data-choice="${choice}" title="${escape(label)}"><input type="radio" name="response-${questionIndex}" value="${choice}" aria-label="${escape(label)}" ${value===choice?'checked':''}><span aria-hidden="true">✓</span></label>`).join('')}</div></fieldset><p class="batch-response" id="response-${questionIndex}"><span data-response-value>${value===null?'&nbsp;':'✓ '+escape(agreement[value])}</span>${agreement.map(label=>`<span class="batch-response-measure" aria-hidden="true">✓ ${escape(label)}</span>`).join('')}</p></section>`}
 function quiz({guided=false}={}){
