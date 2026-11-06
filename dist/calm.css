@@ -92,3 +92,22 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline-color:#516ec4}
 .large-text .batch-question h2{font-size:25px}.large-text .batch-response{font-size:19px}.large-text .batch-quiz .quiz-toolbar h1{font-size:22px}.large-text .batch-scale-labels{font-size:17px}
 }
 @media(prefers-reduced-motion:reduce){.quiz-statusbar{backdrop-filter:none}}
+/* An inner color disc and a separate outer ring make selection unmistakable. */
+.batch-options{align-items:center;min-height:82px}
+.batch-option,.large-text .batch-option{--disc-size:62px;width:var(--disc-size);height:var(--disc-size);min-height:var(--disc-size);border:2px solid var(--choice-accent);background:#fff;box-shadow:none;isolation:isolate}
+.batch-option[data-choice="0"],.batch-option[data-choice="4"]{--disc-size:72px}
+.batch-option[data-choice="2"]{--disc-size:52px}
+.batch-option::after{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--choice-accent);opacity:0;transform:scale(.65);transition:transform 180ms ease-out,opacity 160ms ease-out;pointer-events:none;z-index:-1}
+.batch-option>span{display:none}
+.batch-option:has(input:checked){background:#fff;border:3px solid var(--choice-accent);box-shadow:none}
+.batch-option:has(input:checked)::after{opacity:1;transform:scale(1)}
+.batch-option:has(input:checked):hover,.batch-option:hover{background:#fff;box-shadow:0 0 0 5px var(--choice-tint)}
+.batch-option:active::after{transform:scale(.9)}
+.batch-question.is-current{border-color:#a9b9df;box-shadow:0 3px 16px #4865b008}
+.batch-question.is-answered:not(.is-current){background:#fafbfe;border-color:#e3e8f1;box-shadow:none}
+.batch-question.is-answered:not(.is-current) h2{color:#627087}
+.selection-motion-paused .batch-option::after{transition:none}
+@media(max-width:700px){.batch-options{min-height:62px;gap:5px}.batch-option,.large-text .batch-option{--disc-size:48px}.batch-option[data-choice="0"],.batch-option[data-choice="4"]{--disc-size:54px}.batch-option[data-choice="2"]{--disc-size:48px}.batch-option::after{inset:4px}}
+@media(max-width:360px){.batch-option[data-choice="0"],.batch-option[data-choice="4"]{--disc-size:50px}}
+@media(prefers-reduced-motion:reduce){.batch-option::after{transition:none}}
+@media(max-width:340px){.batch-options{gap:0}.batch-option[data-choice="0"],.batch-option[data-choice="4"]{--disc-size:48px}}
