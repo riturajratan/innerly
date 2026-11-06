@@ -1,4 +1,4 @@
-import {discoveryHomeMarkup,homeDemoMarkup,validIntent,intentContext,intentDimensions,intentReportMarkup} from './start-experience.mjs?v=discovery-home-3';
+import {discoveryHomeMarkup,homeDemoMarkup,validIntent,intentContext,intentDimensions,intentReportMarkup} from './start-experience.mjs?v=joyful-2';
 import {thumbScrollTarget} from './answer-position.mjs';
 import {thinkingViews,normalizePair,preferencePathsMarkup,connectionsMarkup,connectionReading,journeyMarkup} from './thinking-views.mjs';
 import {overviewMarkup,personalDetailMarkup,evidenceMarkup,chartReadingMarkup,allScenarioMarkup} from './report-explorer.mjs?v=thinking-views-1';
