@@ -1,5 +1,15 @@
 # Innerly editorial artwork
 
+## Bottom invitation: your next chapter
+
+Production asset: `dist/assets/innerly-next-chapter.webp` (2172 × 724). Created with the built-in `image_gen.imagegen` tool, then converted to WebP at quality 84. The hero keeps its original four-adult panorama; this bottom illustration has a separate walking-and-growth scene. Its white background blends with the pale blue CTA through the existing CSS multiply rule.
+
+Selected original: `/Users/riturajratan/.codex/generated_images/01a18109-9fb3-7a73-b585-d5adc3c62961/exec-6ef0261a-2ef1-478a-9dfe-983cf6f0e0e3.png`.
+
+Exact final prompt:
+
+Use case: illustration-story. Asset type: wide bottom call-to-action illustration for Innerly, a mature adult self-reflection website. Primary request: an original, distinctive 'your next chapter' editorial scene, clearly different from a seated-people homepage hero. Two adults in their early thirties, a South Asian woman and a Black man, walking side by side along a gently curving garden path, looking forward with quietly optimistic expressions. Natural full adult proportions, elegant everyday clothing, no children. One carries a small notebook loosely at their side. A few restrained botanical plants at different growth stages anchor the lower edge. Composition: very wide 3:1 panoramic strip, full figures contained, landscape with generous negative space, shallow composition suitable under an existing website CTA headline and button. No lettering, no words, no numbers, no UI. Medium: refined hand-painted gouache with soft paper texture, sophisticated magazine editorial style, fine expressive adult faces. Palette: desaturated sky blue, dusty teal, navy, lavender, small muted ochre accents, harmonious with a pale blue #eaf5fb website section. Background must be solid pure white #ffffff, with all outer edges fading naturally to pure white. Absolutely no transparency, alpha cutout, colored fringe, colored halo, checkerboard, or rough outline. Keep the painted subjects on the white background with clean, natural painterly edges. Avoid: seated people, chairs, four-person lineup, mountains, glowing brains, puzzle pieces, arrows, hearts, polygon figures, 3D, photoreal stock images, medical claims, logos and watermarks. Conceptual decorative artwork, not a testimonial or named customer.
+
 ## Social sharing image
 
 Production asset: `dist/assets/innerly-social-cover.png` (1200 × 630). Original image created with built-in image generation and resized for sharing, with no content alteration. Source: `/Users/riturajratan/.codex/generated_images/01a18109-9fb3-7a73-b585-d5adc3c62961/exec-9d88e460-2bd6-4766-a07b-b0571ad70021.png`.

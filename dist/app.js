@@ -1,6 +1,6 @@
 import {bindPreferenceShowcase} from './home-showcase.mjs?v=faces-1';
 import {bindRelationshipDemo} from './relationship-preview.mjs?v=conversation-1';
-import {discoveryHomeMarkup,homeDemoMarkup,socialExampleMarkup,validIntent,intentContext,intentDimensions,intentReportMarkup} from './start-experience.mjs?v=conversation-1';
+import {discoveryHomeMarkup,homeDemoMarkup,socialExampleMarkup,validIntent,intentContext,intentDimensions,intentReportMarkup} from './start-experience.mjs?v=next-chapter-1';
 import {thumbScrollTarget} from './answer-position.mjs';
 import {thinkingViews,normalizePair,preferencePathsMarkup,connectionsMarkup,connectionReading,journeyMarkup} from './thinking-views.mjs';
 import {overviewMarkup,personalDetailMarkup,evidenceMarkup,chartReadingMarkup,allScenarioMarkup} from './report-explorer.mjs?v=thinking-views-1';
