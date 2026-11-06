@@ -1,5 +1,17 @@
 # Innerly editorial artwork
 
+## Relationship conversation
+
+Production asset: `dist/assets/innerly-relationship-conversation.webp` (1536 × 1024, approximately 220 KB). Generated with the built-in `image_gen.imagegen` tool on 6 November 2026, then converted to WebP at quality 84. This is decorative conceptual artwork, not a testimonial or named customer.
+
+Original output: `/Users/riturajratan/.codex/generated_images/01a18109-9fb3-7a73-b585-d5adc3c62961/exec-4e3c8762-3133-47c3-86d4-761b491dcc9e.png`.
+
+Exact prompt:
+
+Use case: illustration-story. Asset type: Innerly homepage relationship section illustration. Primary request: refined editorial gouache illustration of two adults having a warm thoughtful conversation, one listening and one gently speaking, seated facing each other in simple comfortable chairs, a small table with two cups between them. Calm emotionally intelligent adult self-awareness brand. Subject: South Asian woman age 30 and man age 35, natural adult proportions, expressive subtle faces and relaxed everyday clothes; the relationship may be friends or partners. Composition: landscape 3:2 with complete figures contained, generous white breathing space and edges fading to pure white. Color palette: restrained navy, desaturated sky blue, dusty teal, lavender and tiny ochre accents matching a mature white/navy website. Hand-painted fine paper texture, elegant magazine illustration, optimistic and sober. Constraints: no text, no letters, no logos, no hearts, no ratings, no UI, no charts, no children, no 3D, no polygon people, no medical or therapy claims. Decorative conceptual artwork, not named customers or testimonials.
+
+## Homepage panorama
+
 Production asset: `dist/assets/innerly-editorial-people.webp` (2172 × 724, approximately 223 KB).
 
 Created with the built-in `image_gen.imagegen` tool on 6 November 2026. This is original decorative artwork; the depicted adults are not customers, clinicians or testimonial subjects. WebP conversion preserves the generated composition. No reference-site image was copied.
