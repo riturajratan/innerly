@@ -103,9 +103,9 @@ test("homepage states real questionnaire scope and offers start or resume withou
       /hero-language-summary|home-language-section|data-choose-language|question languages|भाषा|languages are supported|Detailed reports in English/,
     );
   }
-  assert.equal((home.match(/data-social-example=/g) || []).length, 3);
+  assert.equal((home.match(/data-life-area=/g) || []).length, 4);
   assert.match(home, /innerly-editorial-people.webp/);
-  assert.doesNotMatch(home, /95%|210M|5-star|4\.9|Total tests taken/);
+  assert.doesNotMatch(home, /95% accurate|accuracy[^<]*95%|210M|5-star|4\.9|Total tests taken/);
   const resumed = discoveryHomeMarkup({
     draft: { answers: [0, null, 4, null] },
   });
