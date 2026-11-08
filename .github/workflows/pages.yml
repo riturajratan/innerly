@@ -30,6 +30,8 @@ jobs:
       - name: Check application and tests
         run: |
           node scripts/render-home.mjs
+          node scripts/render-mental-home.mjs
+          node --check dist/mental-app.mjs
           node --check dist/app.js
           node --test tests/*.test.mjs
       - name: Configure Pages

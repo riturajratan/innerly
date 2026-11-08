@@ -27,8 +27,8 @@ test('placeholder ratings and names are clearly separated from real customer fee
   assert.doesNotMatch(markup, /verified|aggregateRating|reviewCount/);
 });
 
-test('public HTML contains current homepage content and coherent share metadata without invented review schema', () => {
-  const html = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8');
+test('legacy HTML contains the earlier homepage content and coherent share metadata without invented review schema', () => {
+  const html = readFileSync(new URL('../dist/personality.html', import.meta.url), 'utf8');
   const content = html.match(/<main\b[^>]*id="app"[^>]*>([\s\S]*?)<\/main>/)[1];
   assert.equal(content, discoveryHomeMarkup({}));
   assert.equal((content.match(/<h1>/g) || []).length, 1);

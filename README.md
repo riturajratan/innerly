@@ -1,3 +1,61 @@
+# Innerly — 60-statement reflection
+
+**Deployment: GitHub Pages publishes `dist/` after checks on pushes to `main`.**
+
+## Our core mission
+
+Help people understand their current state of mind, identify thinking and behavioural patterns that may contribute to mental stress, and discover practical ways to improve their mental well-being, resilience and overall quality of life.
+
+Product journey: understand your mind → notice thinking and behavioural patterns → explore practical next steps. This is the direction for the experience; it does not establish clinical validity or promise an outcome. Keep the homepage brief, with the complete mission available in English and Hindi under “Our core mission.”
+
+## Current experience
+
+The active check-in now uses exactly the owner's 60 English statements, in the supplied order. The previous 36-personality-plus-10-wellbeing questionnaire is no longer the active form. All 60 statements and five disagreement/agreement options are bundled in the existing 20 languages. Translation data lives in `dist/reflection60-locales/`; the supplied English source lives in `dist/reflection60-questions.mjs`. Translations are editorial drafts, not validated clinical instruments.
+
+The continuous round-option layout, answer selection ring, automatic next-unanswered scrolling, review navigator, tree/completion percentage, larger text, reduced motion, and Save & take a break remain. The current question stays clear while other questions gently blur. Clicking or keyboard-focusing another question makes it clear immediately; automatic scrolling, review jumps and resume update the same focus state. Other questions remain interactive, reduced motion is respected, and printing removes the blur. There are no five-question page boundaries. Browser/manual/URL language selection and Arabic/Urdu RTL remain. Homepage and detailed reports remain English/Hindi, with a native-language coverage notice.
+
+The homepage opens with a warm illustration of three adults of different generations, on the right on desktop and above the copy on small screens. The image has responsive WebP sources, reserved dimensions and high fetch priority. Interactive sample graphs remain in the report-preview section below. The illustration is generated artwork, not a testimonial or a photograph of real customers.
+
+All test-start actions share the label “Start My Test” in English (with localized equivalents) and a warm yellow background with dark text, including homepage sections, history and report restart. Saving and printing retain their existing styles.
+
+## Report semantics
+
+No scoring key or validation was supplied for this new set. **It produces a descriptive reflection, not PHQ-4/GAD scores, disorder labels, severity bands or a percentage of mental health.** Seven editorial topic groups organize 59 statements. Charts count disagreement, neutral and agreement selections; selecting a topic reveals an optional reflection prompt. The full report includes response detail and optional next-step prompts. Higher agreement is not interpreted as better or worse.
+
+Statement 2 concerns self-harm. It remains optional and is excluded from chart aggregates and the printable response list. Answer selection follows the same automatic next-unanswered scrolling as other statements. The support buttons, panel, question note and report support section have been removed at the owner’s request. The questionnaire is not a clinical risk assessment; disagreement or skipping never implies that someone is safe.
+
+The [NIMH ASQ toolkit](https://www.nimh.nih.gov/research/research-conducted-at-nimh/asq-toolkit-materials) distinguishes a validated screen from further assessment by a trained clinician. This custom item is neither. Qualified clinical and fluent-speaker review remain necessary before any clinical or cross-cultural validity claims.
+
+## Versioned local data
+
+- Questionnaire: `user-reflections-60-v1`.
+- Draft: `innerly-reflections-60-draft-v1`.
+- Completed reflection reports: `innerly-reflections-60-v1`.
+- Earlier 46-question draft key remains untouched; its answers are never mapped onto new questions.
+- Earlier saved PHQ-4 reports remain readable through My check-ins with their original method. They use the existing `innerly-mental-checkin-v1` key. Saving/deleting a report writes only its own version's namespace.
+- Earlier personality reports remain accessible through `dist/personality.html`.
+
+Answers are in page memory until the visitor explicitly saves in this browser. A saved draft then autosaves subsequent changes. Storage failure keeps in-memory answers and shows an error. No accounts, cloud database, translation service, payments or response analytics are connected.
+
+The homepage keeps the earlier illustrated feeling exploration, country life-evaluation data and repeated start actions. Its sample report and question count now describe the new reflection. Country figures never affect the individual's response summary.
+
+## Local development
+
+```sh
+node scripts/render-home.mjs
+node scripts/render-mental-home.mjs
+node --check dist/mental-app.mjs
+node --check dist/checkin-flow.mjs
+node --test tests/*.test.mjs
+python3 -m http.server 4298 --bind 127.0.0.1 --directory dist
+```
+
+`render-home.mjs` now updates the legacy personality entry. `render-mental-home.mjs` updates the new public entry. The GitHub Pages workflow renders both entries, checks JavaScript syntax and runs the test suite before publishing `dist/`.
+
+## Earlier personality implementation notes
+
+The following notes describe the retained legacy experience, not the new mental-health homepage.
+
 # Innerly
 
 Live site: https://www.riturajratan.com/innerly/
