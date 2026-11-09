@@ -1,4 +1,4 @@
-# Innerly — 60-statement reflection
+# Innerly — V1 wellbeing reflection
 
 **Deployment: GitHub Pages publishes `dist/` after checks on pushes to `main`.**
 
@@ -10,7 +10,9 @@ Product journey: understand your mind → notice thinking and behavioural patter
 
 ## Current experience
 
-The active check-in now uses exactly the owner's 60 English statements, in the supplied order. The previous 36-personality-plus-10-wellbeing questionnaire is no longer the active form. All 60 statements and five disagreement/agreement options are bundled in the existing 20 languages. Translation data lives in `dist/reflection60-locales/`; the supplied English source lives in `dist/reflection60-questions.mjs`. Translations are editorial drafts, not validated clinical instruments.
+The active check-in uses the 36 approved questions from `Innerly_V1_Questionnaire.xlsx` (Question Bank, A2:C37), preserving IDs Q01–Q36, exact English wording, order and six dimensions. Instructions B8:B13 supplies Never, Rarely, Sometimes, Often, Almost Always and Not Applicable / Prefer to Skip. Every question can be explicitly skipped. Duration follows the workbook: 8–12 minutes.
+
+All questions, six response choices, dimension labels and the questionnaire notice are bundled in the existing 20 languages: en, hi, zh, es, fr, ar, bn, pt, ru, ur, id, de, ja, mr, te, tr, ta, vi, ko, it. Translation assets live in `dist/innerly-v1-locales/`. The workbook extraction is `dist/innerly-v1-source.json`; `dist/innerly-v1-questions.mjs` is its browser module, with parity checked in tests. Translations are editorial drafts requiring fluent-speaker review before validation claims. Texts are nested under `texts` so Indonesian code `id` cannot overwrite a question ID.
 
 The continuous round-option layout, answer selection ring, automatic next-unanswered scrolling, review navigator, tree/completion percentage, larger text, reduced motion, and Save & take a break remain. The current question stays clear while other questions gently blur. Clicking or keyboard-focusing another question makes it clear immediately; automatic scrolling, review jumps and resume update the same focus state. Other questions remain interactive, reduced motion is respected, and printing removes the blur. There are no five-question page boundaries. Browser/manual/URL language selection and Arabic/Urdu RTL remain. Homepage and detailed reports remain English/Hindi, with a native-language coverage notice.
 
@@ -20,18 +22,15 @@ All test-start actions share the label “Start My Test” in English (with loca
 
 ## Report semantics
 
-No scoring key or validation was supplied for this new set. **It produces a descriptive reflection, not PHQ-4/GAD scores, disorder labels, severity bands or a percentage of mental health.** Seven editorial topic groups organize 59 statements. Charts count disagreement, neutral and agreement selections; selecting a topic reveals an optional reflection prompt. The full report includes response detail and optional next-step prompts. Higher agreement is not interpreted as better or worse.
-
-Statement 2 concerns self-harm. It remains optional and is excluded from chart aggregates and the printable response list. Answer selection follows the same automatic next-unanswered scrolling as other statements. The support buttons, panel, question note and report support section have been removed at the owner’s request. The questionnaire is not a clinical risk assessment; disagreement or skipping never implies that someone is safe.
-
-The [NIMH ASQ toolkit](https://www.nimh.nih.gov/research/research-conducted-at-nimh/asq-toolkit-materials) distinguishes a validated screen from further assessment by a trained clinician. This custom item is neither. Qualified clinical and fluent-speaker review remain necessary before any clinical or cross-cultural validity claims.
+No scoring key, reverse-scoring rules or validation were supplied. **Reports describe responses without calculating clinical totals, disorder labels, severity bands or a percentage of mental health.** Six workbook dimensions contain six questions each. Five-color charts count the actual frequency selections; selecting a category opens its six responses and an optional reflection prompt. Skips are tracked separately, never as zero/Never. An all-skipped form has an explicit no-responses state. Positive and negative wording are both present, so higher frequency is not interpreted as uniformly better or worse. Numeric values 0–4 are response indexes, not scored points.
 
 ## Versioned local data
 
-- Questionnaire: `user-reflections-60-v1`.
-- Draft: `innerly-reflections-60-draft-v1`.
-- Completed reflection reports: `innerly-reflections-60-v1`.
-- Earlier 46-question draft key remains untouched; its answers are never mapped onto new questions.
+- Questionnaire: `innerly-workbook-v1`.
+- Draft: `innerly-workbook-v1-draft`.
+- Completed reflection reports: `innerly-workbook-v1-reports`.
+- Earlier 60- and 46-question draft keys remain untouched; their answers are never mapped onto new questions.
+- Earlier 60-statement reports remain readable from `innerly-reflections-60-v1` with their original questions, agreement scale and descriptive method.
 - Earlier saved PHQ-4 reports remain readable through My check-ins with their original method. They use the existing `innerly-mental-checkin-v1` key. Saving/deleting a report writes only its own version's namespace.
 - Earlier personality reports remain accessible through `dist/personality.html`.
 

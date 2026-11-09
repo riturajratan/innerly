@@ -46,14 +46,14 @@ test('support reflects symptom thresholds and daily impact without grading anger
 test('reports distinguish translated screens, context, fictional examples and real history',()=>{
  const hindi=reportMarkup(record([1,1,1,1],{language:'hi'}),[],'en');assert.match(hindi,/editorial Hindi translation/);assert.match(hindi,/not a diagnosis/);assert.match(hindi,/not diagnostic scores/);
  assert.match(sampleReport('journey'),/EXAMPLE · NOT YOUR RESULTS/);assert.match(sampleReport('journey'),/Illustrative responses only/);
- const flow=quizMarkup(Array(60).fill(null));
- assert.equal((flow.match(/<fieldset/g)||[]).length,60);assert.equal((flow.match(/data-skip=/g)||[]).length,1);
- assert.doesNotMatch(flow,/Over the last two weeks/);assert.match(flow,/Agree|Disagree/);
- assert.match(quizMarkup(Array(60).fill(null),'hi'),/clinical|नैदानिक|निदान|चिकित्सकीय/);
+ const flow=quizMarkup(Array(36).fill(null));
+ assert.equal((flow.match(/<fieldset/g)||[]).length,36);assert.equal((flow.match(/data-skip=/g)||[]).length,36);
+ assert.doesNotMatch(flow,/Over the last two weeks/);assert.match(flow,/Never|Almost Always/);
+ assert.match(quizMarkup(Array(36).fill(null),'hi'),/clinical|नैदानिक|निदान|चिकित्सकीय/);
 });
 test('public entry is mental-health focused, with legacy personality kept separate',async()=>{
  const html=await readFile(new URL('../dist/index.html',import.meta.url),'utf8');
- assert.match(html,/mental-app\.mjs/);assert.match(html,/60 statements/);assert.match(html,/personality\.html/);assert.doesNotMatch(html,/accuracy rate|testimonials|country-selector/);
+ assert.match(html,/mental-app\.mjs/);assert.match(html,/36 questions/);assert.match(html,/personality\.html/);assert.doesNotMatch(html,/accuracy rate|testimonials|country-selector/);
  const app=await readFile(new URL('../dist/mental-app.mjs',import.meta.url),'utf8');assert.doesNotMatch(app,/fetch\(|XMLHttpRequest|sendBeacon/);
  assert.match(app,/mh-save-confirm/);assert.match(app,/if\(!report&&answers\.some/);
 });

@@ -1,13 +1,13 @@
-import {questionUI,growthCaption} from './mental-language.mjs';
-import {REFLECTION60_VERSION,reflectionQuestions,reflectionChoices,validReflectionResponse,completeReflection,makeReflectionReport} from './reflection60-model.mjs';
-export const REFLECTION_COUNT=60;
-export const QUESTION_TOTAL=60;
-export const FLOW_VERSION=REFLECTION60_VERSION;
-export const questionBank=reflectionQuestions;
-export const questionChoices=(index,language='en')=>reflectionChoices(language);
-export const validQuestionResponse=validReflectionResponse;
-export const completeFlow=completeReflection;
-export const makeFlowReport=makeReflectionReport;
+import {questionUI,growthCaption} from './mental-language.mjs?v=mh-13';
+import {INNERLY_V1_VERSION,QUESTION_COUNT,workbookQuestions,workbookChoices,validWorkbookResponse,completeWorkbook,makeWorkbookReport} from './innerly-v1-model.mjs';
+export const REFLECTION_COUNT=QUESTION_COUNT;
+export const QUESTION_TOTAL=QUESTION_COUNT;
+export const FLOW_VERSION=INNERLY_V1_VERSION;
+export const questionBank=workbookQuestions;
+export const questionChoices=(index,language='en')=>workbookChoices(language);
+export const validQuestionResponse=validWorkbookResponse;
+export const completeFlow=completeWorkbook;
+export const makeFlowReport=makeWorkbookReport;
 export function completedCount(answers){return Array.from(answers).filter((v,i)=>validQuestionResponse(v,i)).length;}
 export function nextFlowQuestion(answers,start=0,end=QUESTION_TOTAL){for(let i=start;i<Math.min(end,QUESTION_TOTAL);i++)if(!validQuestionResponse(answers[i],i))return i;return null;}
 export function growthState(answers){const count=completedCount(answers),progress=count/QUESTION_TOTAL;return {count,progress,percent:Math.floor(progress*100),stage:count===0?0:progress<.25?1:progress<.5?2:progress<1?3:4,leaves:count===0?0:Math.max(1,Math.floor(progress*10)),stem:count===0?0:.2+progress*.8};}

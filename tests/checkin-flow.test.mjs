@@ -1,41 +1,65 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {source} from '../dist/innerly-v1-questions.mjs';
+import {INNERLY_V1_VERSION,workbookDimensions,frequencyCounts,readWorkbookReports,skipChoice,questionnaireLocale} from '../dist/innerly-v1-model.mjs';
 import {QUESTION_TOTAL,FLOW_VERSION,questionBank,questionChoices,completeFlow,makeFlowReport,growthState,nextFlowQuestion} from '../dist/checkin-flow.mjs';
-import {englishStatements} from '../dist/reflection60-questions.mjs';
-import {REFLECTION60_VERSION,readReflectionReports,reflectionTopics,responseCounts,topicResponses} from '../dist/reflection60-model.mjs';
-import {readSavedCheckins,makeCheckin} from '../dist/mental-model.mjs';
+import {makeReflectionReport,readReflectionReports} from '../dist/reflection60-model.mjs';
+import {makeCheckin,readSavedCheckins} from '../dist/mental-model.mjs';
 import {readDraft,DRAFT_STORAGE} from '../dist/checkin-draft.mjs';
 import {quizMarkup,mentalHomeMarkup,reportMarkup} from '../dist/mental-views.mjs';
-const full=(n=2)=>Array(60).fill(n),meta={id:'reflection-new',createdAt:'2026-11-08T12:00:00Z',language:'en'};
-
-test('active questionnaire is exactly the 60 supplied statements in their requested order',()=>{
- assert.equal(QUESTION_TOTAL,60);assert.equal(FLOW_VERSION,REFLECTION60_VERSION);assert.deepEqual(questionBank.map(q=>q.en),englishStatements);assert.equal(new Set(questionBank.map(q=>q.id)).size,60);
- assert.equal(questionBank[0].en,'I spend a lot of time organizing or planning to make sure everything is perfect.');
- assert.equal(questionBank[1].en,'I sometimes harm myself or think about it when upset.');
- assert.equal(questionBank[59].en,'I avoid close relationships because I fear being hurt or betrayed.');
- assert.ok(questionBank.every((q,i)=>questionChoices(i).length===5));
- assert.deepEqual(questionBank.flatMap((q,i)=>q.optional?[i]:[]),[1]);
+const full=(n=2)=>Array(36).fill(n),meta={id:'workbook-test',createdAt:'2026-11-09T12:00:00Z',language:'en'};
+test('active bank preserves the workbook IDs, exact English order, six dimensions and frequency scale',()=>{
+ assert.deepEqual(source,JSON.parse(fs.readFileSync(new URL('../dist/innerly-v1-source.json',import.meta.url),'utf8')));
+ assert.equal(QUESTION_TOTAL,36);assert.equal(FLOW_VERSION,INNERLY_V1_VERSION);
+ assert.deepEqual(questionBank.map(q=>[q.id,q.texts.en]),source.questions.map(q=>[q.id,q.en]));
+ assert.equal(new Set(questionBank.map(q=>q.id)).size,36);assert.ok(questionBank.every(q=>q.optional));
+ assert.deepEqual(questionChoices(0),['Never','Rarely','Sometimes','Often','Almost Always']);
+ assert.equal(skipChoice('en'),'Not Applicable / Prefer to Skip');
+ assert.deepEqual(workbookDimensions.map(d=>d.en),[...new Set(source.questions.map(q=>q.dimension))]);
+ assert.deepEqual(workbookDimensions.flatMap(d=>d.items),Array.from({length:36},(_,i)=>i));
+ assert.ok(workbookDimensions.every(d=>d.items.length===6));
 });
-test('only statement two can be skipped; all other missing or malformed values block completion',()=>{
- for(const v of [0,1,2,3,4,'skip']){const a=full();a[1]=v;assert.equal(completeFlow(a),true);}
- for(let i=0;i<60;i++)for(const value of [null,undefined,-1,5,'1',1.5,...(i===1?[]:['skip'])]){const a=full();a[i]=value;assert.equal(completeFlow(a),false);assert.equal(nextFlowQuestion(a),i);assert.throws(()=>makeFlowReport(a,meta));}
- assert.equal(completeFlow(new Array(60)),false);assert.equal(completeFlow(Array(46).fill(1)),false);
+test('every question can be explicitly skipped; omissions and invalid frequencies cannot finish',()=>{
+ for(let i=0;i<36;i++){
+  for(const v of [0,1,2,3,4,'skip']){const a=full();a[i]=v;assert.equal(completeFlow(a),true);}
+  for(const v of [null,undefined,-1,5,6,'1',1.5]){const a=full();a[i]=v;assert.equal(completeFlow(a),false);assert.equal(nextFlowQuestion(a),i);assert.throws(()=>makeFlowReport(a,meta));}
+ }
+ for(const a of [new Array(36),Array(35).fill(0),Array(60).fill(0),null])assert.equal(completeFlow(a),false);
 });
-test('response charts partition 59 non-sensitive statements exactly once and exclude self-harm responses',()=>{
- const items=reflectionTopics.flatMap(t=>t.items).sort((a,b)=>a-b);assert.deepEqual(items,Array.from({length:60},(_,i)=>i+1).filter(n=>n!==2));
- for(const v of [0,1,2,3,4,'skip']){const a=full(3);a[1]=v;assert.deepEqual(responseCounts(a),[0,0,0,59,0]);for(const t of reflectionTopics){const s=topicResponses(a,t);assert.equal(s.total,t.items.length);assert.equal(s.agreed,t.items.length);}}
+test('frequency summaries preserve actual responses and exclude skips without reverse-scoring',()=>{
+ const a=Array.from({length:36},(_,i)=>i%6===5?'skip':i%6);
+ assert.deepEqual(frequencyCounts(a),{counts:[6,6,6,6,6],skipped:6,answered:30,total:36});
+ for(const d of workbookDimensions)assert.deepEqual(frequencyCounts(a,d.items),{counts:[1,1,1,1,1],skipped:1,answered:5,total:6});
+ assert.deepEqual(frequencyCounts(full('skip')),{counts:[0,0,0,0,0],skipped:36,answered:0,total:36});
+ for(const v of [0,4])assert.equal(frequencyCounts(full(v)).counts[v],36);
 });
-test('new reports carry no clinical totals and cannot be reinterpreted as old PHQ-4 reports',()=>{
- const report=makeFlowReport(full(),meta);assert.equal(report.scores,undefined);assert.equal(report.reflection,undefined);assert.deepEqual(readSavedCheckins(JSON.stringify([report])),[]);
- const old=makeCheckin(Array(10).fill(1),{...meta,id:'old'});assert.deepEqual(readReflectionReports(JSON.stringify([old])),[]);assert.equal(readSavedCheckins(JSON.stringify([old]))[0].scores.total,4);
- const restored=readReflectionReports(JSON.stringify([{...report,scores:{total:99}},report]));assert.equal(restored.length,1);assert.equal(restored[0].scores,undefined);
- assert.notEqual(DRAFT_STORAGE,'innerly-checkin-draft-v1');assert.equal(readDraft(JSON.stringify({version:'reflection-36-plus-mental-10-v1',language:'en',savedAt:meta.createdAt,answers:Array(46).fill(1)})),null);
+test('workbook reports and drafts cannot reinterpret earlier 60-item or PHQ responses',()=>{
+ const current=makeFlowReport(full(),meta),old60=makeReflectionReport(Array(60).fill(2),{...meta,id:'sixty'}),phq=makeCheckin(Array(10).fill(1),{...meta,id:'phq'});
+ assert.deepEqual(readWorkbookReports(JSON.stringify([old60,phq])),[]);
+ assert.deepEqual(readReflectionReports(JSON.stringify([current])),[]);assert.deepEqual(readSavedCheckins(JSON.stringify([current])),[]);
+ assert.deepEqual(readWorkbookReports(JSON.stringify([{...current,scores:{total:99}},current])),[current]);
+ assert.notEqual(DRAFT_STORAGE,'innerly-reflections-60-draft-v1');
+ assert.equal(readDraft(JSON.stringify({version:old60.version,language:'en',savedAt:meta.createdAt,answers:old60.answers})),null);
+ assert.match(reportMarkup(old60,[]),/59 statements/);assert.match(reportMarkup(phq,[]),/PHQ-4/);
+ assert.equal(current.scores,undefined);
 });
-test('tree represents completion only, including an intentional optional skip',()=>{
- for(let n=0;n<=60;n++){const a=Array.from({length:60},(_,i)=>i<n?4:null),b=Array.from({length:60},(_,i)=>i<n?0:null);assert.deepEqual(growthState(a),growthState(b));assert.equal(growthState(a).count,n);assert.equal(growthState(a).percent,Math.floor(n/60*100));}
- const a=full();a[1]='skip';assert.equal(growthState(a).percent,100);assert.equal(growthState(a).stage,4);
+test('tree counts completion independently of response meaning, including skipped questions',()=>{
+ for(let n=0;n<=36;n++){
+  const arrays=[0,4,'skip'].map(value=>Array.from({length:36},(_,i)=>i<n?value:null));
+  assert.deepEqual(growthState(arrays[0]),growthState(arrays[1]));assert.deepEqual(growthState(arrays[0]),growthState(arrays[2]));
+  assert.equal(growthState(arrays[0]).percent,Math.floor(n/36*100));
+ }
 });
-test('new UI preserves circles and continuity, with an optional statement and no old screening claims',()=>{
- const quiz=quizMarkup(Array(60).fill(null));assert.equal((quiz.match(/<fieldset/g)||[]).length,60);assert.equal((quiz.match(/type="radio"/g)||[]).length,300);assert.match(quiz,/data-skip="1"/);assert.doesNotMatch(quiz,/data-action="reflection-support"|mh-sensitive-note/);assert.doesNotMatch(quiz,/data-action="next"|data-action="previous"|Over the last two weeks|PHQ-4/);
- const home=mentalHomeMarkup();assert.match(home,/60 statements/);assert.doesNotMatch(home,/PHQ-4|46 questions|36 reflection/);
- for(const view of ['snapshot','days','journey']){const html=reportMarkup(makeFlowReport(full(),meta),[],'en',view);assert.doesNotMatch(html,/undefined|NaN|PHQ-4|GAD-2|reported distress/);assert.match(html,/59 statements/);assert.doesNotMatch(html,/I sometimes harm myself/);}
+test('active UI exposes frequency choices, universal skip, correct counts and safe empty-category reports',()=>{
+ const quiz=quizMarkup(full(null));assert.equal((quiz.match(/<fieldset/g)||[]).length,36);assert.equal((quiz.match(/type="radio"/g)||[]).length,180);assert.equal((quiz.match(/data-skip=/g)||[]).length,36);
+ assert.doesNotMatch(quiz,/Disagree|Agree|Neutral|data-action="next"|data-action="previous"|PHQ-4/);assert.match(quiz,/Almost Always/);
+ assert.match(mentalHomeMarkup(),/36 questions · Around 8–12 minutes/);assert.doesNotMatch(mentalHomeMarkup(),/60 statements|self-harm statement/);
+ for(const value of [0,4,'skip'])for(const view of ['snapshot','days','journey']){
+  const html=reportMarkup(makeFlowReport(full(value),meta),[],'en',view);
+  assert.doesNotMatch(html,/undefined|NaN|Infinity|59 statements|reported distress|PHQ-4/);
+  if(view==='snapshot')assert.equal((html.match(/data-workbook-dimension=/g)||[]).length,6);
+  if(value==='skip')assert.match(html,/no responses to interpret/);
+ }
+ assert.equal(questionnaireLocale('hi').choices.length,6);
 });

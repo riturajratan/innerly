@@ -3,11 +3,11 @@ import {topLifeEvaluations,rankedCountryRows,countryDetail,globalDiscovery} from
 import {latestEvaluation} from '../dist/world-perspective.mjs';
 import {growthState} from '../dist/checkin-flow.mjs';
 test('completion percentage follows completed questions and never rounds unfinished work to 100%',()=>{
- for(const [count,percent] of [[0,0],[1,1],[5,8],[30,50],[59,98],[60,100]]){
- const values=Array.from({length:60},(_,i)=>i<count?0:null);assert.equal(growthState(values).percent,percent);
+ for(const [count,percent] of [[0,0],[1,2],[5,13],[18,50],[35,97],[36,100]]){
+ const values=Array.from({length:36},(_,i)=>i<count?0:null);assert.equal(growthState(values).percent,percent);
  if(count)values[0]=4;assert.equal(growthState(values).percent,percent);
  }
- const skipped=Array(60).fill(0);skipped[1]='skip';assert.equal(growthState(skipped).percent,100);skipped[36]='skip';assert.equal(growthState(skipped).percent,98);
+ const skipped=Array(36).fill(0);skipped[1]='skip';assert.equal(growthState(skipped).percent,100);skipped[35]='skip';assert.equal(growthState(skipped).percent,100);
 });
 test('discovery ranks the actual source means and leaves exact uncertainty accessible',()=>{
  assert.equal(topLifeEvaluations.length,10);assert.equal(topLifeEvaluations[0].name,'Finland');for(let i=0;i<10;i++){assert.deepEqual(topLifeEvaluations[i].row,latestEvaluation(topLifeEvaluations[i].name));if(i)assert.ok(topLifeEvaluations[i-1].row[1]>=topLifeEvaluations[i].row[1]);}

@@ -1,7 +1,7 @@
-import {supportedLanguage} from './mental-language.mjs';
-import {FLOW_VERSION,QUESTION_TOTAL,validQuestionResponse,completedCount,nextFlowQuestion} from './checkin-flow.mjs?v=mh-6';
+import {supportedLanguage} from './mental-language.mjs?v=mh-13';
+import {FLOW_VERSION,QUESTION_TOTAL,validQuestionResponse,completedCount,nextFlowQuestion} from './checkin-flow.mjs?v=mh-13';
 
-export const DRAFT_STORAGE='innerly-reflections-60-draft-v1';
+export const DRAFT_STORAGE='innerly-workbook-v1-draft';
 
 // A draft is only persisted after explicit on-device saving consent.
 // Never reinterpret responses from a different question/scale version.

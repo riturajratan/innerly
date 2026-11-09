@@ -95,3 +95,16 @@
 [data-action="begin"]:focus-visible,#mh-new-confirm:focus-visible{outline:3px solid #277779;outline-offset:4px}
 [data-action="begin"]:is(.mh-primary,.mh-secondary,.mh-link):active,#mh-new-confirm:active{background:#e5b52b;box-shadow:none}
 @media(max-width:700px){.mh-report-actions>[data-action="begin"].mh-link{width:100%}}
+/* Workbook frequency labels remain visible on every circular choice. */
+.mh-frequency-caption{display:block;font-size:15px;line-height:1.45;text-align:center;max-width:120px;overflow-wrap:anywhere;color:#3d5862;margin-top:12px}
+.mh-reflection-options label{justify-content:flex-start}
+.mh-skip{min-height:44px;line-height:1.6}
+.mh-skip[aria-pressed=true]{font-weight:600;color:#376d73}
+.mh-frequency-legend{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:13px;margin:22px 0 10px;line-height:1.6}
+.mh-frequency-legend span{display:flex;align-items:center;gap:7px}
+.mh-frequency-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.mh-workbook-answers{padding-inline-start:26px}
+.mh-workbook-answers li{padding:15px 0;border-bottom:1px solid var(--line)}
+.mh-workbook-answers strong{font-size:16px;color:#397b82}
+.mh-reflection-summary>strong small{font-size:18px;white-space:nowrap}
+@media(max-width:600px){.mh-frequency-caption{font-size:12px;line-height:1.45;margin-top:10px;max-width:100%}.mh-large .mh-frequency-caption{font-size:14px}.mh-topic-row>span:first-child{align-items:flex-start}.mh-topic-row b small{display:block}}

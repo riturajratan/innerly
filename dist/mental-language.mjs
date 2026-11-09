@@ -22,7 +22,7 @@ export function questionUI(code,key,en=key,hi=en){
  return questionLocales[code]?.ui[key]||en;
 }
 export function responseState(code,answered){return questionLocales[code]?.states?.[answered?0:1]||(code==='hi'?(answered?'जवाब दिया':'जवाब बाकी'):(answered?'answered':'not answered'));}
-export function coverageNotice(code){return (wellbeingLocales[code]?.coverage||(code==='hi'?'सभी 46 सवाल और विकल्प 20 भाषाओं में। होमपेज और पूरी रिपोर्ट अभी English और हिन्दी में हैं।':'All 46 questions and answer options in 20 languages. Homepage and full reports currently in English and Hindi.')).replaceAll('46','60');}
+export function coverageNotice(code){return (wellbeingLocales[code]?.coverage||(code==='hi'?'सभी 46 सवाल और विकल्प 20 भाषाओं में। होमपेज और पूरी रिपोर्ट अभी English और हिन्दी में हैं।':'All 46 questions and answer options in 20 languages. Homepage and full reports currently in English and Hindi.')).replaceAll('46','36');}
 export function translationNotice(code){return wellbeingLocales[code]?.note||(code==='hi'?'इन symptom-frequency सवालों का हिन्दी अनुवाद संपादकीय है; इस app में उसका स्वतंत्र validation नहीं हुआ है। यह diagnosis नहीं है।':'');}
 export function timeframe(code){return wellbeingLocales[code]?.timeframe||(code==='hi'?'पिछले दो सप्ताह में यह समस्या आपको कितनी बार परेशान करती रही है?':'Over the last two weeks, how often have you been bothered by the following problem?');}
 export function contextNote(code){return wellbeingLocales[code]?.context||(code==='hi'?'पिछले दो सप्ताह · सिर्फ़ संदर्भ, screening score का हिस्सा नहीं':'Over the last two weeks · Context only, not part of the screening score');}
