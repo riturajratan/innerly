@@ -27,11 +27,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Configure Clerk public key
+        env:
+          CLERK_PUBLISHABLE_KEY: ${{ vars.CLERK_PUBLISHABLE_KEY }}
+        run: node scripts/render-auth-config.mjs
       - name: Check application and tests
         run: |
           node scripts/render-home.mjs
           node scripts/render-mental-home.mjs
           node --check dist/mental-app.mjs
+          node --check dist/clerk-auth.mjs
           node --check dist/app.js
           node --test tests/*.test.mjs
       - name: Configure Pages

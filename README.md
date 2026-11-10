@@ -36,7 +36,7 @@ No scoring key, reverse-scoring rules or validation were supplied. **Reports des
 
 Previously skipped values in same-version drafts become unanswered when resumed; numeric answers are preserved. Earlier completed reports keep their original skips.
 
-Answers are in page memory until the visitor explicitly saves in this browser. A saved draft then autosaves subsequent changes. Storage failure keeps in-memory answers and shows an error. No accounts, cloud database, translation service, payments or response analytics are connected.
+Answers are in page memory until the visitor explicitly saves in this browser. A saved draft then autosaves subsequent changes. Storage failure keeps in-memory answers and shows an error. Clerk is configured locally with Google and verified email-code login; a password is not required at signup. The production instance has verified DNS, issued SSL certificates and email-code login configured, with Google deferred. Its hosted email login screen opens correctly, and the Pages workflow injects the production publishable key from the repository Actions variable. Real production email delivery still needs an owner test. No cloud database, translation service, payments or response analytics are connected. Accounts do not sync or protect browser-saved reports. See [Clerk setup](docs/clerk-setup.md) for email/Google configuration and deployment.
 
 The homepage’s example questions and report previews do not save responses or change questionnaire progress. Topic and report controls have independent state.
 

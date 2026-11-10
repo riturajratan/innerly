@@ -9,6 +9,9 @@ import {bindHomeInteractions} from './innerly-home.mjs?v=mh-16';
 import {MENTAL_STORAGE,readSavedCheckins} from './mental-model.mjs?v=mh-14';
 import {QUESTION_TOTAL,completedCount,completeFlow as isComplete,validQuestionResponse as validResponse,makeFlowReport as makeCheckin,nextFlowQuestion as nextUnanswered,growthState} from './checkin-flow.mjs?v=mh-14';
 import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=mh-16';
+import {clerkPublishableKey} from './auth-config.mjs?v=auth-1';
+import {createClerkAuth} from './clerk-auth.mjs?v=auth-1';
+import {rememberAuthReturn,takeAuthReturn,AUTH_RETURN_STORAGE} from './auth-continuation.mjs?v=auth-1';
 const app=document.querySelector('#app'),dialog=document.querySelector('#mh-dialog');
 let preferredLanguage='';try{preferredLanguage=localStorage.getItem(LANGUAGE_STORAGE)||'';}catch{}
 let language=resolveQuestionLanguage({url:new URL(location.href).searchParams.get('lang'),saved:preferredLanguage,browserLanguages:navigator.languages||[],deviceLanguage:navigator.language});
@@ -17,12 +20,14 @@ let saved=[],answers=Array(QUESTION_TOTAL).fill(null),view='home',report=null,re
 let draftEnabled=false,draftSynced=false;
 try{saved=[...readWorkbookReports(localStorage.getItem(INNERLY_V1_STORAGE)),...readReflectionReports(localStorage.getItem(REFLECTION60_STORAGE)),...readSavedCheckins(localStorage.getItem(MENTAL_STORAGE))];const draft=readDraft(localStorage.getItem(DRAFT_STORAGE));if(draft){answers=draft.answers;language=draft.language;draftEnabled=true;draftSynced=true;}}catch{}
 let answerLanguage=language;
+const auth=createClerkAuth({publishableKey:clerkPublishableKey,window,document,onChange:updateAuthHeader});
 const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
 let paused=false;const motion=()=>paused||reduce.matches?'instant':'smooth';
 function cancelGuide(){clearTimeout(guideTimer);guideTimer=null;}
 function focusHeading(){const heading=app.querySelector('h1');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}window.scrollTo({top:0,behavior:'instant'});}
 function localizeStartButtons(){for(const button of app.querySelectorAll('[data-action="begin"]')){button.innerHTML=`${esc(qt('Start test','Start My Test','अपना टेस्ट शुरू करें'))} <span aria-hidden="true">→</span>`;button.lang=language;button.dir=languageDirection(language);}}
 function render(focus=true){
+ clearAuthReturn();updateAuthHeader(auth.state);
  cancelGuide();document.documentElement.lang=view==='quiz'?language:displayLanguage(language);document.documentElement.dir=view==='quiz'?languageDirection(language):'ltr';document.querySelector('.mh-header').lang=displayLanguage(language);document.querySelector('.mh-header').dir='ltr';document.querySelector('.mh-footer').lang=displayLanguage(language);document.querySelector('.mh-footer').dir='ltr';document.querySelector('#mh-language-note').textContent=coverageNotice(language);document.querySelector('#mh-language-note').lang=language;document.querySelector('#mh-language-note').dir=languageDirection(language);document.title=say(language,'Innerly — A mental-health check-in','Innerly — अपने मन का हाल जानें');document.querySelector('#mh-language').value=language;
  document.querySelector('#mh-home').textContent=say(language,'Home','होम');document.querySelector('#mh-history').textContent=say(language,'My reports','मेरी रिपोर्ट');document.querySelector('.mh-footer>span').textContent=say(language,'A moment for your mind.','कुछ पल, अपने मन के लिए।');document.querySelector('.mh-footer a').textContent=say(language,'Earlier personality reports','पुरानी personality reports');document.querySelector('#mh-motion').textContent=say(language,paused?'Resume motion':'Pause motion',paused?'Motion चालू करें':'Motion रोकें');
  document.body.classList.toggle('mh-in-checkin',view==='quiz');document.body.classList.toggle('mh-home-page',view==='home');
@@ -30,7 +35,7 @@ function render(focus=true){
  if(view==='home'){app.innerHTML=mentalHomeMarkup({language});bindHomeInteractions(app,language,localizeStartButtons);if(answers.some(v=>v!==null)&&!report)app.insertAdjacentHTML('afterbegin',`<div class="mh-resume-banner"><span><strong>${completedCount(answers)} / ${QUESTION_TOTAL}</strong> · ${say(language,draftSynced?'Saved in this browser. Ready when you are.':'Your answers are still here in this open page.',draftSynced?'इसी browser में सेव है। जब चाहें जारी रखें।':'इस खुले पेज में आपके जवाब अभी भी हैं।')}</span><div><button class="mh-secondary" data-action="resume" lang="${language}" dir="${languageDirection(language)}">${qt('Continue test','Continue my check-in','अपना check-in जारी रखें')} →</button><button class="mh-link" data-action="discard" lang="${language}" dir="${languageDirection(language)}">${qt('removeDraft','Remove draft','Draft हटाएँ')}</button></div></div>`);}
  if(view==='quiz'){app.innerHTML=quizMarkup(answers,language,draftSynced);setActiveQuestion(resumeQuestion(answers)??0);}
  if(view==='report')app.innerHTML=reportMarkup(report,saved,language,reportView);
- if(view==='history')app.innerHTML=`<section class="mh-history"><p class="mh-kicker">${say(language,'SAVED ON THIS DEVICE','इस DEVICE पर सेव')}</p><h1>${say(language,'Your check-ins. Your pace.','आपके check-ins। आपकी गति।')}</h1><p>${say(language,'Only reports you chose to save in this browser appear here.','इस browser में आपकी मर्ज़ी से सेव reports यहाँ दिखती हैं।')}</p>${saved.length?`<div class="mh-saved-list">${saved.toSorted((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).map(r=>`<article><button class="mh-saved-open" data-open="${esc(r.id)}"><span>${new Date(r.createdAt).toLocaleDateString(language,{day:'numeric',month:'long',year:'numeric'})}</span><strong>${r.version===INNERLY_V1_VERSION?say(language,'Innerly V1 · 36 questions','Innerly V1 · 36 सवाल'):r.version===REFLECTION60_VERSION?say(language,'60-statement reflection','60 statements की reflection'):`Earlier PHQ-4 ${r.scores.total}/12`}</strong><small><bdi>${languageName(r.language)}</bdi> →</small></button><button class="mh-link" data-delete="${esc(r.id)}" aria-label="${say(language,'Delete this saved check-in','यह सेव check-in हटाएँ')}">${say(language,'Delete','हटाएँ')}</button></article>`).join('')}</div>`:`<div class="mh-empty">${say(language,'Your first saved report will appear here.','आपकी पहली सेव report यहाँ दिखेगी।')}</div>`}<button class="mh-primary" data-action="begin">${qt('Start test','Start My Test','अपना टेस्ट शुरू करें')} →</button><p class="mh-footnote"><a href="personality.html">${say(language,'View earlier personality reports','पुरानी personality reports देखें')} ↗</a></p></section>`;
+ if(view==='history')app.innerHTML=`<section class="mh-history"><p class="mh-kicker">${say(language,'SAVED ON THIS DEVICE','इस DEVICE पर सेव')}</p><h1>${say(language,'Your check-ins. Your pace.','आपके check-ins। आपकी गति।')}</h1><p>${say(language,'Reports saved in this browser appear here. They do not sync to your account. Anyone using this browser can open them.','इस browser में सेव reports यहाँ दिखती हैं। ये खाते से sync नहीं होतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है।')}</p>${saved.length?`<div class="mh-saved-list">${saved.toSorted((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).map(r=>`<article><button class="mh-saved-open" data-open="${esc(r.id)}"><span>${new Date(r.createdAt).toLocaleDateString(language,{day:'numeric',month:'long',year:'numeric'})}</span><strong>${r.version===INNERLY_V1_VERSION?say(language,'Innerly V1 · 36 questions','Innerly V1 · 36 सवाल'):r.version===REFLECTION60_VERSION?say(language,'60-statement reflection','60 statements की reflection'):`Earlier PHQ-4 ${r.scores.total}/12`}</strong><small><bdi>${languageName(r.language)}</bdi> →</small></button><button class="mh-link" data-delete="${esc(r.id)}" aria-label="${say(language,'Delete this saved check-in','यह सेव check-in हटाएँ')}">${say(language,'Delete','हटाएँ')}</button></article>`).join('')}</div>`:`<div class="mh-empty">${say(language,'Your first saved report will appear here.','आपकी पहली सेव report यहाँ दिखेगी।')}</div>`}<button class="mh-primary" data-action="begin">${qt('Start test','Start My Test','अपना टेस्ट शुरू करें')} →</button><p class="mh-footnote"><a href="personality.html">${say(language,'View earlier personality reports','पुरानी personality reports देखें')} ↗</a></p></section>`;
  localizeStartButtons();
  if(focus)focusHeading();
 }
@@ -90,7 +95,47 @@ function recordAnswer(i,value){
 function saveReport(){
  if(saved.some(r=>r.id===report.id))return;
  showDialog(`<h2>${say(language,'Save on this device?','इस device पर सेव करें?')}</h2><p>${say(language,'This stores your answers and report in this browser. Other people using this browser may be able to read them. You can delete saved check-ins from My check-ins.','इससे आपके जवाब और report इसी browser में रहेंगे। इसी browser का इस्तेमाल करने वाले दूसरे लोग इन्हें देख सकते हैं। “मेरे check-ins” से इन्हें हटा सकते हैं।')}</p><button class="mh-primary" id="mh-save-confirm">${say(language,'Save my report here','मेरी report यहाँ सेव करें')}</button>`);
- dialog.querySelector('#mh-save-confirm').onclick=()=>{try{const next=[report,...saved.filter(r=>r.id!==report.id)],key=reportStorage(report);localStorage.setItem(key,JSON.stringify(next.filter(r=>reportStorage(r)===key).slice(0,50)));saved=next;closeDialog();render(false);app.querySelector('#mh-report-status').textContent=say(language,'Saved on this device.','इस device पर सेव हो गई।');}catch{closeDialog();app.querySelector('#mh-report-status').textContent=say(language,'This browser could not save your report. You can print or save a PDF instead.','इस browser में report सेव नहीं हुई। Print या PDF में सेव कर सकते हैं।');}};
+ dialog.querySelector('#mh-save-confirm').onclick=()=>{if(storeCurrentReport()){closeDialog();render(false);app.querySelector('#mh-report-status').textContent=say(language,'Saved on this device.','इस device पर सेव हो गई।');}else{closeDialog();app.querySelector('#mh-report-status').textContent=say(language,'This browser could not save your report. You can print or save a PDF instead.','इस browser में report सेव नहीं हुई। Print या PDF में सेव कर सकते हैं।');}};
+}
+function storeCurrentReport(){
+ try{const next=[report,...saved.filter(r=>r.id!==report.id)],key=reportStorage(report);localStorage.setItem(key,JSON.stringify(next.filter(r=>reportStorage(r)===key).slice(0,50)));saved=next;return true;}catch{return false;}
+}
+function clearAuthReturn(){try{sessionStorage.removeItem(AUTH_RETURN_STORAGE);}catch{}}
+function updateAuthHeader(state){
+ const button=document.querySelector('#mh-auth');if(!button)return;
+ button.hidden=state.status==='disabled';button.disabled=state.status==='loading';
+ button.textContent=say(language,state.status==='loading'?'Loading…':state.status==='signed-in'?'My account':'Sign in',state.status==='loading'?'लोड हो रहा है…':state.status==='signed-in'?'मेरा खाता':'साइन इन');
+ button.setAttribute('aria-busy',String(state.status==='loading'));
+}
+function authError(){
+ showDialog(`<h2>${say(language,'Sign-in is unavailable right now','अभी साइन इन नहीं हो पा रहा')}</h2><p>${say(language,'Your check-in is still here. You can continue without an account, or try sign-in again.','आपका check-in यहीं है। बिना खाते के जारी रखें या फिर साइन इन करके देखें।')}</p><div class="mh-account-actions"><button class="mh-secondary" data-close>${say(language,'Continue here','यहीं जारी रखें')}</button><button class="mh-primary" id="mh-auth-retry">${say(language,'Try again','फिर कोशिश करें')}</button></div>`);
+ dialog.querySelector('#mh-auth-retry').onclick=()=>{closeDialog();requestAccount();};
+}
+async function openAccount(){
+ try{
+  await auth.ready();
+  if(auth.state.status!=='signed-in'){await auth.signIn(language);return;}
+  const user=auth.state.user;
+  showDialog(`<h2>${say(language,'Your Innerly account','आपका Innerly खाता')}</h2><p class="mh-account-email">${esc(user?.primaryEmailAddress?.emailAddress||user?.fullName||'')}</p><p>${say(language,'Your account is managed by Clerk. Saved answers and reports stay in this browser and do not sync to your account.','आपका खाता Clerk संभालता है। सेव जवाब और reports इसी browser में रहते हैं, खाते से sync नहीं होते।')}</p><p class="mh-footnote">${say(language,'Signing out does not remove saved reports. Anyone using this browser can open them. Remove them from My reports on a shared device.','साइन आउट करने से सेव reports नहीं हटतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है। साझा device पर “मेरी रिपोर्ट” से इन्हें हटाएँ।')}</p><div class="mh-account-actions"><button class="mh-secondary" id="mh-account-manage">${say(language,'Manage account','खाता मैनेज करें')}</button><button class="mh-secondary" id="mh-account-out">${say(language,'Sign out','साइन आउट')}</button></div>`);
+  dialog.querySelector('#mh-account-manage').onclick=async()=>{closeDialog();try{await auth.profile();}catch{authError();}};
+  dialog.querySelector('#mh-account-out').onclick=async()=>{closeDialog();try{await auth.signOut(language);}catch{authError();}};
+ }catch{authError();}
+}
+function requestAccount(){
+ cancelGuide();
+ const unsavedReport=report&&!saved.some(r=>r.id===report.id);
+ const unsavedAnswers=!report&&answers.some(v=>v!==null)&&!draftSynced;
+ const proceed=()=>{
+  try{rememberAuthReturn(sessionStorage,{view,reportId:report?.id||null,language});}
+  catch{ /* Existing browser saves still remain available if session storage is blocked. */ }
+  openAccount();
+ };
+ if(!unsavedReport&&!unsavedAnswers){proceed();return;}
+ showDialog(`<h2>${say(language,'Keep your check-in before signing in','साइन इन से पहले अपना check-in रखें')}</h2><p>${say(language,'Sign-in or account settings can reload this page. Save your current answers here first so you can return to them. This saves only in this browser, where other people using this device could read them. It does not upload them to your account.','साइन इन या खाते की settings से पेज दोबारा खुल सकता है। पहले जवाब यहीं सेव करें ताकि वापस जारी रख सकें। यह केवल इसी browser में सेव होगा, जहाँ इस device का इस्तेमाल करने वाले दूसरे लोग इसे देख सकते हैं। जवाब खाते पर upload नहीं होंगे।')}</p><p id="mh-auth-save-error" role="status"></p><div class="mh-account-actions"><button class="mh-secondary" data-close>${say(language,'Stay in my check-in','check-in में रहें')}</button><button class="mh-primary" id="mh-auth-save">${say(language,'Save here & continue','यहीं सेव करें और आगे बढ़ें')}</button></div>`);
+ dialog.querySelector('#mh-auth-save').onclick=()=>{
+  if(!(unsavedReport?storeCurrentReport():persistDraft())){dialog.querySelector('#mh-auth-save-error').textContent=say(language,'Saving failed. Keep this page open; your answers are still here.','सेव नहीं हुआ। पेज खुला रखें; जवाब यहीं हैं।');return;}
+  draftStatus();closeDialog();proceed();
+ };
 }
 app.addEventListener('focusin',e=>activateQuestionFrom(e.target));
 app.addEventListener('pointerdown',e=>{activateQuestionFrom(e.target);cancelGuide();pointerInput=true;if(view==='quiz')window.scrollTo({top:window.scrollY,behavior:'instant'});});app.addEventListener('keydown',()=>{pointerInput=false;cancelGuide();});
@@ -111,6 +156,7 @@ app.addEventListener('click',e=>{
 });
 dialog.addEventListener('click',e=>{const jump=e.target.closest('[data-jump]');if(jump){closeDialog();goToQuestion(Number(jump.dataset.jump),'instant');return;}if(e.target.closest('[data-close]'))closeDialog();});dialog.addEventListener('cancel',()=>lastFocus?.focus?.());
 document.querySelector('#mh-home').onclick=()=>{view='home';render();};document.querySelector('.mh-brand').onclick=e=>{e.preventDefault();view='home';render();};document.querySelector('#mh-history').onclick=()=>{view='history';render();};
+document.querySelector('#mh-auth').onclick=requestAccount;
 document.querySelector('#mh-language').onchange=e=>{if(!report&&answers.some(v=>v!==null)){e.target.value=language;showDialog(`<h2>${qt('keepLanguage','Keep one language for this check-in','इस check-in में एक ही भाषा रखें')}</h2>${['en','hi'].includes(language)?`<p>${say(language,'Finish this check-in in the language you started with. You can change languages for a new one.','यह check-in उसी भाषा में पूरा करें जिसमें शुरू किया था। नए check-in के लिए भाषा बदल सकते हैं।')}</p>`:''}`);return;}language=e.target.value;if(view==='quiz')answerLanguage=language;try{localStorage.setItem(LANGUAGE_STORAGE,language);}catch{}const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);render();};
 document.querySelector('#mh-large').onclick=e=>{const large=document.body.classList.toggle('mh-large');e.currentTarget.setAttribute('aria-pressed',String(large));};
 document.querySelector('#mh-motion').onclick=e=>{paused=!paused;document.body.classList.toggle('mh-paused',paused);e.currentTarget.setAttribute('aria-pressed',String(paused));e.currentTarget.textContent=say(language,paused?'Resume motion':'Pause motion',paused?'Motion चालू करें':'Motion रोकें');};
@@ -118,4 +164,16 @@ let printDetails=[];
 window.addEventListener('beforeprint',()=>{if(view!=='report'||!report)return;printDetails=[...app.querySelectorAll('details')].map(d=>[d,d.open]);printDetails.forEach(([d])=>d.open=true);if([INNERLY_V1_VERSION,REFLECTION60_VERSION].includes(report.version))return;app.querySelector('.mh-report').insertAdjacentHTML('beforeend',`<section class="mh-print-graphs"><h2>${say(language,'Your screening snapshot','आपकी screening झलक')}</h2>${screenBars(report.scores,displayLanguage(language))}<h2>${say(language,'Your answers','आपके जवाब')}</h2>${responseBars(report.answers,displayLanguage(language))}<h2>${say(language,'Your saved timeline','आपकी सेव यात्रा')}</h2>${historyChart([...saved.filter(r=>r.id!==report.id),report],displayLanguage(language),false,report.language)}</section>`);});
 window.addEventListener('afterprint',()=>{app.querySelector('.mh-print-graphs')?.remove();printDetails.forEach(([d,open])=>d.open=open);printDetails=[];});
 window.addEventListener('beforeunload',e=>{if(!report&&!draftSynced&&answers.some(v=>v!==null)){e.preventDefault();e.returnValue='';}});
+// Consume the navigation marker once. Health data is restored only from the
+// same existing browser saves, never from Clerk or an account identity.
+let authReturn=null;try{authReturn=takeAuthReturn(sessionStorage);}catch{}
+if(authReturn){
+ language=resolveQuestionLanguage({url:authReturn.language});
+ if(authReturn.view==='quiz'&&answers.some(v=>v!==null)){view='quiz';language=answerLanguage;}
+ else if(authReturn.view==='report'){const found=saved.find(r=>r.id===authReturn.reportId);if(found){report=found;language=found.language;view='report';}}
+ else if(authReturn.view==='history')view='history';
+ const returnUrl=new URL(location.href);returnUrl.searchParams.set('lang',language);history.replaceState(null,'',returnUrl);
+}
 render(false);
+if(view==='quiz')goToQuestion(resumeQuestion(answers),'instant');
+auth.ready().catch(()=>{}); // A provider outage must never block the guest check-in.
