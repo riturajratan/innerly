@@ -24,6 +24,10 @@ All test-start actions share the label “Start My Test” in English (with loca
 
 No scoring key, reverse-scoring rules or validation were supplied. **Reports describe responses without calculating clinical totals, disorder labels, severity bands or a percentage of mental health.** Six workbook dimensions contain six questions each. Five-color charts count the actual frequency selections; selecting a category opens its six responses and an optional reflection prompt. Skips are tracked separately, never as zero/Never. Earlier all-skipped reports retain an explicit no-responses state; new reports require every answer. Positive and negative wording are both present, so higher frequency is not interpreted as uniformly better or worse. Numeric values 0–4 are response indexes, not scored points.
 
+The result begins with two actual dimension profiles (self-awareness and relationships) and four labelled, decorative blurred previews. Full-report access is planned as a **one-time USD 1 payment for that report**, with no subscription. Checkout is not connected: the page states payments are coming soon and offers **Skip for now — view full report**. Preview access is temporary in-memory UI state, not a paid entitlement. The static app is not a secure paywall; [the backend access plan](docs/report-access-plan.md) defines authenticated ownership checks, provider webhooks and server-only report/PDF delivery required before charging.
+
+The full report includes an interactive six-area overview, every dimension’s six response positions, all 36 responses in a selectable map, optional question-specific reflection prompts, and a single-question timeline from up to eight actual same-language/version saved check-ins. Missing responses break the line, and a first report shows one point. Dimension/question selection persists between views. Printing includes all six dimensions and every exact question/response. These views retain the original answer frequencies without combining mixed positive/negative statements into a score.
+
 ## Versioned local data
 
 - Questionnaire: `innerly-workbook-v1`.

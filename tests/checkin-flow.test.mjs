@@ -56,7 +56,7 @@ test('active UI exposes frequency choices without skip and full reports after al
  assert.doesNotMatch(quiz,/Disagree|Agree|Neutral|data-action="next"|data-action="previous"|PHQ-4/);assert.match(quiz,/Almost Always/);
  assert.match(mentalHomeMarkup(),/36 questions/);assert.match(mentalHomeMarkup(),/8–12 minutes/);assert.doesNotMatch(mentalHomeMarkup(),/60 statements|self-harm statement/);
  for(const value of [0,4])for(const view of ['snapshot','days','journey']){
-  const html=reportMarkup(makeFlowReport(full(value),meta),[],'en',view);
+  const html=reportMarkup(makeFlowReport(full(value),meta),[],'en',view,{unlocked:true});
   assert.doesNotMatch(html,/undefined|NaN|Infinity|59 statements|reported distress|PHQ-4/);
   if(view==='snapshot')assert.equal((html.match(/data-workbook-dimension=/g)||[]).length,6);
  }
@@ -66,5 +66,5 @@ test('active UI exposes frequency choices without skip and full reports after al
 test('previously saved workbook reports keep skipped answers without allowing a new skipped report',()=>{
  const historic={...meta,version:INNERLY_V1_VERSION,answers:full()};historic.answers[3]='skip';
  const restored=readWorkbookReports(JSON.stringify([historic]));assert.deepEqual(restored,[historic]);assert.throws(()=>makeFlowReport(historic.answers,meta));
- assert.equal(frequencyCounts(restored[0].answers).skipped,1);assert.match(reportMarkup(restored[0],[],'en','days'),/Not Applicable/);
+ assert.equal(frequencyCounts(restored[0].answers).skipped,1);assert.match(reportMarkup(restored[0],[],'en','days',{unlocked:true}),/Not Applicable/);
 });

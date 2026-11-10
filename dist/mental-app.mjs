@@ -1,5 +1,7 @@
 import {INNERLY_V1_VERSION,INNERLY_V1_STORAGE,readWorkbookReports} from './innerly-v1-model.mjs?v=mh-14';
-import {workbookDimensionReading} from './innerly-v1-views.mjs?v=mh-14';
+import {workbookDimensionReading} from './innerly-v1-views.mjs?v=dimensions-1';
+import {workbookQuestionReading,workbookTimelineDetail} from './innerly-v1-charts.mjs?v=dimensions-1';
+import {dimensionProfile} from './innerly-v1-insights.mjs?v=dimensions-1';
 import {REFLECTION60_VERSION,REFLECTION60_STORAGE,readReflectionReports} from './reflection60-model.mjs';
 import {topicReading} from './reflection60-views.mjs?v=mh-14';
 import {LANGUAGE_STORAGE,resolveQuestionLanguage,languageDirection,languageName,displayLanguage,questionUI,wellbeingLocales,coverageNotice,responseState,growthCaption} from './mental-language.mjs?v=mh-14';
@@ -8,7 +10,7 @@ import {feelingReading} from './feeling-explorer.mjs?v=mh-14';
 import {bindHomeInteractions} from './innerly-home.mjs?v=mh-16';
 import {MENTAL_STORAGE,readSavedCheckins} from './mental-model.mjs?v=mh-14';
 import {QUESTION_TOTAL,completedCount,completeFlow as isComplete,validQuestionResponse as validResponse,makeFlowReport as makeCheckin,nextFlowQuestion as nextUnanswered,growthState} from './checkin-flow.mjs?v=mh-14';
-import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=mh-16';
+import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=dimensions-1';
 import {clerkPublishableKey} from './auth-config.mjs?v=auth-1';
 import {createClerkAuth} from './clerk-auth.mjs?v=auth-1';
 import {rememberAuthReturn,takeAuthReturn,AUTH_RETURN_STORAGE} from './auth-continuation.mjs?v=auth-1';
@@ -17,6 +19,8 @@ let preferredLanguage='';try{preferredLanguage=localStorage.getItem(LANGUAGE_STO
 let language=resolveQuestionLanguage({url:new URL(location.href).searchParams.get('lang'),saved:preferredLanguage,browserLanguages:navigator.languages||[],deviceLanguage:navigator.language});
 const qt=(key,en,hi)=>questionUI(language,key,en,hi);
 let saved=[],answers=Array(QUESTION_TOTAL).fill(null),view='home',report=null,reportView='snapshot',guideTimer=null,pointerInput=false,lastFocus=null;
+let reportSelection={dimension:'dimension-1',question:0};
+const previewUnlockedReports=new Set(); // Preview access only. Never use this as a paid entitlement.
 let draftEnabled=false,draftSynced=false;
 try{saved=[...readWorkbookReports(localStorage.getItem(INNERLY_V1_STORAGE)),...readReflectionReports(localStorage.getItem(REFLECTION60_STORAGE)),...readSavedCheckins(localStorage.getItem(MENTAL_STORAGE))];const draft=readDraft(localStorage.getItem(DRAFT_STORAGE));if(draft){answers=draft.answers;language=draft.language;draftEnabled=true;draftSynced=true;}}catch{}
 let answerLanguage=language;
@@ -34,7 +38,7 @@ function render(focus=true){
  document.querySelector('#mh-home').setAttribute('aria-current',view==='home'?'page':'false');document.querySelector('#mh-history').setAttribute('aria-current',view==='history'?'page':'false');
  if(view==='home'){app.innerHTML=mentalHomeMarkup({language});bindHomeInteractions(app,language,localizeStartButtons);if(answers.some(v=>v!==null)&&!report)app.insertAdjacentHTML('afterbegin',`<div class="mh-resume-banner"><span><strong>${completedCount(answers)} / ${QUESTION_TOTAL}</strong> · ${say(language,draftSynced?'Saved in this browser. Ready when you are.':'Your answers are still here in this open page.',draftSynced?'इसी browser में सेव है। जब चाहें जारी रखें।':'इस खुले पेज में आपके जवाब अभी भी हैं।')}</span><div><button class="mh-secondary" data-action="resume" lang="${language}" dir="${languageDirection(language)}">${qt('Continue test','Continue my check-in','अपना check-in जारी रखें')} →</button><button class="mh-link" data-action="discard" lang="${language}" dir="${languageDirection(language)}">${qt('removeDraft','Remove draft','Draft हटाएँ')}</button></div></div>`);}
  if(view==='quiz'){app.innerHTML=quizMarkup(answers,language,draftSynced);setActiveQuestion(resumeQuestion(answers)??0);}
- if(view==='report')app.innerHTML=reportMarkup(report,saved,language,reportView);
+ if(view==='report')app.innerHTML=reportMarkup(report,saved,language,reportView,{...reportSelection,unlocked:previewUnlockedReports.has(report.id)});
  if(view==='history')app.innerHTML=`<section class="mh-history"><p class="mh-kicker">${say(language,'SAVED ON THIS DEVICE','इस DEVICE पर सेव')}</p><h1>${say(language,'Your check-ins. Your pace.','आपके check-ins। आपकी गति।')}</h1><p>${say(language,'Reports saved in this browser appear here. They do not sync to your account. Anyone using this browser can open them.','इस browser में सेव reports यहाँ दिखती हैं। ये खाते से sync नहीं होतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है।')}</p>${saved.length?`<div class="mh-saved-list">${saved.toSorted((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).map(r=>`<article><button class="mh-saved-open" data-open="${esc(r.id)}"><span>${new Date(r.createdAt).toLocaleDateString(language,{day:'numeric',month:'long',year:'numeric'})}</span><strong>${r.version===INNERLY_V1_VERSION?say(language,'Innerly V1 · 36 questions','Innerly V1 · 36 सवाल'):r.version===REFLECTION60_VERSION?say(language,'60-statement reflection','60 statements की reflection'):`Earlier PHQ-4 ${r.scores.total}/12`}</strong><small><bdi>${languageName(r.language)}</bdi> →</small></button><button class="mh-link" data-delete="${esc(r.id)}" aria-label="${say(language,'Delete this saved check-in','यह सेव check-in हटाएँ')}">${say(language,'Delete','हटाएँ')}</button></article>`).join('')}</div>`:`<div class="mh-empty">${say(language,'Your first saved report will appear here.','आपकी पहली सेव report यहाँ दिखेगी।')}</div>`}<button class="mh-primary" data-action="begin">${qt('Start test','Start My Test','अपना टेस्ट शुरू करें')} →</button><p class="mh-footnote"><a href="personality.html">${say(language,'View earlier personality reports','पुरानी personality reports देखें')} ↗</a></p></section>`;
  localizeStartButtons();
  if(focus)focusHeading();
@@ -55,7 +59,7 @@ function finish(){
  if(!isComplete(answers)){const i=nextUnanswered(answers);if(view!=='quiz'){view='quiz';render();}app.querySelector('#mh-form-message').textContent=qt('A few answers are still missing.','A few answers are still missing. Let us finish those.','कुछ जवाब बाकी हैं। उन्हें पूरा करें।');goToQuestion(i);return;}
  report=makeCheckin(answers,{id:crypto.randomUUID(),createdAt:new Date().toISOString(),language});let removed=true;
  if(draftEnabled){try{localStorage.removeItem(DRAFT_STORAGE);}catch{removed=false;}}
- draftEnabled=false;draftSynced=false;reportView='snapshot';view='report';render();
+ draftEnabled=false;draftSynced=false;reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};view='report';render();
  if(!removed)app.querySelector('#mh-report-status').textContent=say(language,'Your report is ready, but this browser could not remove the saved draft.','Report तैयार है, लेकिन इस browser में सेव draft हट नहीं सका।');
 }
 function setActiveQuestion(i){
@@ -92,6 +96,14 @@ function recordAnswer(i,value){
  if(wasAnswered||!pointerInput)return;
  guideTimer=setTimeout(()=>{if(view!=='quiz')return;const next=nextContinuousQuestion(answers,i);if(next!==null)goToQuestion(next);else finish();},paused||reduce.matches?120:420);
 }
+function unlockReportPreview(){
+ if(report?.version!==INNERLY_V1_VERSION)return;
+ previewUnlockedReports.add(report.id);view='report';render();
+}
+function showReportOffer(){
+ showDialog(`<h2>${say(language,'Your full report · $1','आपकी पूरी report · $1')}</h2><p>${say(language,'One-time payment for this report. No recurring subscription.','इस report के लिए एक बार भुगतान। कोई recurring subscription नहीं।')}</p><p>${say(language,'Payments are coming soon. You can explore and download your full report for free during this preview.','भुगतान जल्द शुरू होंगे। इस preview में आप पूरी report मुफ़्त देख और डाउनलोड कर सकते हैं।')}</p><div class="mh-account-actions"><button class="mh-primary" id="wb-free-preview">${say(language,'Open my free preview','मेरा मुफ़्त preview खोलें')}</button></div>`);
+ dialog.querySelector('#wb-free-preview').onclick=()=>{closeDialog();unlockReportPreview();};
+}
 function saveReport(){
  if(saved.some(r=>r.id===report.id))return;
  showDialog(`<h2>${say(language,'Save on this device?','इस device पर सेव करें?')}</h2><p>${say(language,'This stores your answers and report in this browser. Other people using this browser may be able to read them. You can delete saved check-ins from My check-ins.','इससे आपके जवाब और report इसी browser में रहेंगे। इसी browser का इस्तेमाल करने वाले दूसरे लोग इन्हें देख सकते हैं। “मेरे check-ins” से इन्हें हटा सकते हैं।')}</p><button class="mh-primary" id="mh-save-confirm">${say(language,'Save my report here','मेरी report यहाँ सेव करें')}</button>`);
@@ -116,7 +128,7 @@ async function openAccount(){
   await auth.ready();
   if(auth.state.status!=='signed-in'){await auth.signIn(language);return;}
   const user=auth.state.user;
-  showDialog(`<h2>${say(language,'Your Innerly account','आपका Innerly खाता')}</h2><p class="mh-account-email">${esc(user?.primaryEmailAddress?.emailAddress||user?.fullName||'')}</p><p>${say(language,'Your account is managed by Clerk. Saved answers and reports stay in this browser and do not sync to your account.','आपका खाता Clerk संभालता है। सेव जवाब और reports इसी browser में रहते हैं, खाते से sync नहीं होते।')}</p><p class="mh-footnote">${say(language,'Signing out does not remove saved reports. Anyone using this browser can open them. Remove them from My reports on a shared device.','साइन आउट करने से सेव reports नहीं हटतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है। साझा device पर “मेरी रिपोर्ट” से इन्हें हटाएँ।')}</p><div class="mh-account-actions"><button class="mh-secondary" id="mh-account-manage">${say(language,'Manage account','खाता मैनेज करें')}</button><button class="mh-secondary" id="mh-account-out">${say(language,'Sign out','साइन आउट')}</button></div>`);
+  showDialog(`<h2>${say(language,'Your Innerly account','आपका Innerly खाता')}</h2><p class="mh-account-email">${esc(user?.primaryEmailAddress?.emailAddress||user?.fullName||'')}</p><p class="mh-footnote">${say(language,'Signing out does not remove saved reports. Anyone using this browser can open them. Remove them from My reports on a shared device.','साइन आउट करने से सेव reports नहीं हटतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है। साझा device पर “मेरी रिपोर्ट” से इन्हें हटाएँ।')}</p><div class="mh-account-actions"><button class="mh-secondary" id="mh-account-manage">${say(language,'Manage account','खाता मैनेज करें')}</button><button class="mh-secondary" id="mh-account-out">${say(language,'Sign out','साइन आउट')}</button></div>`);
   dialog.querySelector('#mh-account-manage').onclick=async()=>{closeDialog();try{await auth.profile();}catch{authError();}};
   dialog.querySelector('#mh-account-out').onclick=async()=>{closeDialog();try{await auth.signOut(language);}catch{authError();}};
  }catch{authError();}
@@ -139,20 +151,45 @@ function requestAccount(){
 }
 app.addEventListener('focusin',e=>activateQuestionFrom(e.target));
 app.addEventListener('pointerdown',e=>{activateQuestionFrom(e.target);cancelGuide();pointerInput=true;if(view==='quiz')window.scrollTo({top:window.scrollY,behavior:'instant'});});app.addEventListener('keydown',()=>{pointerInput=false;cancelGuide();});
-app.addEventListener('change',e=>{if(e.target.matches('[data-answer]'))recordAnswer(Number(e.target.dataset.answer),Number(e.target.value));});
+app.addEventListener('change',e=>{
+ if(e.target.matches('[data-answer]'))recordAnswer(Number(e.target.dataset.answer),Number(e.target.value));
+ if(e.target.matches('[data-workbook-area]')&&report?.version===INNERLY_V1_VERSION){
+  const profile=dimensionProfile(report.answers,e.target.value);reportSelection={dimension:profile.id,question:profile.items[0]};
+  const y=window.scrollY;render(false);app.querySelector('[data-workbook-area]')?.focus({preventScroll:true});window.scrollTo({top:y,behavior:'instant'});
+ }
+});
 app.addEventListener('click',e=>{
  const button=e.target.closest('button');if(!button)return;
  if(button.dataset.feelingBar!==undefined){for(const b of app.querySelectorAll('[data-feeling-bar]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-feeling-reading').textContent=feelingReading(button.dataset.feelingKey,Number(button.dataset.feelingBar),language);return;}
  if(button.dataset.theme){for(const b of app.querySelectorAll('[data-theme]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-theme-content').innerHTML=themeMarkup(button.dataset.theme,displayLanguage(language));localizeStartButtons();return;}
  if(button.dataset.demoView){for(const b of app.querySelectorAll('[data-demo-view]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-demo-content').innerHTML=sampleReport(button.dataset.demoView,displayLanguage(language));return;}
- if(button.dataset.workbookDimension){for(const b of app.querySelectorAll('[data-workbook-dimension]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-topic-reading').innerHTML=workbookDimensionReading(report.answers,button.dataset.workbookDimension,language);return;}
+ if(button.dataset.workbookDimension){
+  const profile=dimensionProfile(report.answers,button.dataset.workbookDimension);reportSelection={dimension:profile.id,question:profile.items[0]};
+  for(const b of app.querySelectorAll('[data-workbook-dimension]'))b.setAttribute('aria-pressed',String(b===button));
+  app.querySelector('#mh-topic-reading').innerHTML=workbookDimensionReading(report.answers,profile.id,language,reportSelection.question);
+  if(pointerInput&&window.matchMedia('(max-width:760px)').matches)app.querySelector('#mh-topic-reading').scrollIntoView({behavior:motion(),block:'start'});return;
+ }
+ if(button.dataset.workbookQuestion!==undefined||button.dataset.workbookMap!==undefined){
+  const index=Number(button.dataset.workbookQuestion??button.dataset.workbookMap);
+  if(!Number.isInteger(index)||index<0||index>=QUESTION_TOTAL||report?.version!==INNERLY_V1_VERSION)return;
+  reportSelection={dimension:`dimension-${Math.floor(index/6)+1}`,question:index};
+  for(const b of app.querySelectorAll('[data-workbook-question],[data-workbook-map]'))b.setAttribute('aria-pressed',String(b===button));
+  if(reportView==='timeline')app.querySelector('#wb-timeline-detail').innerHTML=workbookTimelineDetail(report,saved,index,displayLanguage(language));
+  else app.querySelector('#wb-question-detail').innerHTML=workbookQuestionReading(report.answers,index,displayLanguage(language));
+  if(pointerInput&&window.matchMedia('(max-width:760px)').matches)app.querySelector(reportView==='timeline'?'#wb-timeline-detail':'#wb-question-detail').scrollIntoView({behavior:motion(),block:'start'});
+  return;
+ }
+ if(button.dataset.workbookOpen){
+  const profile=dimensionProfile(report.answers,button.dataset.workbookOpen);reportSelection={dimension:profile.id,question:profile.items[0]};reportView='snapshot';render(false);
+  const target=app.querySelector(`[data-workbook-dimension="${profile.id}"]`);target?.focus({preventScroll:true});target?.scrollIntoView({behavior:motion(),block:'center'});return;
+ }
  if(button.dataset.reflectionTopic){for(const b of app.querySelectorAll('[data-reflection-topic]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-topic-reading').innerHTML=topicReading(report.answers,button.dataset.reflectionTopic,language);return;}
  if(button.dataset.reportView){reportView=button.dataset.reportView;const y=window.scrollY;render(false);app.querySelector(`[data-report-view="${reportView}"]`).focus({preventScroll:true});window.scrollTo({top:y,behavior:'instant'});return;}
  if(button.dataset.screenDetail){for(const b of app.querySelectorAll('[data-screen-detail]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-score-reading').innerHTML=screeningDetail(report,button.dataset.screenDetail,displayLanguage(language));return;}
  if(button.dataset.historyPoint){const r=button.dataset.historyPoint===report.id?report:saved.find(r=>r.id===button.dataset.historyPoint);if(r){showDialog(`<h2>${say(language,'A check-in snapshot','Check-in की झलक')}</h2><p>${new Date(r.createdAt).toLocaleDateString(language)} · PHQ-4 ${r.scores.total}/12</p>${screenBars(r.scores,displayLanguage(language))}<p>${say(language,'This describes that two-week period, not a prediction.','यह उस दो-सप्ताह की अवधि के बारे में है, आगे का अनुमान नहीं।')}</p>`);}return;}
- if(button.dataset.open){report=saved.find(r=>r.id===button.dataset.open);if(report){language=report.language;view='report';reportView='snapshot';render();}return;}
+ if(button.dataset.open){report=saved.find(r=>r.id===button.dataset.open);if(report){language=report.language;view='report';reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};render();}return;}
  if(button.dataset.delete){const id=button.dataset.delete;showDialog(`<h2>${say(language,'Delete this saved check-in?','यह सेव check-in हटाएँ?')}</h2><p>${say(language,'This removes its answers and report from this browser. Downloaded copies are not affected.','इसके जवाब और report इस browser से हटेंगे। Download की गई copies नहीं हटेंगी।')}</p><button class="mh-primary" id="mh-delete-confirm">${say(language,'Delete this check-in','यह check-in हटाएँ')}</button>`);dialog.querySelector('#mh-delete-confirm').onclick=()=>{try{const key=reportStorage(saved.find(r=>r.id===id)),next=saved.filter(r=>r.id!==id);localStorage.setItem(key,JSON.stringify(next.filter(r=>reportStorage(r)===key)));saved=next;closeDialog();render();}catch{dialog.querySelector('p').textContent=say(language,'Deletion failed. Please try again.','हटाया नहीं जा सका। फिर कोशिश करें।');}};return;}
- switch(button.dataset.action){case'begin':begin();break;case'home':view='home';render();break;case'resume':resume();break;case'break':takeBreak();break;case'discard':discardDraft();break;case'review':reviewAnswers();break;case'unanswered':cancelGuide();goToQuestion(resumeQuestion(answers),'instant');break;case'finish':finish();break;case'preview':{const p=app.querySelector('#mh-report-preview');p.tabIndex=-1;p.focus({preventScroll:true});p.scrollIntoView({behavior:motion(),block:'start'});break;}case'save':saveReport();break;case'print':window.print();break;}
+ switch(button.dataset.action){case'report-offer':showReportOffer();break;case'unlock-preview':unlockReportPreview();break;case'begin':begin();break;case'home':view='home';render();break;case'resume':resume();break;case'break':takeBreak();break;case'discard':discardDraft();break;case'review':reviewAnswers();break;case'unanswered':cancelGuide();goToQuestion(resumeQuestion(answers),'instant');break;case'finish':finish();break;case'preview':{const p=app.querySelector('#mh-report-preview');p.tabIndex=-1;p.focus({preventScroll:true});p.scrollIntoView({behavior:motion(),block:'start'});break;}case'save':saveReport();break;case'print':window.print();break;}
 });
 dialog.addEventListener('click',e=>{const jump=e.target.closest('[data-jump]');if(jump){closeDialog();goToQuestion(Number(jump.dataset.jump),'instant');return;}if(e.target.closest('[data-close]'))closeDialog();});dialog.addEventListener('cancel',()=>lastFocus?.focus?.());
 document.querySelector('#mh-home').onclick=()=>{view='home';render();};document.querySelector('.mh-brand').onclick=e=>{e.preventDefault();view='home';render();};document.querySelector('#mh-history').onclick=()=>{view='history';render();};
