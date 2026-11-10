@@ -39,7 +39,7 @@ zh:{
 当生活中出了问题时，我会尝试从这段经历中学习。`.split('\n'),
  choices:['从不','很少','有时','经常','几乎总是','不适用／选择跳过'],
  dimensions:['自我觉察与自我理解','思维模式与思维灵活性','情绪平衡与反应管理','决策与行为控制','人际关系与社交行为','压力应对、复原力与个人成长'],
- notice:'用于自我反思，而非诊断。你可以跳过任何问题。'
+ notice:'请回答所有问题以查看你的报告。这份自我反思问卷不用于诊断。'
 },
 ja:{
  questions:`自分の気持ちの変化に気づいたとき、何が影響したのかをたいてい理解できます。
@@ -80,7 +80,7 @@ ja:{
 生活の中で何かがうまくいかなかったとき、その経験から学ぼうとします。`.split('\n'),
  choices:['まったくない','めったにない','ときどき','よくある','ほぼいつも','当てはまらない／回答をスキップしたい'],
  dimensions:['自己への気づきと自己理解','思考パターンと柔軟な考え方','感情のバランスと反応の調整','意思決定と行動のコントロール','人間関係と対人行動','ストレスへの対処・立ち直る力・自己成長'],
- notice:'自分を振り返るためのもので、診断ではありません。どの質問もスキップできます。'
+ notice:'レポートを見るには、すべての質問に答えてください。この振り返りは診断ではありません。'
 },
 ko:{
  questions:`기분이 달라진 것을 알아차리면, 무엇이 영향을 주었을지 대체로 알 수 있습니다.
@@ -121,7 +121,7 @@ ko:{
 제 삶에서 일이 잘못되면 그 경험에서 배우려고 노력합니다.`.split('\n'),
  choices:['전혀 없음','드물게','가끔','자주','거의 항상','해당 없음 / 답변을 건너뛰고 싶음'],
  dimensions:['자기 인식과 자기 이해','사고 패턴과 사고의 유연성','정서적 균형과 반응 조절','의사 결정과 행동 조절','관계와 사회적 행동','스트레스 대처, 회복 탄력성과 개인적 성장'],
- notice:'자신을 돌아보기 위한 것이며 진단이 아닙니다. 어떤 질문이든 건너뛸 수 있습니다.'
+ notice:'보고서를 보려면 모든 질문에 답해 주세요. 이 자기 성찰은 진단이 아닙니다.'
 },
 id:{
  questions:`Ketika menyadari perubahan perasaan saya, biasanya saya dapat mengenali apa yang mungkin turut menyebabkannya.
@@ -162,7 +162,7 @@ Ketika menghadapi situasi yang sulit, saya merasa nyaman meminta bantuan orang l
 Ketika ada yang tidak berjalan baik dalam hidup saya, saya berusaha belajar dari pengalaman itu.`.split('\n'),
  choices:['Tidak pernah','Jarang','Kadang-kadang','Sering','Hampir selalu','Tidak berlaku / Memilih untuk melewati'],
  dimensions:['Kesadaran dan Pemahaman Diri','Pola Pikir dan Keluwesan Berpikir','Keseimbangan Emosi dan Pengelolaan Respons','Pengambilan Keputusan dan Pengendalian Perilaku','Hubungan dan Perilaku Sosial','Menghadapi Stres, Ketangguhan, dan Pertumbuhan Pribadi'],
- notice:'Untuk refleksi diri, bukan diagnosis. Anda boleh melewati pertanyaan apa pun.'
+ notice:'Jawab semua pertanyaan untuk melihat laporan Anda. Refleksi diri ini bukan diagnosis.'
 },
 vi:{
  questions:`Khi nhận thấy cảm xúc của mình thay đổi, tôi thường có thể nhận ra điều gì có thể đã góp phần tạo nên sự thay đổi đó.
@@ -203,6 +203,6 @@ Khi đối mặt với tình huống khó khăn, tôi cảm thấy thoải mái 
 Khi có điều không ổn xảy ra trong cuộc sống, tôi cố gắng học hỏi từ trải nghiệm đó.`.split('\n'),
  choices:['Không bao giờ','Hiếm khi','Thỉnh thoảng','Thường xuyên','Hầu như luôn luôn','Không áp dụng / Muốn bỏ qua'],
  dimensions:['Tự nhận thức và thấu hiểu bản thân','Kiểu tư duy và sự linh hoạt trong suy nghĩ','Cân bằng cảm xúc và điều chỉnh phản ứng','Ra quyết định và kiểm soát hành vi','Các mối quan hệ và hành vi xã hội','Ứng phó với căng thẳng, khả năng phục hồi và phát triển bản thân'],
- notice:'Để tự suy ngẫm, không phải chẩn đoán. Bạn có thể bỏ qua bất kỳ câu hỏi nào.'
+ notice:'Hãy trả lời tất cả câu hỏi để xem báo cáo của bạn. Bài tự suy ngẫm này không phải là chẩn đoán.'
 }
 };

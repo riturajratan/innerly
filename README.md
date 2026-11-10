@@ -10,19 +10,19 @@ Product journey: understand your mind → notice thinking and behavioural patter
 
 ## Current experience
 
-The active check-in uses the 36 approved questions from `Innerly_V1_Questionnaire.xlsx` (Question Bank, A2:C37), preserving IDs Q01–Q36, exact English wording, order and six dimensions. Instructions B8:B13 supplies Never, Rarely, Sometimes, Often, Almost Always and Not Applicable / Prefer to Skip. Every question can be explicitly skipped. Duration follows the workbook: 8–12 minutes.
+The active check-in uses the 36 approved questions from `Innerly_V1_Questionnaire.xlsx` (Question Bank, A2:C37), preserving IDs Q01–Q36, exact English wording, order and six dimensions. The five active options are Never, Rarely, Sometimes, Often and Almost Always. Per the owner’s 10 November update, all 36 answers are required before a new report can be generated. The workbook’s original sixth option remains only in source data and earlier saved reports. Duration follows the workbook: 8–12 minutes.
 
-All questions, six response choices, dimension labels and the questionnaire notice are bundled in the existing 20 languages: en, hi, zh, es, fr, ar, bn, pt, ru, ur, id, de, ja, mr, te, tr, ta, vi, ko, it. Translation assets live in `dist/innerly-v1-locales/`. The workbook extraction is `dist/innerly-v1-source.json`; `dist/innerly-v1-questions.mjs` is its browser module, with parity checked in tests. Translations are editorial drafts requiring fluent-speaker review before validation claims. Texts are nested under `texts` so Indonesian code `id` cannot overwrite a question ID.
+All questions, five active response choices, dimension labels and the questionnaire notice are bundled in the existing 20 languages: en, hi, zh, es, fr, ar, bn, pt, ru, ur, id, de, ja, mr, te, tr, ta, vi, ko, it. Translation assets live in `dist/innerly-v1-locales/`. The workbook extraction is `dist/innerly-v1-source.json`; `dist/innerly-v1-questions.mjs` is its browser module, with parity checked in tests. Translations are editorial drafts requiring fluent-speaker review before validation claims. Texts are nested under `texts` so Indonesian code `id` cannot overwrite a question ID.
 
 The continuous round-option layout, answer selection ring, automatic next-unanswered scrolling, review navigator, tree/completion percentage, larger text, reduced motion, and Save & take a break remain. The current question stays clear while other questions gently blur. Clicking or keyboard-focusing another question makes it clear immediately; automatic scrolling, review jumps and resume update the same focus state. Other questions remain interactive, reduced motion is respected, and printing removes the blur. There are no five-question page boundaries. Browser/manual/URL language selection and Arabic/Urdu RTL remain. Homepage and detailed reports remain English/Hindi, with a native-language coverage notice.
 
-The homepage opens with a warm illustration of three adults of different generations, on the right on desktop and above the copy on small screens. The image has responsive WebP sources, reserved dimensions and high fetch priority. Interactive sample graphs remain in the report-preview section below. The illustration is generated artwork, not a testimonial or a photograph of real customers.
+The homepage uses a blue, navy and lilac visual system with a centred welcome and original multi-generation editorial artwork. A dedicated relationship explorer leads into an independent three-view report preview, exact workbook question examples, a short journey and privacy/language FAQs. Five yellow start actions connect to the same check-in (four on mobile). All examples are labelled illustrative and do not collect responses. There are no ratings, outcome claims or population comparisons. English and Hindi layouts support mobile, larger text and reduced motion. The people are conceptual illustrations, not testimonials or real customers. See `design/innerly-everyday-v2-prompt.txt` for provenance.
 
 All test-start actions share the label “Start My Test” in English (with localized equivalents) and a warm yellow background with dark text, including homepage sections, history and report restart. Saving and printing retain their existing styles.
 
 ## Report semantics
 
-No scoring key, reverse-scoring rules or validation were supplied. **Reports describe responses without calculating clinical totals, disorder labels, severity bands or a percentage of mental health.** Six workbook dimensions contain six questions each. Five-color charts count the actual frequency selections; selecting a category opens its six responses and an optional reflection prompt. Skips are tracked separately, never as zero/Never. An all-skipped form has an explicit no-responses state. Positive and negative wording are both present, so higher frequency is not interpreted as uniformly better or worse. Numeric values 0–4 are response indexes, not scored points.
+No scoring key, reverse-scoring rules or validation were supplied. **Reports describe responses without calculating clinical totals, disorder labels, severity bands or a percentage of mental health.** Six workbook dimensions contain six questions each. Five-color charts count the actual frequency selections; selecting a category opens its six responses and an optional reflection prompt. Skips are tracked separately, never as zero/Never. Earlier all-skipped reports retain an explicit no-responses state; new reports require every answer. Positive and negative wording are both present, so higher frequency is not interpreted as uniformly better or worse. Numeric values 0–4 are response indexes, not scored points.
 
 ## Versioned local data
 
@@ -34,9 +34,11 @@ No scoring key, reverse-scoring rules or validation were supplied. **Reports des
 - Earlier saved PHQ-4 reports remain readable through My check-ins with their original method. They use the existing `innerly-mental-checkin-v1` key. Saving/deleting a report writes only its own version's namespace.
 - Earlier personality reports remain accessible through `dist/personality.html`.
 
+Previously skipped values in same-version drafts become unanswered when resumed; numeric answers are preserved. Earlier completed reports keep their original skips.
+
 Answers are in page memory until the visitor explicitly saves in this browser. A saved draft then autosaves subsequent changes. Storage failure keeps in-memory answers and shows an error. No accounts, cloud database, translation service, payments or response analytics are connected.
 
-The homepage keeps the earlier illustrated feeling exploration, country life-evaluation data and repeated start actions. Its sample report and question count now describe the new reflection. Country figures never affect the individual's response summary.
+The homepage’s example questions and report previews do not save responses or change questionnaire progress. Topic and report controls have independent state.
 
 ## Local development
 

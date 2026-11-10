@@ -13,17 +13,17 @@ test('active bank preserves the workbook IDs, exact English order, six dimension
  assert.deepEqual(source,JSON.parse(fs.readFileSync(new URL('../dist/innerly-v1-source.json',import.meta.url),'utf8')));
  assert.equal(QUESTION_TOTAL,36);assert.equal(FLOW_VERSION,INNERLY_V1_VERSION);
  assert.deepEqual(questionBank.map(q=>[q.id,q.texts.en]),source.questions.map(q=>[q.id,q.en]));
- assert.equal(new Set(questionBank.map(q=>q.id)).size,36);assert.ok(questionBank.every(q=>q.optional));
+ assert.equal(new Set(questionBank.map(q=>q.id)).size,36);assert.ok(questionBank.every(q=>!q.optional));
  assert.deepEqual(questionChoices(0),['Never','Rarely','Sometimes','Often','Almost Always']);
  assert.equal(skipChoice('en'),'Not Applicable / Prefer to Skip');
  assert.deepEqual(workbookDimensions.map(d=>d.en),[...new Set(source.questions.map(q=>q.dimension))]);
  assert.deepEqual(workbookDimensions.flatMap(d=>d.items),Array.from({length:36},(_,i)=>i));
  assert.ok(workbookDimensions.every(d=>d.items.length===6));
 });
-test('every question can be explicitly skipped; omissions and invalid frequencies cannot finish',()=>{
+test('every question requires a valid frequency; skips and omissions block new reports',()=>{
  for(let i=0;i<36;i++){
-  for(const v of [0,1,2,3,4,'skip']){const a=full();a[i]=v;assert.equal(completeFlow(a),true);}
-  for(const v of [null,undefined,-1,5,6,'1',1.5]){const a=full();a[i]=v;assert.equal(completeFlow(a),false);assert.equal(nextFlowQuestion(a),i);assert.throws(()=>makeFlowReport(a,meta));}
+  for(const v of [0,1,2,3,4]){const a=full();a[i]=v;assert.equal(completeFlow(a),true);}
+  for(const v of [null,undefined,-1,5,6,'1',1.5,'skip']){const a=full();a[i]=v;assert.equal(completeFlow(a),false);assert.equal(nextFlowQuestion(a),i);assert.throws(()=>makeFlowReport(a,meta));}
  }
  for(const a of [new Array(36),Array(35).fill(0),Array(60).fill(0),null])assert.equal(completeFlow(a),false);
 });
@@ -44,22 +44,27 @@ test('workbook reports and drafts cannot reinterpret earlier 60-item or PHQ resp
  assert.match(reportMarkup(old60,[]),/59 statements/);assert.match(reportMarkup(phq,[]),/PHQ-4/);
  assert.equal(current.scores,undefined);
 });
-test('tree counts completion independently of response meaning, including skipped questions',()=>{
+test('tree counts answered questions only, independently of response meaning',()=>{
  for(let n=0;n<=36;n++){
-  const arrays=[0,4,'skip'].map(value=>Array.from({length:36},(_,i)=>i<n?value:null));
-  assert.deepEqual(growthState(arrays[0]),growthState(arrays[1]));assert.deepEqual(growthState(arrays[0]),growthState(arrays[2]));
+  const arrays=[0,4].map(value=>Array.from({length:36},(_,i)=>i<n?value:null));
+  assert.deepEqual(growthState(arrays[0]),growthState(arrays[1]));
   assert.equal(growthState(arrays[0]).percent,Math.floor(n/36*100));
  }
 });
-test('active UI exposes frequency choices, universal skip, correct counts and safe empty-category reports',()=>{
- const quiz=quizMarkup(full(null));assert.equal((quiz.match(/<fieldset/g)||[]).length,36);assert.equal((quiz.match(/type="radio"/g)||[]).length,180);assert.equal((quiz.match(/data-skip=/g)||[]).length,36);
+test('active UI exposes frequency choices without skip and full reports after all answers',()=>{
+ const quiz=quizMarkup(full(null));assert.equal((quiz.match(/<fieldset/g)||[]).length,36);assert.equal((quiz.match(/type="radio"/g)||[]).length,180);assert.equal((quiz.match(/data-skip=/g)||[]).length,0);
  assert.doesNotMatch(quiz,/Disagree|Agree|Neutral|data-action="next"|data-action="previous"|PHQ-4/);assert.match(quiz,/Almost Always/);
- assert.match(mentalHomeMarkup(),/36 questions · Around 8–12 minutes/);assert.doesNotMatch(mentalHomeMarkup(),/60 statements|self-harm statement/);
- for(const value of [0,4,'skip'])for(const view of ['snapshot','days','journey']){
+ assert.match(mentalHomeMarkup(),/36 questions/);assert.match(mentalHomeMarkup(),/8–12 minutes/);assert.doesNotMatch(mentalHomeMarkup(),/60 statements|self-harm statement/);
+ for(const value of [0,4])for(const view of ['snapshot','days','journey']){
   const html=reportMarkup(makeFlowReport(full(value),meta),[],'en',view);
   assert.doesNotMatch(html,/undefined|NaN|Infinity|59 statements|reported distress|PHQ-4/);
   if(view==='snapshot')assert.equal((html.match(/data-workbook-dimension=/g)||[]).length,6);
-  if(value==='skip')assert.match(html,/no responses to interpret/);
  }
  assert.equal(questionnaireLocale('hi').choices.length,6);
+});
+
+test('previously saved workbook reports keep skipped answers without allowing a new skipped report',()=>{
+ const historic={...meta,version:INNERLY_V1_VERSION,answers:full()};historic.answers[3]='skip';
+ const restored=readWorkbookReports(JSON.stringify([historic]));assert.deepEqual(restored,[historic]);assert.throws(()=>makeFlowReport(historic.answers,meta));
+ assert.equal(frequencyCounts(restored[0].answers).skipped,1);assert.match(reportMarkup(restored[0],[],'en','days'),/Not Applicable/);
 });

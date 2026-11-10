@@ -47,7 +47,7 @@ test('reports distinguish translated screens, context, fictional examples and re
  const hindi=reportMarkup(record([1,1,1,1],{language:'hi'}),[],'en');assert.match(hindi,/editorial Hindi translation/);assert.match(hindi,/not a diagnosis/);assert.match(hindi,/not diagnostic scores/);
  assert.match(sampleReport('journey'),/EXAMPLE · NOT YOUR RESULTS/);assert.match(sampleReport('journey'),/Illustrative responses only/);
  const flow=quizMarkup(Array(36).fill(null));
- assert.equal((flow.match(/<fieldset/g)||[]).length,36);assert.equal((flow.match(/data-skip=/g)||[]).length,36);
+ assert.equal((flow.match(/<fieldset/g)||[]).length,36);assert.equal((flow.match(/data-skip=/g)||[]).length,0);
  assert.doesNotMatch(flow,/Over the last two weeks/);assert.match(flow,/Never|Almost Always/);
  assert.match(quizMarkup(Array(36).fill(null),'hi'),/clinical|नैदानिक|निदान|चिकित्सकीय/);
 });

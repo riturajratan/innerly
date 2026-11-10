@@ -1,0 +1,11 @@
+Innerly homepage illustration · 10 November 2026
+Mode: built-in Imagegen, new generation. No reference images.
+Original: /Users/riturajratan/.codex/generated_images/01a1a23d-26e0-7242-b557-d85afe0e945d/exec-f6cad78a-733d-4ad8-8199-fb479fae86cd.png
+Exports: dist/assets/innerly-everyday-v2.webp (1600px) and innerly-everyday-v2-800.webp (800px). Resized and converted to WebP; no content edits.
+
+Final prompt:
+Use case: illustration-story.
+Asset type: an original wide homepage hero illustration for Innerly, an adult mental wellbeing self-reflection website.
+Create an elegant contemporary editorial illustration, landscape about 2.5:1. A welcoming shared garden scene with five adult people of different ages and genders, connected by a single flowing powder-blue path. At left a young adult woman with medium brown skin quietly writes in a notebook while sitting on a sculptural periwinkle seat; centre two adults, a man and woman of different skin tones, listen to each other face to face at an unhurried distance; right an older grey-haired woman and a middle-aged man spend a peaceful moment near a small leafy tree. All clothed in modern everyday clothing, mature proportions, natural expressive poses and subtle faces, not caricatures. Convey self-understanding and human connection, not compulsory happiness.
+Art direction: sophisticated flat editorial shapes with finely textured grain, crisp contours, rich midnight-navy line details, powder blue, periwinkle, mint, very restrained warm yellow accents. Seamless pale ice-blue background close to #eef5ff. Airy, thoughtfully composed, plenty of breathing room around figures. People occupy the central lower two-thirds, all heads and bodies fully within frame. Soft simple foliage and sun shapes only. It should feel like a premium contemporary wellbeing brand, not children's clip art, watercolor or a medical illustration.
+No words, letters, logos, charts, watermarks, UI, frames, border, hearts floating above heads, exaggerated smiles, brain anatomy or medical symbols. This is a new illustration, do not reuse any earlier artwork.

@@ -5,8 +5,8 @@ import {FLOW_VERSION} from '../dist/checkin-flow.mjs';
 import {feelingExamples,feelingVisual,feelingReading} from '../dist/feeling-explorer.mjs';
 import {mentalHomeMarkup} from '../dist/mental-views.mjs';
 
-test('an explicit draft round-trip keeps partial answers, scales, skips and language',()=>{
- const a=Array(36).fill(null);a[0]=4;a[5]=0;a[35]=3;a[1]='skip';
+test('an explicit draft round-trip keeps partial answers, scales and language',()=>{
+ const a=Array(36).fill(null);a[0]=4;a[5]=0;a[35]=3;a[1]=2;
  const draft=makeDraft(a,'hi','2026-11-08T10:00:00.000Z');
  const restored=readDraft(JSON.stringify(draft));assert.deepEqual(restored.answers,a);assert.equal(restored.language,'hi');assert.equal(restored.version,FLOW_VERSION);assert.equal(resumeQuestion(restored.answers),2);
  a[0]=1;assert.equal(draft.answers[0],4);
@@ -26,6 +26,13 @@ test('feeling examples remain visibly fictional, interactive and distinct from p
   assert.ok(example.rows.every(row=>row[0]>=0&&row[0]<=7));assert.equal(example.rows.length,3);
   for(const l of ['en','hi']){const markup=feelingVisual(key,l);assert.match(markup,/data-feeling-bar="2"/);assert.match(markup,/Fictional diary|काल्पनिक diary/);assert.match(markup,/Not your results|आपके नतीजे नहीं/);assert.ok(feelingReading(key,2,l));}
  }
- const home=mentalHomeMarkup();assert.match(home,/data-theme="relationships"/);assert.ok((home.match(/class="mh-primary" data-action="begin"/g)||[]).length>=3);
+ const home=mentalHomeMarkup();assert.match(home,/data-home-topic="relationships"/);assert.ok((home.match(/class="mh-primary" data-action="begin"/g)||[]).length>=3);
  assert.notEqual(feelingReading('relationships',0),feelingReading('sleep',0));
+});
+
+test('old same-version draft skips become unanswered without losing numeric responses',()=>{
+ const answers=Array(36).fill(3);answers[2]='skip';answers[30]='skip';
+ const raw={version:FLOW_VERSION,language:'hi',savedAt:'2026-11-09T12:00:00Z',answers};
+ const restored=readDraft(JSON.stringify(raw));assert.equal(restored.answers[2],null);assert.equal(restored.answers[30],null);assert.equal(restored.answers[0],3);assert.equal(resumeQuestion(restored.answers),2);
+ assert.throws(()=>makeDraft(answers,'hi'));assert.deepEqual(raw.answers,answers);
 });

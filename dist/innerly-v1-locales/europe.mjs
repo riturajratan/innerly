@@ -39,7 +39,7 @@ Cuando me enfrento a una situación difícil, me siento a gusto pidiendo ayuda a
 Cuando algo sale mal en mi vida, intento aprender de la experiencia.`,
 `Nunca|Rara vez|A veces|A menudo|Casi siempre|No se aplica / Prefiero omitir`,
 `Conciencia y comprensión de uno mismo|Patrones de pensamiento y flexibilidad mental|Equilibrio emocional y manejo de las respuestas|Toma de decisiones y control del comportamiento|Relaciones y comportamiento social|Afrontamiento del estrés, resiliencia y crecimiento personal`,
-`Para reflexionar, no para diagnosticar. Puedes omitir cualquier pregunta.`),
+`Responde a todas las preguntas para ver tu informe. Esta reflexión no es un diagnóstico.`),
 fr:pack(`Lorsque je remarque un changement dans ce que je ressens, je peux généralement reconnaître ce qui a pu y contribuer.
 Lorsque je prends une décision, je peux distinguer si mes sentiments ou les faits m'influencent davantage.
 Lorsque je réagis fortement à quelque chose, j'ai du mal à comprendre pourquoi.
@@ -78,7 +78,7 @@ Lorsque je fais face à une situation difficile, je suis à l'aise pour demander
 Lorsque quelque chose se passe mal dans ma vie, j'essaie d'en tirer une leçon.`,
 `Jamais|Rarement|Parfois|Souvent|Presque toujours|Sans objet / Je préfère passer`,
 `Conscience et compréhension de soi|Modes de pensée et souplesse mentale|Équilibre émotionnel et gestion des réactions|Prise de décision et maîtrise du comportement|Relations et comportement social|Gestion du stress, résilience et développement personnel`,
-`Un outil de réflexion, pas un diagnostic. Vous pouvez passer n'importe quelle question.`),
+`Répondez à toutes les questions pour voir votre rapport. Cette réflexion ne constitue pas un diagnostic.`),
 de:pack(`Wenn ich eine Veränderung meiner Gefühle bemerke, kann ich meist erkennen, was dazu beigetragen haben könnte.
 Wenn ich eine Entscheidung treffe, kann ich unterscheiden, ob mich eher meine Gefühle oder die Fakten beeinflussen.
 Wenn ich stark auf etwas reagiere, fällt es mir schwer zu verstehen, warum.
@@ -117,7 +117,7 @@ Wenn ich vor einer schwierigen Situation stehe, fällt es mir nicht schwer, ande
 Wenn in meinem Leben etwas schiefläuft, versuche ich, aus der Erfahrung zu lernen.`,
 `Nie|Selten|Manchmal|Oft|Fast immer|Nicht zutreffend / Lieber überspringen`,
 `Selbstwahrnehmung und Selbstverständnis|Denkmuster und geistige Flexibilität|Emotionales Gleichgewicht und Umgang mit Reaktionen|Entscheidungsfindung und Verhaltenskontrolle|Beziehungen und Sozialverhalten|Stressbewältigung, Resilienz und persönliche Entwicklung`,
-`Zur Selbstreflexion, nicht zur Diagnose. Sie können jede Frage überspringen.`),
+`Beantworten Sie jede Frage, um Ihren Bericht zu sehen. Diese Selbstreflexion ist keine Diagnose.`),
 pt:pack(`Quando percebo uma mudança no que sinto, geralmente consigo reconhecer o que pode ter contribuído para isso.
 Ao tomar uma decisão, consigo perceber se meus sentimentos ou os fatos estão me influenciando mais.
 Quando reajo intensamente a algo, tenho dificuldade para entender o motivo.
@@ -156,7 +156,7 @@ Quando enfrento uma situação difícil, sinto-me à vontade para pedir ajuda ao
 Quando algo dá errado na minha vida, tento aprender com a experiência.`,
 `Nunca|Raramente|Às vezes|Frequentemente|Quase sempre|Não se aplica / Prefiro pular`,
 `Autoconsciência e autocompreensão|Padrões de pensamento e flexibilidade mental|Equilíbrio emocional e gestão das reações|Tomada de decisões e controle do comportamento|Relacionamentos e comportamento social|Enfrentamento do estresse, resiliência e crescimento pessoal`,
-`Para reflexão, não para diagnóstico. Você pode pular qualquer pergunta.`),
+`Responda a todas as perguntas para ver seu relatório. Esta reflexão não é um diagnóstico.`),
 it:pack(`Quando noto un cambiamento in come mi sento, di solito riesco a riconoscere cosa potrebbe avervi contribuito.
 Quando prendo una decisione, riesco a distinguere se mi influenzano maggiormente i sentimenti o i fatti.
 Quando reagisco intensamente a qualcosa, faccio fatica a capire perché.
@@ -195,7 +195,7 @@ Quando affronto una situazione difficile, mi sento a mio agio nel chiedere aiuto
 Quando qualcosa va storto nella mia vita, cerco di imparare dall'esperienza.`,
 `Mai|Raramente|A volte|Spesso|Quasi sempre|Non applicabile / Preferisco saltare`,
 `Consapevolezza e comprensione di sé|Schemi di pensiero e flessibilità mentale|Equilibrio emotivo e gestione delle reazioni|Processo decisionale e controllo del comportamento|Relazioni e comportamento sociale|Gestione dello stress, resilienza e crescita personale`,
-`Per riflettere, non per formulare una diagnosi. Puoi saltare qualsiasi domanda.`),
+`Rispondi a tutte le domande per vedere il tuo rapporto. Questa riflessione non è una diagnosi.`),
 ru:pack(`Когда я замечаю изменение в своих чувствах, я обычно могу понять, что могло на это повлиять.
 Принимая решение, я могу определить, что влияет на меня сильнее: чувства или факты.
 Когда я сильно реагирую на что-то, мне трудно понять почему.
@@ -234,7 +234,7 @@ ru:pack(`Когда я замечаю изменение в своих чувс�
 Когда в моей жизни что-то идёт не так, я стараюсь извлечь урок из этого опыта.`,
 `Никогда|Редко|Иногда|Часто|Почти всегда|Не относится ко мне / Предпочитаю пропустить`,
 `Осознание и понимание себя|Модели мышления и гибкость ума|Эмоциональное равновесие и управление реакциями|Принятие решений и контроль поведения|Отношения и социальное поведение|Преодоление стресса, устойчивость и личностный рост`,
-`Для самоанализа, не для постановки диагноза. Любой вопрос можно пропустить.`),
+`Ответьте на все вопросы, чтобы увидеть свой отчёт. Этот самоанализ не является диагнозом.`),
 tr:pack(`Duygularımda bir değişiklik fark ettiğimde, buna neyin katkıda bulunmuş olabileceğini genellikle anlayabilirim.
 Bir karar verirken duygularımdan mı yoksa gerçeklerden mi daha çok etkilendiğimi ayırt edebilirim.
 Bir şeye güçlü tepki verdiğimde, nedenini anlamakta zorlanırım.
@@ -273,5 +273,5 @@ Zor bir durumla karşılaştığımda, başkalarından yardım istemekte rahat h
 Hayatımda bir şeyler ters gittiğinde, bu deneyimden ders çıkarmaya çalışırım.`,
 `Hiçbir zaman|Nadiren|Bazen|Sık sık|Neredeyse her zaman|Bana uygun değil / Atlamayı tercih ediyorum`,
 `Öz farkındalık ve kendini anlama|Düşünce kalıpları ve zihinsel esneklik|Duygusal denge ve tepkileri yönetme|Karar verme ve davranış kontrolü|İlişkiler ve sosyal davranış|Stresle başa çıkma, dayanıklılık ve kişisel gelişim`,
-`Kendiniz üzerine düşünmek içindir, tanı değildir. İstediğiniz soruyu atlayabilirsiniz.`)
+`Raporunuzu görmek için tüm soruları yanıtlayın. Bu öz değerlendirme bir tanı değildir.`)
 };

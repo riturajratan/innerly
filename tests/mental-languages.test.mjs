@@ -15,11 +15,11 @@ test('URL, manual preference and browser languages resolve in order, including r
 test('changing the record language never changes descriptive counts or translates old answers into a new version',()=>{
  const reports=languages.map(({code})=>makeFlowReport(answers,{...meta,id:code,language:code}));const restored=readReflectionReports(JSON.stringify(reports));assert.equal(restored.length,20);for(const {code} of languages){const r=restored.find(r=>r.id===code);assert.equal(r.language,code);assert.deepEqual(responseCounts(r.answers),responseCounts(answers));assert.equal(r.scores,undefined);}
 });
-test('all 20 languages survive partial draft save and restore including an optional skip',()=>{
- for(const {code} of languages){const partial=Array(36).fill(null);partial[0]=4;partial[1]='skip';partial[35]=3;const d=makeDraft(partial,code,meta.createdAt);assert.deepEqual(readDraft(JSON.stringify(d)),d);}
+test('all 20 languages survive partial draft save and restore with all questions required',()=>{
+ for(const {code} of languages){const partial=Array(36).fill(null);partial[0]=4;partial[1]=1;partial[35]=3;const d=makeDraft(partial,code,meta.createdAt);assert.deepEqual(readDraft(JSON.stringify(d)),d);}
  const d=makeDraft(answers,'en');assert.equal(readDraft(JSON.stringify({...d,language:'xx'})),null);assert.equal(readDraft(JSON.stringify({...d,language:'es-MX'})),null);
 });
 test('question UI and EN/HI report fallback render safely for every language',()=>{
- for(const {code,name} of languages){const html=quizMarkup(Array(36).fill(null),code);assert.equal((html.match(/<fieldset/g)||[]).length,36);assert.doesNotMatch(html,/undefined|NaN/);assert.ok(html.includes(esc(coverageNotice(code))));assert.doesNotMatch(html,/reflection-support|mh-support/);
+ for(const {code,name} of languages){const html=quizMarkup(Array(36).fill(null),code);assert.equal((html.match(/<fieldset/g)||[]).length,36);assert.doesNotMatch(html,/undefined|NaN/);assert.ok(html.includes(esc(coverageNotice(code))));assert.doesNotMatch(html,/reflection-support|mh-support|data-skip=/);
  const report=makeFlowReport(answers,{...meta,language:code});for(const view of ['snapshot','days','journey']){const text=reportMarkup(report,[report],code,view);assert.doesNotMatch(text,/undefined|NaN|PHQ-4|mh-support|Tele MANAS/);if(code!=='en')assert.ok(text.includes(name));}assert.doesNotMatch(sampleReport('days',code),/undefined|NaN/);assert.equal(displayLanguage(code),code==='hi'?'hi':'en');}
 });
