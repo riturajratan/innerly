@@ -4,6 +4,7 @@ import {dimensionProfile,workbookTimeline,itemReflections} from '../dist/innerly
 import {workbookDimensions,makeWorkbookReport} from '../dist/innerly-v1-model.mjs';
 import {workbookReportMarkup} from '../dist/innerly-v1-views.mjs';
 import {workbookTimelineDetail} from '../dist/innerly-v1-charts.mjs';
+import {workbookDimensionExplorer,workbookFocusStatus} from '../dist/innerly-v1-charts.mjs';
 import {reportMarkup} from '../dist/mental-views.mjs';
 import {FREE_DIMENSIONS} from '../dist/innerly-v1-preview.mjs';
 const make=(id,date,value=2,language='en')=>makeWorkbookReport(Array(36).fill(value),{id,createdAt:date,language});
@@ -68,4 +69,21 @@ test('report opens with two real previews, four decorative locked cards and an e
  }
  assert.match(reportMarkup(current,[]),/One-time payment/);
  assert.match(reportMarkup(current,[]),/Payments coming soon/);
+});
+
+test('all expanded graphs expose six keyboard-accessible marks and linked questions with correct navigation limits',()=>{
+ for(const l of ['en','hi'])for(const d of workbookDimensions){
+  for(const selected of [d.items[0],d.items[5]]){
+   const html=workbookDimensionExplorer(current.answers,d.id,l,selected);
+   assert.equal((html.match(/role="button" tabindex="0"/g)||[]).length,6);
+   assert.equal((html.match(/data-workbook-question=/g)||[]).length,6);
+   assert.equal((html.match(/data-explore-area=/g)||[]).length,6);
+   assert.match(html,new RegExp(`data-workbook-question="${selected}" aria-pressed="true"`));
+   assert.match(html,selected===d.items[0]?/data-response-step="-1" disabled/:/data-response-step="1" disabled/);
+   assert.doesNotMatch(html,/undefined|NaN|Infinity/);
+  }
+ }
+ assert.match(workbookFocusStatus(current.answers,26),/Q27/);
+ assert.match(workbookFocusStatus(current.answers,26),/Almost Always/);
+ const skipped=[...current.answers];skipped[26]='skip';assert.match(workbookFocusStatus(skipped,26),/Not answered/);
 });

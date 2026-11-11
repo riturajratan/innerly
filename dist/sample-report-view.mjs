@@ -1,4 +1,4 @@
-import {workbookReportMarkup} from './innerly-v1-views.mjs?v=interactive-1';
+import {workbookReportMarkup} from './innerly-v1-views.mjs?v=explorer-1';
 import {displayLanguage} from './mental-language.mjs?v=mh-14';
 const say=(l,en,hi)=>l==='hi'?hi:en;
 export function sampleReportMarkup({report,history=[],language='en',preset='mixed',view='snapshot',selection={}}){

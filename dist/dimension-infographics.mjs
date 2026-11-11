@@ -19,11 +19,11 @@ export function dimensionObservation(answers,id,l='en'){
  return say(l,`Your responses range from ${labels[selected[0]]} to ${labels[selected.at(-1)]}.`,`आपके जवाब “${labels[selected[0]]}” से “${labels[selected.at(-1)]}” तक हैं।`);
 }
 
-export function dimensionGraphic(answers,id,l='en',decorative=false,focusedQuestion=-1){
+export function dimensionGraphic(answers,id,l='en',decorative=false,focusedQuestion=-1,keyboard=false){
  const p=dimensionProfile(answers,id),color=palette[p.index],labels=workbookChoices(l);
  const title=p.rows.map(r=>`${r.id}: ${r.value===null?say(l,'Not answered','जवाब नहीं दिया'):labels[r.value]}`).join('; ');
  const missing=(x,y)=>`<text x="${x}" y="${y}" text-anchor="middle" fill="#68798b" font-size="17">—</text>`;
- const mark=(row,content)=>`<g class="ig-question${row.index===focusedQuestion?' is-focused':''}" data-graphic-question="${row.index}">${content}</g>`;
+ const mark=(row,content)=>`<g class="ig-question${row.index===focusedQuestion?' is-focused':''}" data-graphic-question="${row.index}" ${keyboard?`role="button" tabindex="0" aria-label="${esc(`${row.id}: ${row.value===null?say(l,'Not answered','जवाब नहीं दिया'):labels[row.value]}`)}"`:''}>${content}</g>`;
  let graphic='';
  if(p.index===0){
   graphic=p.rows.map((r,i)=>{const y=16+i*25,end=r.value===null?null:65+r.value*48;return mark(r,`<text x="8" y="${y+5}" class="ig-id">${r.id}</text><path d="M65 ${y}H257" class="ig-track"/>${end===null?missing(160,y+5):`<path d="M65 ${y}H${end}" stroke="${color}" stroke-width="8" opacity=".23"/><circle cx="${end}" cy="${y}" r="5" fill="${color}"/>`}`);}).join('');
@@ -39,7 +39,7 @@ export function dimensionGraphic(answers,id,l='en',decorative=false,focusedQuest
  }else{
   graphic=p.rows.map((r,i)=>{const x=52+(i%3)*98,y=33+Math.floor(i/3)*83;return mark(r,`${[0,1,2,3,4].map(v=>{const a=(-90+v*72)*Math.PI/180,b=a+53*Math.PI/180;return `<path d="M${x+23*Math.cos(a)} ${y+23*Math.sin(a)}A23 23 0 0 1 ${x+23*Math.cos(b)} ${y+23*Math.sin(b)}" fill="none" stroke="${r.value===v?color:'#dce5e8'}" stroke-width="6" stroke-linecap="round"/>`;}).join('')}<text x="${x}" y="${y+5}" text-anchor="middle" class="ig-id">${r.id}</text>`);}).join('');
  }
- return `<svg class="wb-infographic" viewBox="0 -6 310 176" ${decorative?'aria-hidden="true"':`role="img" aria-label="${esc(title)}"`} focusable="false">${graphic}</svg>`;
+ return `<svg class="wb-infographic" viewBox="0 -6 310 176" ${decorative?'aria-hidden="true"':`role="${keyboard?'group':'img'}" aria-label="${esc(title)}"`} focusable="false">${graphic}</svg>`;
 }
 
 export function dimensionInfographicCard(answers,id,l='en',{interactive=false,selected='',preview=false,question=0}={}){

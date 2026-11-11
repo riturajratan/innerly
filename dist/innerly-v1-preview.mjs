@@ -1,4 +1,4 @@
-import {dimensionInfographicCard,dimensionGraphic} from './dimension-infographics.mjs?v=interactive-1';
+import {dimensionInfographicCard,dimensionGraphic} from './dimension-infographics.mjs?v=explorer-1';
 import {workbookDimensions,questionnaireLocale,frequencyCounts} from './innerly-v1-model.mjs?v=mh-14';
 import {displayLanguage,languageName} from './mental-language.mjs?v=mh-14';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

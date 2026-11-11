@@ -1,18 +1,18 @@
-import {sampleReportMarkup} from './sample-report-view.mjs?v=interactive-1';
-import {sampleReportData} from './sample-report.mjs?v=interactive-1';
+import {sampleReportMarkup} from './sample-report-view.mjs?v=explorer-1';
+import {sampleReportData} from './sample-report.mjs?v=explorer-1';
 import {INNERLY_V1_VERSION,INNERLY_V1_STORAGE,readWorkbookReports,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=mh-14';
-import {workbookDimensionReading} from './innerly-v1-views.mjs?v=interactive-1';
-import {workbookQuestionReading,workbookTimelineDetail} from './innerly-v1-charts.mjs?v=interactive-1';
-import {dimensionProfile} from './innerly-v1-insights.mjs?v=interactive-1';
+import {workbookDimensionReading} from './innerly-v1-views.mjs?v=explorer-1';
+import {workbookQuestionReading,workbookTimelineDetail,workbookFocusStatus} from './innerly-v1-charts.mjs?v=explorer-1';
+import {dimensionProfile} from './innerly-v1-insights.mjs?v=explorer-1';
 import {REFLECTION60_VERSION,REFLECTION60_STORAGE,readReflectionReports} from './reflection60-model.mjs';
 import {topicReading} from './reflection60-views.mjs?v=mh-14';
 import {LANGUAGE_STORAGE,resolveQuestionLanguage,languageDirection,languageName,displayLanguage,questionUI,wellbeingLocales,coverageNotice,responseState,growthCaption} from './mental-language.mjs?v=mh-14';
 import {DRAFT_STORAGE,readDraft,makeDraft,resumeQuestion,nextContinuousQuestion} from './checkin-draft.mjs?v=mh-14';
 import {feelingReading} from './feeling-explorer.mjs?v=mh-14';
-import {bindHomeInteractions} from './innerly-home.mjs?v=interactive-1';
+import {bindHomeInteractions} from './innerly-home.mjs?v=explorer-1';
 import {MENTAL_STORAGE,readSavedCheckins} from './mental-model.mjs?v=mh-14';
 import {QUESTION_TOTAL,completedCount,completeFlow as isComplete,validQuestionResponse as validResponse,makeFlowReport as makeCheckin,nextFlowQuestion as nextUnanswered,growthState} from './checkin-flow.mjs?v=mh-14';
-import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=interactive-1';
+import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=explorer-1';
 import {clerkPublishableKey} from './auth-config.mjs?v=auth-1';
 import {createClerkAuth} from './clerk-auth.mjs?v=auth-1';
 import {rememberAuthReturn,takeAuthReturn,AUTH_RETURN_STORAGE} from './auth-continuation.mjs?v=auth-1';
@@ -58,11 +58,23 @@ function hideGraphTooltip(){const tip=document.querySelector('#wb-graphic-toolti
 function highlightGraphic(index){
  for(const mark of app.querySelectorAll('[data-infographic] [data-graphic-question]'))mark.classList.toggle('is-focused',Number(mark.dataset.graphicQuestion)===index);
 }
+function selectReportQuestion(index,scroll=false){
+ if(!Number.isInteger(index)||index<0||index>=QUESTION_TOTAL||report?.version!==INNERLY_V1_VERSION)return;
+ reportSelection={dimension:`dimension-${Math.floor(index/6)+1}`,question:index};highlightGraphic(index);hideGraphTooltip();
+ for(const b of app.querySelectorAll('[data-workbook-question],[data-workbook-map]'))b.setAttribute('aria-pressed',String(Number(b.dataset.workbookQuestion??b.dataset.workbookMap)===index));
+ if(reportView==='timeline'){
+  app.querySelector('#wb-timeline-detail').innerHTML=workbookTimelineDetail(report,saved,index,displayLanguage(language));
+  if(reportDemo){const notes=app.querySelectorAll('#wb-timeline-detail>.wb-help');if(notes.length)notes[notes.length-1].textContent=say(language,'These example dates and check-ins are fictional.','ये उदाहरण की तारीखें और check-ins काल्पनिक हैं।');}
+ }else app.querySelector('#wb-question-detail').innerHTML=workbookQuestionReading(report.answers,index,displayLanguage(language));
+ const status=app.querySelector('#wb-focus-status');
+ if(status){const profile=dimensionProfile(report.answers,reportSelection.dimension),position=profile.items.indexOf(index);status.innerHTML=workbookFocusStatus(report.answers,index,displayLanguage(language));app.querySelector('#wb-focus-position').textContent=`${position+1} / 6`;app.querySelector('[data-response-step="-1"]').disabled=position===0;app.querySelector('[data-response-step="1"]').disabled=position===5;}
+ if(scroll&&pointerInput)app.querySelector(reportView==='timeline'?'#wb-timeline-detail':'#wb-question-detail').scrollIntoView({behavior:motion(),block:window.matchMedia('(max-width:760px)').matches?'start':'nearest'});
+}
 function graphTooltip(event){
  if(event.pointerType==='touch'){hideGraphTooltip();return;}
  const mark=event.target.closest?.('[data-graphic-question]'),card=mark?.closest('[data-infographic]'),tip=app.querySelector('#wb-graphic-tooltip');
  if(!mark||!card||!tip||view!=='report'){hideGraphTooltip();return;}
- const index=Number(mark.dataset.graphicQuestion),profile=dimensionProfile(report.answers,card.dataset.workbookDimension),row=profile.rows.find(r=>r.index===index);if(!row)return;
+ const index=Number(mark.dataset.graphicQuestion),profile=dimensionProfile(report.answers,(card.dataset.workbookDimension||card.dataset.dimensionId)),row=profile.rows.find(r=>r.index===index);if(!row)return;
  if(graphTooltipIndex!==index){const source=questionBankForTooltip(index);tip.innerHTML=`<strong>${esc(row.id)} · ${esc(source.text)}</strong><span>${esc(row.value===null?say(language,'Not answered','जवाब नहीं दिया'):source.choices[row.value])}</span><small>${say(language,'Select to explore this answer','इस जवाब को समझने के लिए चुनें')}</small>`;graphTooltipIndex=index;}
  tip.hidden=false;tip.style.left=`${Math.max(10,Math.min(event.clientX+16,window.innerWidth-tip.offsetWidth-12))}px`;tip.style.top=`${Math.max(10,Math.min(event.clientY+16,window.innerHeight-tip.offsetHeight-12))}px`;
 }
@@ -187,9 +199,22 @@ app.addEventListener('change',e=>{
  }
 });
 app.addEventListener('pointermove',graphTooltip);app.addEventListener('pointerleave',hideGraphTooltip);window.addEventListener('scroll',hideGraphTooltip,{passive:true});
+app.addEventListener('keydown',e=>{
+ const mark=e.target.closest('[data-detail-graphic] [data-graphic-question]');if(!mark)return;
+ if(['Enter',' '].includes(e.key)){e.preventDefault();selectReportQuestion(Number(mark.dataset.graphicQuestion));}
+ if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();const profile=dimensionProfile(report.answers,reportSelection.dimension),at=profile.items.indexOf(Number(mark.dataset.graphicQuestion)),next=profile.items[Math.max(0,Math.min(5,at+(e.key==='ArrowRight'?1:-1)))];selectReportQuestion(next);app.querySelector(`[data-detail-graphic] [data-graphic-question="${next}"]`)?.focus({preventScroll:true});}
+});
 app.addEventListener('click',e=>{
  hideGraphTooltip();
+ const detailMark=e.target.closest('[data-detail-graphic] [data-graphic-question]');if(detailMark){selectReportQuestion(Number(detailMark.dataset.graphicQuestion));return;}
  const button=e.target.closest('button');if(!button)return;
+ if(button.dataset.exploreArea){
+  const profile=dimensionProfile(report.answers,button.dataset.exploreArea);reportSelection={dimension:profile.id,question:profile.items[0]};
+  for(const card of app.querySelectorAll('[data-workbook-dimension]'))card.setAttribute('aria-pressed',String(card.dataset.workbookDimension===profile.id));
+  app.querySelector('#mh-topic-reading').innerHTML=workbookDimensionReading(report.answers,profile.id,language,reportSelection.question);highlightGraphic(reportSelection.question);
+  app.querySelector(`[data-explore-area="${profile.id}"]`)?.focus({preventScroll:true});return;
+ }
+ if(button.dataset.responseStep){const profile=dimensionProfile(report.answers,reportSelection.dimension),position=profile.items.indexOf(reportSelection.question),index=profile.items[position+Number(button.dataset.responseStep)];if(index!==undefined)selectReportQuestion(index);return;}
  if(button.dataset.samplePreset&&reportDemo){samplePreset=button.dataset.samplePreset;loadSampleReport();const y=window.scrollY;render(false);app.querySelector(`[data-sample-preset="${samplePreset}"]`)?.focus({preventScroll:true});window.scrollTo({top:y,behavior:'instant'});return;}
  if(button.dataset.feelingBar!==undefined){for(const b of app.querySelectorAll('[data-feeling-bar]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-feeling-reading').textContent=feelingReading(button.dataset.feelingKey,Number(button.dataset.feelingBar),language);return;}
  if(button.dataset.theme){for(const b of app.querySelectorAll('[data-theme]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-theme-content').innerHTML=themeMarkup(button.dataset.theme,displayLanguage(language));localizeStartButtons();return;}
@@ -201,14 +226,7 @@ app.addEventListener('click',e=>{
   if(pointerInput&&(button.hasAttribute('data-infographic')||window.matchMedia('(max-width:760px)').matches))app.querySelector('#mh-topic-reading').scrollIntoView({behavior:motion(),block:'start'});return;
  }
  if(button.dataset.workbookQuestion!==undefined||button.dataset.workbookMap!==undefined){
-  const index=Number(button.dataset.workbookQuestion??button.dataset.workbookMap);
-  if(!Number.isInteger(index)||index<0||index>=QUESTION_TOTAL||report?.version!==INNERLY_V1_VERSION)return;
-  reportSelection={dimension:`dimension-${Math.floor(index/6)+1}`,question:index};highlightGraphic(index);
-  for(const b of app.querySelectorAll('[data-workbook-question],[data-workbook-map]'))b.setAttribute('aria-pressed',String(b===button));
-  if(reportView==='timeline'){app.querySelector('#wb-timeline-detail').innerHTML=workbookTimelineDetail(report,saved,index,displayLanguage(language));if(reportDemo){const notes=app.querySelectorAll('#wb-timeline-detail>.wb-help');if(notes.length)notes[notes.length-1].textContent=say(language,'These example dates and check-ins are fictional.','ये उदाहरण की तारीखें और check-ins काल्पनिक हैं।');}}
-  else app.querySelector('#wb-question-detail').innerHTML=workbookQuestionReading(report.answers,index,displayLanguage(language));
-  if(pointerInput&&window.matchMedia('(max-width:760px)').matches)app.querySelector(reportView==='timeline'?'#wb-timeline-detail':'#wb-question-detail').scrollIntoView({behavior:motion(),block:'start'});
-  return;
+  selectReportQuestion(Number(button.dataset.workbookQuestion??button.dataset.workbookMap),true);return;
  }
  if(button.dataset.workbookOpen){
   const profile=dimensionProfile(report.answers,button.dataset.workbookOpen);reportSelection={dimension:profile.id,question:profile.items[0]};reportView='snapshot';render(false);

@@ -25,7 +25,7 @@ test('direct sample clearly labels fictional data, exposes all graphs, and offer
   assert.doesNotMatch(html,/data-action="save"|undefined|NaN|Only reports saved in this browser are available/);
   assert.equal((html.match(/data-sample-preset=/g)||[]).length,3);
   assert.match(html,/wb-demo-banner/);assert.match(html,/data-action="begin"/);
-  if(view==='snapshot')assert.equal((html.match(/data-infographic /g)||[]).length,6);
+  if(view==='snapshot')assert.equal((html.match(/data-workbook-dimension=/g)||[]).length,6);
   if(language==='en')assert.match(html,/FICTIONAL RESPONSES/);else assert.match(html,/काल्पनिक जवाब/);
  }
 });
