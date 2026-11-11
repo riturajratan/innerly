@@ -1,0 +1,56 @@
+/* Small original infographics: actual answer positions, never a health score. */
+.wb-story-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:#dce3ed;border:1px solid #dce3ed;border-radius:16px;overflow:hidden;margin:28px 0}
+.wb-story-card{display:block;position:relative;min-width:0;padding:25px 22px 23px;background:#f7f8fc;color:#24374e;text-align:start;border:0;border-radius:0;font:inherit}
+button.wb-story-card{cursor:pointer;width:100%;transition:background .18s}
+button.wb-story-card:hover{background:#eef2fb}
+button.wb-story-card[aria-pressed=true]{background:#edf1fa;box-shadow:inset 0 -3px 0 #6b82b7}
+.wb-story-number{display:block;font-size:12px;font-weight:700;letter-spacing:1.5px;color:#647799;margin-bottom:8px}
+.wb-infographic{display:block;width:100%;height:auto;overflow:visible;margin:8px 0 6px}
+.wb-infographic .ig-id{font:12px 'DM Sans',system-ui,sans-serif;fill:#5e7085}
+.wb-infographic .ig-track{stroke:#d9e1eb;stroke-width:2;fill:none}
+.wb-infographic .ig-grid{stroke:#e2e7ef;stroke-width:1;fill:none}
+.wb-story-scale{display:block;font-size:11px;line-height:1.8;color:#64758b;margin:2px 0 16px;min-height:20px}
+.wb-story-title{display:block;font-size:22px;line-height:1.4;letter-spacing:-.6px;font-weight:700;margin:0 0 11px;min-height:62px}
+.wb-story-observation{display:block;font-size:15px;line-height:1.8;color:#52647d;min-height:54px}
+.wb-story-explore{display:flex;justify-content:space-between;gap:10px;font-size:14px;line-height:1.7;font-weight:600;color:#436394;margin-top:21px;padding-top:15px;border-top:1px solid #dfe5ef}
+.wb-story-explore>span{font-size:21px;font-weight:400;line-height:1}
+.wb-free-grid{gap:24px}
+.wb-free-grid .wb-story-card{border:1px solid #dce3ed;border-radius:17px;padding:26px 30px;background:#f7f8fc}
+.wb-free-grid .wb-infographic{max-height:220px}
+.wb-free-grid .wb-story-title{min-height:0;font-size:26px}
+.wb-free-grid .wb-story-observation{min-height:0;font-size:17px}
+.wb-free-answer-detail{margin-top:23px;border-top:1px solid #dfe5ef}
+.wb-free-answer-detail summary{cursor:pointer;min-height:48px;padding:16px 0;font-size:15px;line-height:1.7;color:#3b5f93;font-weight:600}
+.wb-free-answer-detail ol{padding:0 0 0 23px;margin:0}
+.wb-free-answer-detail li{padding:12px 0;border-top:1px solid #e1e6ef}
+.wb-free-answer-detail p{font-size:16px;line-height:1.8}
+.wb-free-answer-detail b{font-size:11px;color:#61758d}
+.wb-free-answer-detail strong{display:inline-block;font-size:14px;padding:4px 10px;background:#e8eef8;border-radius:14px;color:#375e8c;margin-top:10px}
+.wb-locked-card .wb-infographic{height:170px}
+.wb-back-overview{min-height:44px;font-size:15px;padding:0 0 18px;color:#42628f}
+.wb-print-infographics{display:none}
+.mh-large .wb-story-title{font-size:25px}
+.mh-large .wb-story-observation{font-size:18px}
+.mh-large .wb-story-scale{font-size:13px}
+@media(max-width:1000px){.wb-story-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wb-story-title{min-height:0}.wb-story-observation{min-height:54px}}
+@media(max-width:600px){
+ .wb-story-grid{grid-template-columns:1fr;margin-top:22px}
+ .wb-story-card{padding:24px}
+ .wb-story-title{font-size:24px}.wb-story-observation{font-size:17px;min-height:0}
+ .wb-story-scale{font-size:12px;margin-bottom:15px}
+ .wb-infographic{max-height:195px}
+ .wb-free-grid .wb-story-card{padding:22px}
+ .wb-free-grid .wb-story-title{font-size:24px}
+ .wb-story-explore{font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){button.wb-story-card{transition:none}}
+@media print{
+ .wb-print-infographics{display:block;margin-top:28px;break-after:page}
+ .wb-print-infographics h2{font-size:24px;margin-bottom:20px}
+ .wb-print-infographics .wb-story-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin:0}
+ .wb-print-infographics .wb-story-card{padding:14px;break-inside:avoid}
+ .wb-print-infographics .wb-story-title{font-size:16px;min-height:44px}
+ .wb-print-infographics .wb-story-observation{font-size:12px;line-height:1.6;min-height:40px}
+ .wb-print-infographics .wb-story-scale{font-size:9px;line-height:1.5}
+ .wb-free-answer-detail:not([open]){display:none}
+}

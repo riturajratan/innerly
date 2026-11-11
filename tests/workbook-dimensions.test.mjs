@@ -59,7 +59,7 @@ test('report opens with two real previews, four decorative locked cards and an e
  assert.deepEqual(FREE_DIMENSIONS,['dimension-1','dimension-5']);
  for(const l of ['en','hi']){
   const preview=reportMarkup(current,[],l);
-  assert.equal((preview.match(/class="wb-free-card"/g)||[]).length,2);
+  assert.equal((preview.match(/class="wb-story-card wb-free-card"/g)||[]).length,2);
   assert.equal((preview.match(/class="wb-locked-card"/g)||[]).length,4);
   assert.match(preview,/data-action="report-offer"/);assert.match(preview,/data-action="unlock-preview"/);
   assert.doesNotMatch(preview,/wb-print-question|data-report-view|data-action="print"|data-workbook-question|undefined|NaN/);
