@@ -23,7 +23,13 @@ export function dimensionGraphic(answers,id,l='en',decorative=false,focusedQuest
  const p=dimensionProfile(answers,id),color=palette[p.index],labels=workbookChoices(l);
  const title=p.rows.map(r=>`${r.id}: ${r.value===null?say(l,'Not answered','जवाब नहीं दिया'):labels[r.value]}`).join('; ');
  const missing=(x,y)=>`<text x="${x}" y="${y}" text-anchor="middle" fill="#68798b" font-size="17">—</text>`;
- const mark=(row,content)=>`<g class="ig-question${row.index===focusedQuestion?' is-focused':''}" data-graphic-question="${row.index}" ${keyboard?`role="button" tabindex="0" aria-label="${esc(`${row.id}: ${row.value===null?say(l,'Not answered','जवाब नहीं दिया'):labels[row.value]}`)}"`:''}>${content}</g>`;
+ const mark=(row,content)=>{
+  const i=p.items.indexOf(row.index);
+  const boxes=[[0,3+i*25,300,25],[12+i*46,0,44,165],null,[9+i%3*98,6+Math.floor(i/3)*80,88,66],[9+i%3*98,8+Math.floor(i/3)*78,88,66],[22+i%3*98,3+Math.floor(i/3)*83,60,60]];
+  const box=keyboard?boxes[p.index]:null;
+  const hit=box?`<rect x="${box[0]}" y="${box[1]}" width="${box[2]}" height="${box[3]}" fill="transparent" aria-hidden="true"/>`:'';
+  return `<g class="ig-question${row.index===focusedQuestion?' is-focused':''}" data-graphic-question="${row.index}" ${keyboard?`role="button" tabindex="0" aria-label="${esc(`${row.id}: ${row.value===null?say(l,'Not answered','जवाब नहीं दिया'):labels[row.value]}`)}"`:''}>${hit}${content}</g>`;
+ };
  let graphic='';
  if(p.index===0){
   graphic=p.rows.map((r,i)=>{const y=16+i*25,end=r.value===null?null:65+r.value*48;return mark(r,`<text x="8" y="${y+5}" class="ig-id">${r.id}</text><path d="M65 ${y}H257" class="ig-track"/>${end===null?missing(160,y+5):`<path d="M65 ${y}H${end}" stroke="${color}" stroke-width="8" opacity=".23"/><circle cx="${end}" cy="${y}" r="5" fill="${color}"/>`}`);}).join('');

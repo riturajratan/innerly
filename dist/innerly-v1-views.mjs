@@ -1,5 +1,5 @@
-import {dimensionInfographicGrid} from './dimension-infographics.mjs?v=explorer-1';
-import {workbookDimensionExplorer,workbookQuestionReading,workbookAnswerMap,workbookTimelineView,workbookPrintDimensions} from './innerly-v1-charts.mjs?v=explorer-1';
+import {dimensionInfographicGrid} from './dimension-infographics.mjs?v=explorer-2';
+import {workbookDimensionExplorer,workbookQuestionReading,workbookAnswerMap,workbookTimelineView,workbookPrintDimensions} from './innerly-v1-charts.mjs?v=explorer-2';
 import {workbookDimensions,workbookQuestions,workbookChoices,skipChoice,questionnaireLocale,frequencyCounts,QUESTION_COUNT} from './innerly-v1-model.mjs?v=mh-14';
 import {displayLanguage,languageName} from './mental-language.mjs?v=mh-14';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

@@ -1,4 +1,4 @@
-import {dimensionGraphic,dimensionTitles} from './dimension-infographics.mjs?v=explorer-1';
+import {dimensionGraphic,dimensionTitles} from './dimension-infographics.mjs?v=explorer-2';
 import {workbookDimensions,workbookQuestions,workbookChoices,questionnaireLocale} from './innerly-v1-model.mjs?v=mh-14';
 import {dimensionProfile,workbookTimeline,itemReflections} from './innerly-v1-insights.mjs?v=dimensions-1';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
