@@ -67,6 +67,10 @@ The following notes describe the retained legacy experience, not the new mental-
 
 Live site: https://www.riturajratan.com/innerly/
 
+Direct interactive sample: https://www.riturajratan.com/innerly/report-demo.html?lang=en (use `lang=hi` for Hindi). The dedicated page uses three labelled fictional answer patterns and fictional history. It does not load real drafts/reports, does not save sample answers, and disables account actions. Its Start My Test action returns to the real questionnaire, resuming a saved draft if present. `node scripts/render-report-demo.mjs` runs after the main homepage renderer in CI.
+
+On real and sample reports, graph marks offer an exact-question tooltip, direct selection and a matching focus highlight. Keyboard users can use the card and six-question controls. Touch selection opens details; hover tooltips are suppressed during touch scrolling. Reduced-motion preferences continue to apply.
+
 A static, browser-local personality reflection experience. The active assessment now uses the **36 statements supplied by the user**, with light English grammar edits. The previous 45-question set is removed from the active questionnaire. Short summary and full report are free; no payment is collected.
 
 ## Run and verify

@@ -35,6 +35,7 @@ jobs:
         run: |
           node scripts/render-home.mjs
           node scripts/render-mental-home.mjs
+          node scripts/render-report-demo.mjs
           node --check dist/mental-app.mjs
           node --check dist/clerk-auth.mjs
           node --check dist/app.js

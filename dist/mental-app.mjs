@@ -1,20 +1,24 @@
-import {INNERLY_V1_VERSION,INNERLY_V1_STORAGE,readWorkbookReports} from './innerly-v1-model.mjs?v=mh-14';
-import {workbookDimensionReading} from './innerly-v1-views.mjs?v=infographics-1';
-import {workbookQuestionReading,workbookTimelineDetail} from './innerly-v1-charts.mjs?v=infographics-1';
-import {dimensionProfile} from './innerly-v1-insights.mjs?v=infographics-1';
+import {sampleReportMarkup} from './sample-report-view.mjs?v=interactive-1';
+import {sampleReportData} from './sample-report.mjs?v=interactive-1';
+import {INNERLY_V1_VERSION,INNERLY_V1_STORAGE,readWorkbookReports,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=mh-14';
+import {workbookDimensionReading} from './innerly-v1-views.mjs?v=interactive-1';
+import {workbookQuestionReading,workbookTimelineDetail} from './innerly-v1-charts.mjs?v=interactive-1';
+import {dimensionProfile} from './innerly-v1-insights.mjs?v=interactive-1';
 import {REFLECTION60_VERSION,REFLECTION60_STORAGE,readReflectionReports} from './reflection60-model.mjs';
 import {topicReading} from './reflection60-views.mjs?v=mh-14';
 import {LANGUAGE_STORAGE,resolveQuestionLanguage,languageDirection,languageName,displayLanguage,questionUI,wellbeingLocales,coverageNotice,responseState,growthCaption} from './mental-language.mjs?v=mh-14';
 import {DRAFT_STORAGE,readDraft,makeDraft,resumeQuestion,nextContinuousQuestion} from './checkin-draft.mjs?v=mh-14';
 import {feelingReading} from './feeling-explorer.mjs?v=mh-14';
-import {bindHomeInteractions} from './innerly-home.mjs?v=mh-16';
+import {bindHomeInteractions} from './innerly-home.mjs?v=interactive-1';
 import {MENTAL_STORAGE,readSavedCheckins} from './mental-model.mjs?v=mh-14';
 import {QUESTION_TOTAL,completedCount,completeFlow as isComplete,validQuestionResponse as validResponse,makeFlowReport as makeCheckin,nextFlowQuestion as nextUnanswered,growthState} from './checkin-flow.mjs?v=mh-14';
-import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=infographics-1';
+import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=interactive-1';
 import {clerkPublishableKey} from './auth-config.mjs?v=auth-1';
 import {createClerkAuth} from './clerk-auth.mjs?v=auth-1';
 import {rememberAuthReturn,takeAuthReturn,AUTH_RETURN_STORAGE} from './auth-continuation.mjs?v=auth-1';
 const app=document.querySelector('#app'),dialog=document.querySelector('#mh-dialog');
+const reportDemo=document.body.dataset.reportDemo==='true';
+let samplePreset='mixed';
 let preferredLanguage='';try{preferredLanguage=localStorage.getItem(LANGUAGE_STORAGE)||'';}catch{}
 let language=resolveQuestionLanguage({url:new URL(location.href).searchParams.get('lang'),saved:preferredLanguage,browserLanguages:navigator.languages||[],deviceLanguage:navigator.language});
 const qt=(key,en,hi)=>questionUI(language,key,en,hi);
@@ -22,33 +26,54 @@ let saved=[],answers=Array(QUESTION_TOTAL).fill(null),view='home',report=null,re
 let reportSelection={dimension:'dimension-1',question:0};
 const previewUnlockedReports=new Set(); // Preview access only. Never use this as a paid entitlement.
 let draftEnabled=false,draftSynced=false;
-try{saved=[...readWorkbookReports(localStorage.getItem(INNERLY_V1_STORAGE)),...readReflectionReports(localStorage.getItem(REFLECTION60_STORAGE)),...readSavedCheckins(localStorage.getItem(MENTAL_STORAGE))];const draft=readDraft(localStorage.getItem(DRAFT_STORAGE));if(draft){answers=draft.answers;language=draft.language;draftEnabled=true;draftSynced=true;}}catch{}
+if(!reportDemo)try{saved=[...readWorkbookReports(localStorage.getItem(INNERLY_V1_STORAGE)),...readReflectionReports(localStorage.getItem(REFLECTION60_STORAGE)),...readSavedCheckins(localStorage.getItem(MENTAL_STORAGE))];const draft=readDraft(localStorage.getItem(DRAFT_STORAGE));if(draft){answers=draft.answers;language=draft.language;draftEnabled=true;draftSynced=true;}}catch{}
 let answerLanguage=language;
-const auth=createClerkAuth({publishableKey:clerkPublishableKey,window,document,onChange:updateAuthHeader});
+const auth=createClerkAuth({publishableKey:reportDemo?'':clerkPublishableKey,window,document,onChange:updateAuthHeader});
 const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
 let paused=false;const motion=()=>paused||reduce.matches?'instant':'smooth';
 function cancelGuide(){clearTimeout(guideTimer);guideTimer=null;}
 function focusHeading(){const heading=app.querySelector('h1');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}window.scrollTo({top:0,behavior:'instant'});}
 function localizeStartButtons(){for(const button of app.querySelectorAll('[data-action="begin"]')){button.innerHTML=`${esc(qt('Start test','Start My Test','अपना टेस्ट शुरू करें'))} <span aria-hidden="true">→</span>`;button.lang=language;button.dir=languageDirection(language);}}
 function render(focus=true){
- clearAuthReturn();updateAuthHeader(auth.state);
+ clearAuthReturn();hideGraphTooltip();updateAuthHeader(auth.state);
  cancelGuide();document.documentElement.lang=view==='quiz'?language:displayLanguage(language);document.documentElement.dir=view==='quiz'?languageDirection(language):'ltr';document.querySelector('.mh-header').lang=displayLanguage(language);document.querySelector('.mh-header').dir='ltr';document.querySelector('.mh-footer').lang=displayLanguage(language);document.querySelector('.mh-footer').dir='ltr';document.querySelector('#mh-language-note').textContent=coverageNotice(language);document.querySelector('#mh-language-note').lang=language;document.querySelector('#mh-language-note').dir=languageDirection(language);document.title=say(language,'Innerly — A mental-health check-in','Innerly — अपने मन का हाल जानें');document.querySelector('#mh-language').value=language;
  document.querySelector('#mh-home').textContent=say(language,'Home','होम');document.querySelector('#mh-history').textContent=say(language,'My reports','मेरी रिपोर्ट');document.querySelector('.mh-footer>span').textContent=say(language,'A moment for your mind.','कुछ पल, अपने मन के लिए।');document.querySelector('.mh-footer a').textContent=say(language,'Earlier personality reports','पुरानी personality reports');document.querySelector('#mh-motion').textContent=say(language,paused?'Resume motion':'Pause motion',paused?'Motion चालू करें':'Motion रोकें');
  document.body.classList.toggle('mh-in-checkin',view==='quiz');document.body.classList.toggle('mh-home-page',view==='home');
  document.querySelector('#mh-home').setAttribute('aria-current',view==='home'?'page':'false');document.querySelector('#mh-history').setAttribute('aria-current',view==='history'?'page':'false');
  if(view==='home'){app.innerHTML=mentalHomeMarkup({language});bindHomeInteractions(app,language,localizeStartButtons);if(answers.some(v=>v!==null)&&!report)app.insertAdjacentHTML('afterbegin',`<div class="mh-resume-banner"><span><strong>${completedCount(answers)} / ${QUESTION_TOTAL}</strong> · ${say(language,draftSynced?'Saved in this browser. Ready when you are.':'Your answers are still here in this open page.',draftSynced?'इसी browser में सेव है। जब चाहें जारी रखें।':'इस खुले पेज में आपके जवाब अभी भी हैं।')}</span><div><button class="mh-secondary" data-action="resume" lang="${language}" dir="${languageDirection(language)}">${qt('Continue test','Continue my check-in','अपना check-in जारी रखें')} →</button><button class="mh-link" data-action="discard" lang="${language}" dir="${languageDirection(language)}">${qt('removeDraft','Remove draft','Draft हटाएँ')}</button></div></div>`);}
  if(view==='quiz'){app.innerHTML=quizMarkup(answers,language,draftSynced);setActiveQuestion(resumeQuestion(answers)??0);}
- if(view==='report')app.innerHTML=reportMarkup(report,saved,language,reportView,{...reportSelection,unlocked:previewUnlockedReports.has(report.id)});
+ if(view==='report')app.innerHTML=reportDemo?sampleReportMarkup({report,history:saved,language,preset:samplePreset,view:reportView,selection:reportSelection}):reportMarkup(report,saved,language,reportView,{...reportSelection,unlocked:previewUnlockedReports.has(report.id)});
  if(view==='history')app.innerHTML=`<section class="mh-history"><p class="mh-kicker">${say(language,'SAVED ON THIS DEVICE','इस DEVICE पर सेव')}</p><h1>${say(language,'Your check-ins. Your pace.','आपके check-ins। आपकी गति।')}</h1><p>${say(language,'Reports saved in this browser appear here. They do not sync to your account. Anyone using this browser can open them.','इस browser में सेव reports यहाँ दिखती हैं। ये खाते से sync नहीं होतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है।')}</p>${saved.length?`<div class="mh-saved-list">${saved.toSorted((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).map(r=>`<article><button class="mh-saved-open" data-open="${esc(r.id)}"><span>${new Date(r.createdAt).toLocaleDateString(language,{day:'numeric',month:'long',year:'numeric'})}</span><strong>${r.version===INNERLY_V1_VERSION?say(language,'Innerly V1 · 36 questions','Innerly V1 · 36 सवाल'):r.version===REFLECTION60_VERSION?say(language,'60-statement reflection','60 statements की reflection'):`Earlier PHQ-4 ${r.scores.total}/12`}</strong><small><bdi>${languageName(r.language)}</bdi> →</small></button><button class="mh-link" data-delete="${esc(r.id)}" aria-label="${say(language,'Delete this saved check-in','यह सेव check-in हटाएँ')}">${say(language,'Delete','हटाएँ')}</button></article>`).join('')}</div>`:`<div class="mh-empty">${say(language,'Your first saved report will appear here.','आपकी पहली सेव report यहाँ दिखेगी।')}</div>`}<button class="mh-primary" data-action="begin">${qt('Start test','Start My Test','अपना टेस्ट शुरू करें')} →</button><p class="mh-footnote"><a href="personality.html">${say(language,'View earlier personality reports','पुरानी personality reports देखें')} ↗</a></p></section>`;
+ if(reportDemo&&view==='report')document.title=say(language,'Innerly — Interactive sample report','Innerly — Interactive उदाहरण report');
+ document.querySelector('#mh-history').hidden=reportDemo;
  localizeStartButtons();
  if(focus)focusHeading();
 }
+function loadSampleReport(){
+ const data=sampleReportData(language,samplePreset);samplePreset=data.preset;report=data.report;saved=data.history;
+ previewUnlockedReports.add(report.id);view='report';
+}
+let graphTooltipIndex=null;
+function hideGraphTooltip(){const tip=document.querySelector('#wb-graphic-tooltip');if(tip)tip.hidden=true;graphTooltipIndex=null;}
+function highlightGraphic(index){
+ for(const mark of app.querySelectorAll('[data-infographic] [data-graphic-question]'))mark.classList.toggle('is-focused',Number(mark.dataset.graphicQuestion)===index);
+}
+function graphTooltip(event){
+ if(event.pointerType==='touch'){hideGraphTooltip();return;}
+ const mark=event.target.closest?.('[data-graphic-question]'),card=mark?.closest('[data-infographic]'),tip=app.querySelector('#wb-graphic-tooltip');
+ if(!mark||!card||!tip||view!=='report'){hideGraphTooltip();return;}
+ const index=Number(mark.dataset.graphicQuestion),profile=dimensionProfile(report.answers,card.dataset.workbookDimension),row=profile.rows.find(r=>r.index===index);if(!row)return;
+ if(graphTooltipIndex!==index){const source=questionBankForTooltip(index);tip.innerHTML=`<strong>${esc(row.id)} · ${esc(source.text)}</strong><span>${esc(row.value===null?say(language,'Not answered','जवाब नहीं दिया'):source.choices[row.value])}</span><small>${say(language,'Select to explore this answer','इस जवाब को समझने के लिए चुनें')}</small>`;graphTooltipIndex=index;}
+ tip.hidden=false;tip.style.left=`${Math.max(10,Math.min(event.clientX+16,window.innerWidth-tip.offsetWidth-12))}px`;tip.style.top=`${Math.max(10,Math.min(event.clientY+16,window.innerHeight-tip.offsetHeight-12))}px`;
+}
+function questionBankForTooltip(index){const l=displayLanguage(language);return {text:workbookQuestions[index].texts[l],choices:workbookChoices(l)};}
 function reportStorage(r){return r.version===INNERLY_V1_VERSION?INNERLY_V1_STORAGE:r.version===REFLECTION60_VERSION?REFLECTION60_STORAGE:MENTAL_STORAGE;}
 function showDialog(markup){lastFocus=document.activeElement;dialog.innerHTML=`<button class="mh-dialog-close" aria-label="${qt('Close dialog','Close','बंद करें')}" data-close>×</button>${markup}`;dialog.showModal();}
 function closeDialog(){dialog.close();lastFocus?.focus?.();}
 function startFresh(){answerLanguage=language;answers=Array(QUESTION_TOTAL).fill(null);report=null;draftEnabled=false;draftSynced=false;view='quiz';render();}
 function resume(){language=answerLanguage;report=null;view='quiz';render();goToQuestion(resumeQuestion(answers),'instant');}
 function begin(){
+ if(reportDemo){const next=new URL('./',location.href);next.searchParams.set('lang',language);next.searchParams.set('start','1');location.assign(next.href);return;}
  cancelGuide();
  if(answers.some(v=>v!==null)&&!isComplete(answers)){resume();return;}
  if(report&&!saved.some(r=>r.id===report.id)){showDialog(`<h2>${say(language,'Start a new check-in?','नया check-in शुरू करें?')}</h2><p>${say(language,'This report is not saved. You can go back to save or print it first.','यह report सेव नहीं है। पहले वापस जाकर इसे सेव या print कर सकते हैं।')}</p><button class="mh-primary" id="mh-new-confirm">${qt('Start test','Start My Test','अपना टेस्ट शुरू करें')}</button>`);dialog.querySelector('#mh-new-confirm').onclick=()=>{closeDialog();startFresh();};return;}
@@ -105,14 +130,16 @@ function showReportOffer(){
  dialog.querySelector('#wb-free-preview').onclick=()=>{closeDialog();unlockReportPreview();};
 }
 function saveReport(){
+ if(reportDemo)return;
  if(saved.some(r=>r.id===report.id))return;
  showDialog(`<h2>${say(language,'Save on this device?','इस device पर सेव करें?')}</h2><p>${say(language,'This stores your answers and report in this browser. Other people using this browser may be able to read them. You can delete saved check-ins from My check-ins.','इससे आपके जवाब और report इसी browser में रहेंगे। इसी browser का इस्तेमाल करने वाले दूसरे लोग इन्हें देख सकते हैं। “मेरे check-ins” से इन्हें हटा सकते हैं।')}</p><button class="mh-primary" id="mh-save-confirm">${say(language,'Save my report here','मेरी report यहाँ सेव करें')}</button>`);
  dialog.querySelector('#mh-save-confirm').onclick=()=>{if(storeCurrentReport()){closeDialog();render(false);app.querySelector('#mh-report-status').textContent=say(language,'Saved on this device.','इस device पर सेव हो गई।');}else{closeDialog();app.querySelector('#mh-report-status').textContent=say(language,'This browser could not save your report. You can print or save a PDF instead.','इस browser में report सेव नहीं हुई। Print या PDF में सेव कर सकते हैं।');}};
 }
 function storeCurrentReport(){
+ if(reportDemo)return false;
  try{const next=[report,...saved.filter(r=>r.id!==report.id)],key=reportStorage(report);localStorage.setItem(key,JSON.stringify(next.filter(r=>reportStorage(r)===key).slice(0,50)));saved=next;return true;}catch{return false;}
 }
-function clearAuthReturn(){try{sessionStorage.removeItem(AUTH_RETURN_STORAGE);}catch{}}
+function clearAuthReturn(){if(reportDemo)return;try{sessionStorage.removeItem(AUTH_RETURN_STORAGE);}catch{}}
 function updateAuthHeader(state){
  const button=document.querySelector('#mh-auth');if(!button)return;
  button.hidden=state.status==='disabled';button.disabled=state.status==='loading';
@@ -134,6 +161,7 @@ async function openAccount(){
  }catch{authError();}
 }
 function requestAccount(){
+ if(reportDemo)return;
  cancelGuide();
  const unsavedReport=report&&!saved.some(r=>r.id===report.id);
  const unsavedAnswers=!report&&answers.some(v=>v!==null)&&!draftSynced;
@@ -158,23 +186,26 @@ app.addEventListener('change',e=>{
   const y=window.scrollY;render(false);app.querySelector('[data-workbook-area]')?.focus({preventScroll:true});window.scrollTo({top:y,behavior:'instant'});
  }
 });
+app.addEventListener('pointermove',graphTooltip);app.addEventListener('pointerleave',hideGraphTooltip);window.addEventListener('scroll',hideGraphTooltip,{passive:true});
 app.addEventListener('click',e=>{
+ hideGraphTooltip();
  const button=e.target.closest('button');if(!button)return;
+ if(button.dataset.samplePreset&&reportDemo){samplePreset=button.dataset.samplePreset;loadSampleReport();const y=window.scrollY;render(false);app.querySelector(`[data-sample-preset="${samplePreset}"]`)?.focus({preventScroll:true});window.scrollTo({top:y,behavior:'instant'});return;}
  if(button.dataset.feelingBar!==undefined){for(const b of app.querySelectorAll('[data-feeling-bar]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-feeling-reading').textContent=feelingReading(button.dataset.feelingKey,Number(button.dataset.feelingBar),language);return;}
  if(button.dataset.theme){for(const b of app.querySelectorAll('[data-theme]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-theme-content').innerHTML=themeMarkup(button.dataset.theme,displayLanguage(language));localizeStartButtons();return;}
  if(button.dataset.demoView){for(const b of app.querySelectorAll('[data-demo-view]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-demo-content').innerHTML=sampleReport(button.dataset.demoView,displayLanguage(language));return;}
  if(button.dataset.workbookDimension){
-  const profile=dimensionProfile(report.answers,button.dataset.workbookDimension);reportSelection={dimension:profile.id,question:profile.items[0]};
+  const profile=dimensionProfile(report.answers,button.dataset.workbookDimension),mark=e.target.closest('[data-graphic-question]'),index=Number(mark?.dataset.graphicQuestion);reportSelection={dimension:profile.id,question:mark&&profile.items.includes(index)?index:profile.items[0]};
   for(const b of app.querySelectorAll('[data-workbook-dimension]'))b.setAttribute('aria-pressed',String(b===button));
-  app.querySelector('#mh-topic-reading').innerHTML=workbookDimensionReading(report.answers,profile.id,language,reportSelection.question);
+  app.querySelector('#mh-topic-reading').innerHTML=workbookDimensionReading(report.answers,profile.id,language,reportSelection.question);highlightGraphic(reportSelection.question);
   if(pointerInput&&(button.hasAttribute('data-infographic')||window.matchMedia('(max-width:760px)').matches))app.querySelector('#mh-topic-reading').scrollIntoView({behavior:motion(),block:'start'});return;
  }
  if(button.dataset.workbookQuestion!==undefined||button.dataset.workbookMap!==undefined){
   const index=Number(button.dataset.workbookQuestion??button.dataset.workbookMap);
   if(!Number.isInteger(index)||index<0||index>=QUESTION_TOTAL||report?.version!==INNERLY_V1_VERSION)return;
-  reportSelection={dimension:`dimension-${Math.floor(index/6)+1}`,question:index};
+  reportSelection={dimension:`dimension-${Math.floor(index/6)+1}`,question:index};highlightGraphic(index);
   for(const b of app.querySelectorAll('[data-workbook-question],[data-workbook-map]'))b.setAttribute('aria-pressed',String(b===button));
-  if(reportView==='timeline')app.querySelector('#wb-timeline-detail').innerHTML=workbookTimelineDetail(report,saved,index,displayLanguage(language));
+  if(reportView==='timeline'){app.querySelector('#wb-timeline-detail').innerHTML=workbookTimelineDetail(report,saved,index,displayLanguage(language));if(reportDemo){const notes=app.querySelectorAll('#wb-timeline-detail>.wb-help');if(notes.length)notes[notes.length-1].textContent=say(language,'These example dates and check-ins are fictional.','ये उदाहरण की तारीखें और check-ins काल्पनिक हैं।');}}
   else app.querySelector('#wb-question-detail').innerHTML=workbookQuestionReading(report.answers,index,displayLanguage(language));
   if(pointerInput&&window.matchMedia('(max-width:760px)').matches)app.querySelector(reportView==='timeline'?'#wb-timeline-detail':'#wb-question-detail').scrollIntoView({behavior:motion(),block:'start'});
   return;
@@ -192,9 +223,10 @@ app.addEventListener('click',e=>{
  switch(button.dataset.action){case'dimension-overview':{const target=app.querySelector(`[data-infographic][data-workbook-dimension="${reportSelection.dimension}"]`);target?.focus({preventScroll:true});target?.scrollIntoView({behavior:motion(),block:'center'});break;}case'report-offer':showReportOffer();break;case'unlock-preview':unlockReportPreview();break;case'begin':begin();break;case'home':view='home';render();break;case'resume':resume();break;case'break':takeBreak();break;case'discard':discardDraft();break;case'review':reviewAnswers();break;case'unanswered':cancelGuide();goToQuestion(resumeQuestion(answers),'instant');break;case'finish':finish();break;case'preview':{const p=app.querySelector('#mh-report-preview');p.tabIndex=-1;p.focus({preventScroll:true});p.scrollIntoView({behavior:motion(),block:'start'});break;}case'save':saveReport();break;case'print':window.print();break;}
 });
 dialog.addEventListener('click',e=>{const jump=e.target.closest('[data-jump]');if(jump){closeDialog();goToQuestion(Number(jump.dataset.jump),'instant');return;}if(e.target.closest('[data-close]'))closeDialog();});dialog.addEventListener('cancel',()=>lastFocus?.focus?.());
-document.querySelector('#mh-home').onclick=()=>{view='home';render();};document.querySelector('.mh-brand').onclick=e=>{e.preventDefault();view='home';render();};document.querySelector('#mh-history').onclick=()=>{view='history';render();};
+function goHome(){if(reportDemo){const next=new URL('./',location.href);next.searchParams.set('lang',language);location.assign(next.href);return;}view='home';render();}
+document.querySelector('#mh-home').onclick=goHome;document.querySelector('.mh-brand').onclick=e=>{e.preventDefault();goHome();};document.querySelector('#mh-history').onclick=()=>{view='history';render();};
 document.querySelector('#mh-auth').onclick=requestAccount;
-document.querySelector('#mh-language').onchange=e=>{if(!report&&answers.some(v=>v!==null)){e.target.value=language;showDialog(`<h2>${qt('keepLanguage','Keep one language for this check-in','इस check-in में एक ही भाषा रखें')}</h2>${['en','hi'].includes(language)?`<p>${say(language,'Finish this check-in in the language you started with. You can change languages for a new one.','यह check-in उसी भाषा में पूरा करें जिसमें शुरू किया था। नए check-in के लिए भाषा बदल सकते हैं।')}</p>`:''}`);return;}language=e.target.value;if(view==='quiz')answerLanguage=language;try{localStorage.setItem(LANGUAGE_STORAGE,language);}catch{}const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);render();};
+document.querySelector('#mh-language').onchange=e=>{if(!report&&answers.some(v=>v!==null)){e.target.value=language;showDialog(`<h2>${qt('keepLanguage','Keep one language for this check-in','इस check-in में एक ही भाषा रखें')}</h2>${['en','hi'].includes(language)?`<p>${say(language,'Finish this check-in in the language you started with. You can change languages for a new one.','यह check-in उसी भाषा में पूरा करें जिसमें शुरू किया था। नए check-in के लिए भाषा बदल सकते हैं।')}</p>`:''}`);return;}language=e.target.value;if(reportDemo)loadSampleReport();if(view==='quiz')answerLanguage=language;if(!reportDemo)try{localStorage.setItem(LANGUAGE_STORAGE,language);}catch{}const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);render();};
 document.querySelector('#mh-large').onclick=e=>{const large=document.body.classList.toggle('mh-large');e.currentTarget.setAttribute('aria-pressed',String(large));};
 document.querySelector('#mh-motion').onclick=e=>{paused=!paused;document.body.classList.toggle('mh-paused',paused);e.currentTarget.setAttribute('aria-pressed',String(paused));e.currentTarget.textContent=say(language,paused?'Resume motion':'Pause motion',paused?'Motion चालू करें':'Motion रोकें');};
 let printDetails=[];
@@ -203,7 +235,7 @@ window.addEventListener('afterprint',()=>{app.querySelector('.mh-print-graphs')?
 window.addEventListener('beforeunload',e=>{if(!report&&!draftSynced&&answers.some(v=>v!==null)){e.preventDefault();e.returnValue='';}});
 // Consume the navigation marker once. Health data is restored only from the
 // same existing browser saves, never from Clerk or an account identity.
-let authReturn=null;try{authReturn=takeAuthReturn(sessionStorage);}catch{}
+let authReturn=null;if(!reportDemo)try{authReturn=takeAuthReturn(sessionStorage);}catch{}
 if(authReturn){
  language=resolveQuestionLanguage({url:authReturn.language});
  if(authReturn.view==='quiz'&&answers.some(v=>v!==null)){view='quiz';language=answerLanguage;}
@@ -211,6 +243,8 @@ if(authReturn){
  else if(authReturn.view==='history')view='history';
  const returnUrl=new URL(location.href);returnUrl.searchParams.set('lang',language);history.replaceState(null,'',returnUrl);
 }
+if(reportDemo)loadSampleReport();
 render(false);
+if(!reportDemo&&!authReturn&&new URL(location.href).searchParams.get('start')==='1'){const next=new URL(location.href);next.searchParams.delete('start');history.replaceState(null,'',next);begin();}
 if(view==='quiz')goToQuestion(resumeQuestion(answers),'instant');
 auth.ready().catch(()=>{}); // A provider outage must never block the guest check-in.
