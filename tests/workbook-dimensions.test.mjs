@@ -75,7 +75,7 @@ test('all expanded graphs expose six keyboard-accessible marks and linked questi
  for(const l of ['en','hi'])for(const d of workbookDimensions){
   for(const selected of [d.items[0],d.items[5]]){
    const html=workbookDimensionExplorer(current.answers,d.id,l,selected);
-   assert.equal((html.match(/role="button" tabindex="0"/g)||[]).length,6);
+   assert.equal((html.match(/class="rp-row" data-response-question=/g)||[]).length,6);
    assert.equal((html.match(/data-workbook-question=/g)||[]).length,6);
    assert.equal((html.match(/data-explore-area=/g)||[]).length,6);
    assert.match(html,new RegExp(`data-workbook-question="${selected}" aria-pressed="true"`));

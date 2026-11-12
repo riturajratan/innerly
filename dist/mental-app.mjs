@@ -1,18 +1,19 @@
-import {sampleReportMarkup} from './sample-report-view.mjs?v=explorer-2';
-import {sampleReportData} from './sample-report.mjs?v=explorer-2';
+import {previewResponseDetail} from './response-graphs.mjs?v=report-3';
+import {sampleReportMarkup} from './sample-report-view.mjs?v=report-3';
+import {sampleReportData} from './sample-report.mjs?v=report-3';
 import {INNERLY_V1_VERSION,INNERLY_V1_STORAGE,readWorkbookReports,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=mh-14';
-import {workbookDimensionReading} from './innerly-v1-views.mjs?v=explorer-2';
-import {workbookQuestionReading,workbookTimelineDetail,workbookFocusStatus} from './innerly-v1-charts.mjs?v=explorer-2';
-import {dimensionProfile} from './innerly-v1-insights.mjs?v=explorer-2';
+import {workbookDimensionReading} from './innerly-v1-views.mjs?v=report-3';
+import {workbookQuestionReading,workbookTimelineDetail,workbookFocusStatus} from './innerly-v1-charts.mjs?v=report-3';
+import {dimensionProfile} from './innerly-v1-insights.mjs?v=report-3';
 import {REFLECTION60_VERSION,REFLECTION60_STORAGE,readReflectionReports} from './reflection60-model.mjs';
 import {topicReading} from './reflection60-views.mjs?v=mh-14';
 import {LANGUAGE_STORAGE,resolveQuestionLanguage,languageDirection,languageName,displayLanguage,questionUI,wellbeingLocales,coverageNotice,responseState,growthCaption} from './mental-language.mjs?v=mh-14';
 import {DRAFT_STORAGE,readDraft,makeDraft,resumeQuestion,nextContinuousQuestion} from './checkin-draft.mjs?v=mh-14';
 import {feelingReading} from './feeling-explorer.mjs?v=mh-14';
-import {bindHomeInteractions} from './innerly-home.mjs?v=explorer-2';
+import {bindHomeInteractions} from './innerly-home.mjs?v=report-3';
 import {MENTAL_STORAGE,readSavedCheckins} from './mental-model.mjs?v=mh-14';
 import {QUESTION_TOTAL,completedCount,completeFlow as isComplete,validQuestionResponse as validResponse,makeFlowReport as makeCheckin,nextFlowQuestion as nextUnanswered,growthState} from './checkin-flow.mjs?v=mh-14';
-import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=explorer-2';
+import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=report-3';
 import {clerkPublishableKey} from './auth-config.mjs?v=auth-1';
 import {createClerkAuth} from './clerk-auth.mjs?v=auth-1';
 import {rememberAuthReturn,takeAuthReturn,AUTH_RETURN_STORAGE} from './auth-continuation.mjs?v=auth-1';
@@ -24,6 +25,7 @@ let language=resolveQuestionLanguage({url:new URL(location.href).searchParams.ge
 const qt=(key,en,hi)=>questionUI(language,key,en,hi);
 let saved=[],answers=Array(QUESTION_TOTAL).fill(null),view='home',report=null,reportView='snapshot',guideTimer=null,pointerInput=false,lastFocus=null;
 let reportSelection={dimension:'dimension-1',question:0};
+let previewSelection={};
 const previewUnlockedReports=new Set(); // Preview access only. Never use this as a paid entitlement.
 let draftEnabled=false,draftSynced=false;
 if(!reportDemo)try{saved=[...readWorkbookReports(localStorage.getItem(INNERLY_V1_STORAGE)),...readReflectionReports(localStorage.getItem(REFLECTION60_STORAGE)),...readSavedCheckins(localStorage.getItem(MENTAL_STORAGE))];const draft=readDraft(localStorage.getItem(DRAFT_STORAGE));if(draft){answers=draft.answers;language=draft.language;draftEnabled=true;draftSynced=true;}}catch{}
@@ -37,12 +39,12 @@ function localizeStartButtons(){for(const button of app.querySelectorAll('[data-
 function render(focus=true){
  clearAuthReturn();hideGraphTooltip();updateAuthHeader(auth.state);
  cancelGuide();document.documentElement.lang=view==='quiz'?language:displayLanguage(language);document.documentElement.dir=view==='quiz'?languageDirection(language):'ltr';document.querySelector('.mh-header').lang=displayLanguage(language);document.querySelector('.mh-header').dir='ltr';document.querySelector('.mh-footer').lang=displayLanguage(language);document.querySelector('.mh-footer').dir='ltr';document.querySelector('#mh-language-note').textContent=coverageNotice(language);document.querySelector('#mh-language-note').lang=language;document.querySelector('#mh-language-note').dir=languageDirection(language);document.title=say(language,'Innerly — A mental-health check-in','Innerly — अपने मन का हाल जानें');document.querySelector('#mh-language').value=language;
- document.querySelector('#mh-home').textContent=say(language,'Home','होम');document.querySelector('#mh-history').textContent=say(language,'My reports','मेरी रिपोर्ट');document.querySelector('.mh-footer>span').textContent=say(language,'A moment for your mind.','कुछ पल, अपने मन के लिए।');document.querySelector('.mh-footer a').textContent=say(language,'Earlier personality reports','पुरानी personality reports');document.querySelector('#mh-motion').textContent=say(language,paused?'Resume motion':'Pause motion',paused?'Motion चालू करें':'Motion रोकें');
+ document.querySelector('#mh-home').textContent=say(language,'Home','होम');document.querySelector('#mh-history').textContent=say(language,'My reports','मेरी रिपोर्ट');document.querySelector('.mh-footer>span').textContent=say(language,'A moment for your mind.','कुछ पल, अपने मन के लिए।');document.querySelector('.mh-footer a[href="personality.html"]').textContent=say(language,'Earlier personality reports','पुरानी personality reports');document.querySelector('#mh-motion').textContent=say(language,paused?'Resume motion':'Pause motion',paused?'Motion चालू करें':'Motion रोकें');
  document.body.classList.toggle('mh-in-checkin',view==='quiz');document.body.classList.toggle('mh-home-page',view==='home');
  document.querySelector('#mh-home').setAttribute('aria-current',view==='home'?'page':'false');document.querySelector('#mh-history').setAttribute('aria-current',view==='history'?'page':'false');
  if(view==='home'){app.innerHTML=mentalHomeMarkup({language});bindHomeInteractions(app,language,localizeStartButtons);if(answers.some(v=>v!==null)&&!report)app.insertAdjacentHTML('afterbegin',`<div class="mh-resume-banner"><span><strong>${completedCount(answers)} / ${QUESTION_TOTAL}</strong> · ${say(language,draftSynced?'Saved in this browser. Ready when you are.':'Your answers are still here in this open page.',draftSynced?'इसी browser में सेव है। जब चाहें जारी रखें।':'इस खुले पेज में आपके जवाब अभी भी हैं।')}</span><div><button class="mh-secondary" data-action="resume" lang="${language}" dir="${languageDirection(language)}">${qt('Continue test','Continue my check-in','अपना check-in जारी रखें')} →</button><button class="mh-link" data-action="discard" lang="${language}" dir="${languageDirection(language)}">${qt('removeDraft','Remove draft','Draft हटाएँ')}</button></div></div>`);}
  if(view==='quiz'){app.innerHTML=quizMarkup(answers,language,draftSynced);setActiveQuestion(resumeQuestion(answers)??0);}
- if(view==='report')app.innerHTML=reportDemo?sampleReportMarkup({report,history:saved,language,preset:samplePreset,view:reportView,selection:reportSelection}):reportMarkup(report,saved,language,reportView,{...reportSelection,unlocked:previewUnlockedReports.has(report.id)});
+ if(view==='report')app.innerHTML=reportDemo?sampleReportMarkup({report,history:saved,language,preset:samplePreset,view:reportView,selection:reportSelection}):reportMarkup(report,saved,language,reportView,{...reportSelection,unlocked:previewUnlockedReports.has(report.id),preview:previewSelection});
  if(view==='history')app.innerHTML=`<section class="mh-history"><p class="mh-kicker">${say(language,'SAVED ON THIS DEVICE','इस DEVICE पर सेव')}</p><h1>${say(language,'Your check-ins. Your pace.','आपके check-ins। आपकी गति।')}</h1><p>${say(language,'Reports saved in this browser appear here. They do not sync to your account. Anyone using this browser can open them.','इस browser में सेव reports यहाँ दिखती हैं। ये खाते से sync नहीं होतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है।')}</p>${saved.length?`<div class="mh-saved-list">${saved.toSorted((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).map(r=>`<article><button class="mh-saved-open" data-open="${esc(r.id)}"><span>${new Date(r.createdAt).toLocaleDateString(language,{day:'numeric',month:'long',year:'numeric'})}</span><strong>${r.version===INNERLY_V1_VERSION?say(language,'Innerly V1 · 36 questions','Innerly V1 · 36 सवाल'):r.version===REFLECTION60_VERSION?say(language,'60-statement reflection','60 statements की reflection'):`Earlier PHQ-4 ${r.scores.total}/12`}</strong><small><bdi>${languageName(r.language)}</bdi> →</small></button><button class="mh-link" data-delete="${esc(r.id)}" aria-label="${say(language,'Delete this saved check-in','यह सेव check-in हटाएँ')}">${say(language,'Delete','हटाएँ')}</button></article>`).join('')}</div>`:`<div class="mh-empty">${say(language,'Your first saved report will appear here.','आपकी पहली सेव report यहाँ दिखेगी।')}</div>`}<button class="mh-primary" data-action="begin">${qt('Start test','Start My Test','अपना टेस्ट शुरू करें')} →</button><p class="mh-footnote"><a href="personality.html">${say(language,'View earlier personality reports','पुरानी personality reports देखें')} ↗</a></p></section>`;
  if(reportDemo&&view==='report')document.title=say(language,'Innerly — Interactive sample report','Innerly — Interactive उदाहरण report');
  document.querySelector('#mh-history').hidden=reportDemo;
@@ -56,6 +58,7 @@ function loadSampleReport(){
 let graphTooltipIndex=null;
 function hideGraphTooltip(){const tip=document.querySelector('#wb-graphic-tooltip');if(tip)tip.hidden=true;graphTooltipIndex=null;}
 function highlightGraphic(index){
+ for(const button of app.querySelectorAll('[data-response-question]:not([data-preview-response])'))button.setAttribute('aria-pressed',String(Number(button.dataset.responseQuestion)===index));
  for(const mark of app.querySelectorAll('[data-infographic] [data-graphic-question]'))mark.classList.toggle('is-focused',Number(mark.dataset.graphicQuestion)===index);
 }
 function selectReportQuestion(index,scroll=false){
@@ -96,7 +99,7 @@ function finish(){
  if(!isComplete(answers)){const i=nextUnanswered(answers);if(view!=='quiz'){view='quiz';render();}app.querySelector('#mh-form-message').textContent=qt('A few answers are still missing.','A few answers are still missing. Let us finish those.','कुछ जवाब बाकी हैं। उन्हें पूरा करें।');goToQuestion(i);return;}
  report=makeCheckin(answers,{id:crypto.randomUUID(),createdAt:new Date().toISOString(),language});let removed=true;
  if(draftEnabled){try{localStorage.removeItem(DRAFT_STORAGE);}catch{removed=false;}}
- draftEnabled=false;draftSynced=false;reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};view='report';render();
+ draftEnabled=false;draftSynced=false;previewSelection={};reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};view='report';render();
  if(!removed)app.querySelector('#mh-report-status').textContent=say(language,'Your report is ready, but this browser could not remove the saved draft.','Report तैयार है, लेकिन इस browser में सेव draft हट नहीं सका।');
 }
 function setActiveQuestion(i){
@@ -208,6 +211,16 @@ app.addEventListener('click',e=>{
  hideGraphTooltip();
  const detailMark=e.target.closest('[data-detail-graphic] [data-graphic-question]');if(detailMark){selectReportQuestion(Number(detailMark.dataset.graphicQuestion));return;}
  const button=e.target.closest('button');if(!button)return;
+ if(button.dataset.responseQuestion!==undefined){
+  const index=Number(button.dataset.responseQuestion);
+  if(button.hasAttribute('data-preview-response')){
+   const card=button.closest('[data-preview-card]');if(!card)return;
+   previewSelection[button.dataset.responseDimension]=index;
+   card.querySelectorAll('[data-response-question]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+   card.querySelector('.rp-detail').innerHTML=previewResponseDetail(report.answers,index,displayLanguage(language));
+  }else selectReportQuestion(index);
+  return;
+ }
  if(button.dataset.exploreArea){
   const profile=dimensionProfile(report.answers,button.dataset.exploreArea);reportSelection={dimension:profile.id,question:profile.items[0]};
   for(const card of app.querySelectorAll('[data-workbook-dimension]'))card.setAttribute('aria-pressed',String(card.dataset.workbookDimension===profile.id));

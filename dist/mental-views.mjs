@@ -1,7 +1,7 @@
-import {workbookReportPreview} from './innerly-v1-preview.mjs?v=explorer-2';
-import {innerlyHome} from './innerly-home.mjs?v=explorer-2';
+import {workbookReportPreview} from './innerly-v1-preview.mjs?v=report-3';
+import {innerlyHome} from './innerly-home.mjs?v=report-3';
 import {INNERLY_V1_VERSION,questionnaireLocale} from './innerly-v1-model.mjs?v=mh-14';
-import {workbookReportMarkup,workbookSample} from './innerly-v1-views.mjs?v=explorer-2';
+import {workbookReportMarkup,workbookSample} from './innerly-v1-views.mjs?v=report-3';
 import {REFLECTION60_VERSION} from './reflection60-model.mjs';
 import {reflectionReportMarkup,reflectionSample} from './reflection60-views.mjs?v=mh-14';
 import {questionUI,batchCopy,coverageNotice,translationNotice,timeframe,contextNote,displayLanguage,languageName} from './mental-language.mjs?v=mh-14';
@@ -57,7 +57,7 @@ export function screeningDetail(report,key,l='en'){
  const score=screenScores(report.answers)[key],name=key==='anxiety'?'GAD-2':'PHQ-2';return `<strong>${name}: ${score} / 6</strong><p>${say(l,score>=3?'This reaches the screening threshold for further assessment. Consider discussing these symptoms with a qualified professional.':'This is below the screening threshold. It does not rule out a mental-health condition; seek support if you are concerned or daily life is affected.',score>=3?'यह आगे जाँच के लिए screening सीमा तक पहुँचता है। इन लक्षणों पर किसी योग्य पेशेवर से बात करें।':'यह screening सीमा से नीचे है। इससे mental-health condition न होने की पुष्टि नहीं होती। चिंता हो या रोज़मर्रा पर असर हो तो मदद लें।')}</p>`;
 }
 export function reportMarkup(report,saved,l='en',view='snapshot',selection={}){
- if(report.version===INNERLY_V1_VERSION&&!selection.unlocked)return workbookReportPreview(report,l);
+ if(report.version===INNERLY_V1_VERSION&&!selection.unlocked)return workbookReportPreview(report,l,selection.preview);
  if(report.version===INNERLY_V1_VERSION)return workbookReportMarkup(report,l,view,selection.dimension||'dimension-1',saved.some(r=>r.id===report.id),saved,selection.question??0);
  if(report.version===REFLECTION60_VERSION)return reflectionReportMarkup(report,l,view,'structure',saved.some(r=>r.id===report.id));
  l=displayLanguage(l);
