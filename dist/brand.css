@@ -1,0 +1,14 @@
+.mh-brand,
+.planning-brand,
+.legal-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .28em;
+}
+
+.innerly-mark {
+  display: block;
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+}

@@ -2,6 +2,7 @@ import {responsePositionGraph,responseDistribution} from './response-graphs.mjs?
 import {dimensionTitles} from './dimension-infographics.mjs?v=report-3';
 import {workbookDimensions,workbookQuestions,workbookChoices,questionnaireLocale} from './innerly-v1-model.mjs?v=mh-14';
 import {dimensionProfile,workbookTimeline,itemReflections} from './innerly-v1-insights.mjs?v=dimensions-1';
+import {guidanceLabel,questionGuidance} from './innerly-v1-guidance.mjs';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const say=(l,en,hi)=>l==='hi'?hi:en;
 const label=(index,l)=>itemReflections[index][l==='hi'?1:0];
@@ -11,7 +12,8 @@ const answer=(value,l)=>value===null?say(l,'Not answered','जवाब नह�
 export function workbookQuestionReading(answers,index,l='en') {
  const row=dimensionProfile(answers,`dimension-${Math.floor(index/6)+1}`).rows.find(r=>r.index===index);
  if(!row)return '';
- return `<div class="wb-question-reading"><span class="wb-eyebrow">${esc(row.id)} · ${say(l,'YOUR RESPONSE','आपका जवाब')}</span><h4>${esc(question(index,l))}</h4><span class="wb-answer-pill">${esc(answer(row.value,l))}</span>${row.value===null?`<p>${say(l,'This earlier report has no answer for this statement. It is not counted as Never.','इस पुरानी report में इस सवाल का जवाब नहीं है। इसे “कभी नहीं” नहीं गिना जाता।')}</p>`:`<p class="wb-reflection-label">${say(l,'A moment to reflect','थोड़ा सोचने के लिए')}</p><p>${esc(itemReflections[index][l==='hi'?3:2])}</p>`}</div>`;
+ const item=questionGuidance(row,l);
+ return `<div class="wb-question-reading"><span class="wb-eyebrow">${esc(row.id)} · ${say(l,'YOUR RESPONSE','आपका जवाब')}</span><h4>${esc(question(index,l))}</h4><span class="wb-answer-pill">${esc(item.response)}</span>${row.value===null?`<p>${say(l,'This earlier report has no answer for this statement. It is not counted as Never.','इस पुरानी report में इस सवाल का जवाब नहीं है। इसे “कभी नहीं” नहीं गिना जाता।')}</p>`:`<p class="wb-reflection-label">${guidanceLabel(item.category,l)}</p><p>${esc(item.label)}</p><p class="wb-reflection-label">${say(l,'One thing to try','एक कदम आज़माएँ')}</p><p>${esc(item.step)}</p><p class="wb-reflection-label">${say(l,'How it might help','इससे क्या मदद मिल सकती है')}</p><p>${esc(item.benefit)}</p>`}</div>`;
 }
 
 export function workbookFocusStatus(answers,index,l='en'){
@@ -53,6 +55,17 @@ export function workbookTimelineView(report,saved,id,l='en',selectedQuestion) {
 }
 
 export function workbookPrintDimensions(answers,l='en') {
- const names=questionnaireLocale(l).dimensions,labels=workbookChoices(l);
- return `<div class="wb-print-dimensions">${workbookDimensions.map(d=>`<section class="wb-print-area"><h2>${esc(names[d.index])}</h2>${dimensionProfile(answers,d.id).rows.map(row=>`<div class="wb-print-question"><p><b>${row.id}</b> ${esc(question(row.index,l))}</p><div class="wb-print-scale">${labels.map((text,i)=>`<span class="${row.value===i?'chosen':''}">${row.value===i?'● ':''}${esc(text)}</span>`).join('')}</div>${row.value===null?`<strong>${say(l,'Not answered','जवाब नहीं दिया')}</strong>`:`<p class="wb-print-reflection"><strong>${say(l,'A moment to reflect','थोड़ा सोचने के लिए')}:</strong> ${esc(itemReflections[row.index][l==='hi'?3:2])}</p>`}</div>`).join('')}</section>`).join('')}</div>`;
+ const names=questionnaireLocale(l).dimensions;
+ return `<div class="wb-print-dimensions">${workbookDimensions.map(d=>`<section class="wb-print-area">
+  <h2>${esc(names[d.index])}</h2>
+  ${dimensionProfile(answers,d.id).rows.map(row=>{
+   const item=questionGuidance(row,l);
+   return `<div class="wb-print-question">
+    <p><b>${row.id}</b> ${esc(question(row.index,l))}</p>
+    <p class="wb-print-answer"><strong>${esc(item.response)}</strong>${item.category==='unanswered'?'':` · ${guidanceLabel(item.category,l)}`}</p>
+    ${item.step?`<p class="wb-print-reflection"><strong>${say(l,'Try','आज़माएँ')}</strong> ${esc(item.step)}</p>
+    <p class="wb-print-benefit"><strong>${say(l,'Possible benefit','संभावित लाभ')}</strong> ${esc(item.benefit)}</p>`:''}
+   </div>`;
+  }).join('')}
+ </section>`).join('')}</div>`;
 }

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Planning · Innerly</title>
+  <link rel="stylesheet" href="planning.css?v=6">
+  <link rel="stylesheet" href="thought-waves.css?v=4">
+  <link rel="icon" type="image/svg+xml" sizes="any" href="assets/innerly-tab-icon.svg?v=2"><link rel="stylesheet" href="brand.css?v=1">
+</head>
+<body class="planning-page">
+  <header class="planning-header">
+    <a class="planning-brand" href="./" aria-label="Innerly home"><img class="innerly-mark" src="assets/innerly-mark.svg?v=5" width="36" height="36" alt=""> innerly.</a>
+    <a class="planning-back" href="./">← Back to home</a>
+  </header>
+  <main class="planning-main">
+    <p class="planning-kicker">Planning</p>
+    <h1 id="planning-title">What’s on your mind?</h1>
+    <div id="planning-waves">
+      <img class="planning-fallback" src="assets/planning-profile.webp" width="1536" height="1024"
+           alt="A head in side profile.">
+    </div>
+    <div class="planning-next">
+      <p>Take a moment to notice what’s been on your mind.</p>
+      <a href="./?start=1">Start my check-in <span aria-hidden="true">→</span></a>
+    </div>
+  </main>
+  <script type="module">
+    import {thoughtWavesMarkup} from './thought-waves-view.mjs?v=5';
+    import {mountThoughtWaves} from './planning.mjs?v=13';
+    const container = document.querySelector('#planning-waves');
+    container.innerHTML = thoughtWavesMarkup('en', 'planning-title');
+    mountThoughtWaves(container.firstElementChild);
+  </script>
+</body>
+</html>

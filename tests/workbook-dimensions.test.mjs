@@ -7,8 +7,32 @@ import {workbookTimelineDetail} from '../dist/innerly-v1-charts.mjs';
 import {workbookDimensionExplorer,workbookFocusStatus} from '../dist/innerly-v1-charts.mjs';
 import {reportMarkup} from '../dist/mental-views.mjs';
 import {FREE_DIMENSIONS} from '../dist/innerly-v1-preview.mjs';
+import {workbookAreaGuidance} from '../dist/innerly-v1-guidance.mjs';
 const make=(id,date,value=2,language='en')=>makeWorkbookReport(Array(36).fill(value),{id,createdAt:date,language});
 const current=make('current','2026-11-10T12:00:00Z',4);
+
+test('guidance reads each original answer in its own context without treating skips or midpoints as difficulties',()=>{
+ const answers=Array(36).fill('skip');
+ answers.splice(6,6,4,4,2,0,0,4);
+ const area=workbookAreaGuidance(answers,'dimension-2');
+ assert.deepEqual(area.supports.map(item=>item.id),['Q08','Q11','Q12']);
+ assert.deepEqual(area.focuses.map(item=>item.id),['Q07','Q10']);
+ assert.deepEqual(area.varies.map(item=>item.id),['Q09']);
+ assert.equal(area.next.id,'Q07');
+ assert.match(area.next.benefit,/thought that keeps repeating/);
+ const missing=workbookAreaGuidance(answers,'dimension-1','hi');
+ assert.equal(missing.next,undefined);
+ assert.ok(missing.items.every(item=>item.category==='unanswered'&&item.step===null&&item.benefit===null));
+});
+
+test('the live report renders all six summaries and gives a step and possible benefit for each answered item in print',()=>{
+ for(const language of ['en','hi']){
+  const html=reportMarkup(current,[],language,'snapshot',{unlocked:true});
+  assert.equal((html.match(/class="wb-guidance-card" style=/g)||[]).length,6);
+  assert.equal((html.match(/class="wb-guidance-next"/g)||[]).length,6);
+  assert.equal((html.match(/<strong>(Possible benefit|संभावित लाभ)<\/strong>/g)||[]).length,36);
+ }
+});
 
 test('all six dimension profiles map every source question exactly once and retain Never separately from missing',()=>{
  const answers=Array.from({length:36},(_,i)=>i%6===5?'skip':i%6);
