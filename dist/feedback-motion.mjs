@@ -1,4 +1,4 @@
-// The whole feedback window grows out of the mind icon along flowing thought waves.
+// A thought becomes a cover, then opens into a two-page feedback note.
 export function createFeedbackMotion({dialog,launcher,surface,energy}){
  const reduce=matchMedia('(prefers-reduced-motion: reduce)'),abort=new AbortController();
  let thought=null;
@@ -6,26 +6,19 @@ export function createFeedbackMotion({dialog,launcher,surface,energy}){
  const motionAllowed=()=>!reduce.matches&&!document.body.classList.contains('mh-paused');
  const stop=()=>{generation++;for(const animation of animations)animation.cancel();animations=[];energy.setAttribute('hidden','');thought?.remove();thought=null;};
  function settle(){
-  const closing=phase==='closing';stop();surface.style.pointerEvents='';
+  const closing=phase==='closing';stop();surface.style.pointerEvents='';surface.inert=false;
   if(closing){phase='closed';dialog.close();}else{phase='open';dialog.dataset.motion='open';}
  }
  function frames(){
   const icon=launcher.querySelector('.ifb-mind').getBoundingClientRect(),box=dialog.getBoundingClientRect();
   const origin={x:icon.left+icon.width/2,y:icon.top+icon.height/2};
-  const dx=origin.x-box.left-box.width/2,dy=origin.y-box.top-box.height/2;
-  const transform=(x,y,sx,sy,skew=0)=>`translate(${x}px,${y}px) scale(${sx},${sy}) skewY(${skew}deg)`;
-  return {origin,box,steps:[
-   {offset:0,transform:transform(dx,dy,.035,.025),opacity:0,filter:'blur(5px)',borderRadius:'60px',clipPath:'polygon(40% 5%,70% 0%,100% 30%,100% 75%,75% 100%,35% 100%,0% 75%,0% 35%)'},
-   {offset:.18,transform:transform(dx*.95,dy*.9,.09,.12,-8),opacity:.1,filter:'blur(4px)',borderRadius:'45px',clipPath:'polygon(25% 3%,65% 0%,100% 15%,100% 75%,85% 100%,45% 100%,5% 80%,0% 35%)'},
-   {offset:.5,transform:transform(dx*.45,dy*.43,.58,.63,-3),opacity:.82,filter:'blur(1px)',borderRadius:'30px',clipPath:'polygon(4% 0%,50% 0%,100% 0%,100% 55%,100% 100%,65% 100%,15% 94%,0% 40%)'},
-   {offset:.82,transform:transform(dx*.025,dy*.02,1.015,1.01),opacity:1,filter:'blur(0px)',borderRadius:'18px',clipPath:'polygon(0% 0%,50% 0%,100% 0%,100% 50%,100% 100%,50% 100%,0% 100%,0% 50%)'},
-   {offset:1,transform:transform(0,0,1,1),opacity:1,filter:'blur(0px)',borderRadius:'18px',clipPath:'polygon(0% 0%,50% 0%,100% 0%,100% 50%,100% 100%,50% 100%,0% 100%,0% 50%)'}
-  ]};
+  return {origin,box};
  }
  function waves({origin:o,box:b},duration,closing=false){
-  const target={x:b.left+Math.min(112,b.width/2),y:b.top+b.height*.5};
+  const sidebar=getComputedStyle(surface.querySelector('.ifb-note')).display==='none'?0:225;
+  const target={x:b.left+sidebar+(b.width-sidebar)*.5,y:b.top+b.height*.5};
   const colors=['#729ac6','#82b3a0','#c9b362'];
-  const control1={x:o.x-90,y:o.y-45},control2={x:target.x+180,y:target.y+100};
+  const control1={x:o.x-65,y:o.y-70},control2={x:target.x+75,y:target.y+110};
   energy.setAttribute('viewBox',`0 0 ${innerWidth} ${innerHeight}`);energy.removeAttribute('hidden');
   energy.innerHTML=`<g fill="none">${colors.map((color,i)=>{
    const d=`M${o.x} ${o.y-6} C${control1.x-i*12} ${control1.y-i*6},${control2.x} ${control2.y+i*22},${target.x} ${target.y}`;
@@ -35,7 +28,7 @@ export function createFeedbackMotion({dialog,launcher,surface,energy}){
    {opacity:0},{opacity:.2,offset:.18},{opacity:.2,offset:.72},{opacity:0}
   ],{duration:duration*.64,easing:'linear',fill:'both'})));
   energy.querySelectorAll('.ifb-energy-path').forEach((path,i)=>{
-   const from=closing?-1:.25,to=closing?.25:-1;
+   const from=closing ? -1 : .25,to=closing ? .25 : -1;
    animations.push(path.animate([
     {strokeDashoffset:from,opacity:0},
     {strokeDashoffset:from+(to-from)*.16,opacity:.72,offset:.16},
@@ -57,54 +50,64 @@ export function createFeedbackMotion({dialog,launcher,surface,energy}){
   if(phase!=='closed')return;
   surface.scrollTop=0;dialog.showModal();launcher.setAttribute('aria-expanded','true');phase='opening';dialog.dataset.motion='opening';
   if(!motionAllowed()){settle();return;}
-  const duration=first?1900:1800,geometry=frames();waves(geometry,duration);
-  surface.style.pointerEvents='none';
+  const duration=first?1600:1450,geometry=frames();
   const note=surface.querySelector('.ifb-note'),paper=surface.querySelector('.ifb-paper');
-  const mobile=getComputedStyle(note).display==='none',width=geometry.box.width,height=geometry.box.height,targetWidth=mobile?58:225;
+  const mobile=getComputedStyle(note).display==='none',spine=mobile?0:225;
+  const width=geometry.box.width-spine,height=geometry.box.height;
+  waves(geometry,duration);surface.style.pointerEvents='none';surface.inert=true;
   thought=document.createElement('div');thought.className='ifb-thought-cover';thought.setAttribute('aria-hidden','true');
-  Object.assign(thought.style,{width:`${width}px`,height:`${height}px`,left:'0',top:'0'});
-  thought.append(note.cloneNode(true));dialog.append(thought);
-  const waveOrigin=Math.max(0,Math.min(100,(geometry.origin.x-geometry.box.left)/width*100));
-  const closedEdge=`ellipse(0% 0% at ${waveOrigin}% 100%)`,openEdge=`ellipse(145% 145% at ${waveOrigin}% 100%)`;
-  // Keep the card and its type at full size; a single curved sweep reveals it.
-  animations.push(thought.animate([
-   {offset:0,clipPath:closedEdge,width:`${width}px`,opacity:1,borderRadius:'18px'},
-   {offset:.16,clipPath:closedEdge,width:`${width}px`,opacity:1,borderRadius:'18px',easing:'cubic-bezier(.2,.6,.3,1)'},
-   {offset:.37,clipPath:openEdge,width:`${width}px`,opacity:1,borderRadius:'18px'},
-   {offset:.5,clipPath:openEdge,width:`${width}px`,opacity:1,borderRadius:'18px',easing:'ease-in-out'},
-   {offset:.88,clipPath:openEdge,width:`${targetWidth}px`,opacity:mobile?0:1,borderRadius:mobile?'18px':'18px 0 0 18px'},
-   {offset:1,clipPath:openEdge,width:`${targetWidth}px`,opacity:0,borderRadius:'18px 0 0 18px'}
+  Object.assign(thought.style,{width:`${width}px`,height:`${height}px`,left:`${spine}px`,top:'0'});
+  const front=document.createElement('div');front.className='ifb-cover-front';
+  front.append(note.cloneNode(true));
+  const emblem=document.createElement('img');emblem.className='ifb-cover-mind';emblem.src='assets/innerly-mark.svg?v=5';emblem.alt='';
+  front.querySelector('.ifb-orbits').append(emblem);
+  thought.append(front);
+  if(!mobile){const back=document.createElement('div');back.className='ifb-cover-back';back.append(note.cloneNode(true));thought.append(back);}
+  dialog.append(thought);
+  const rotate=angle=>`perspective(1500px) translateY(0px) rotateY(${angle}deg)`;
+  const finalAngle=mobile?-104:-180,finalWidth=mobile?width:spine;
+  // A single hinge: the front turns away and its reverse becomes the left page.
+  const current=++generation,animation=thought.animate([
+   {offset:0,transform:'perspective(1500px) translateY(28px) rotateY(0deg)',width:`${width}px`},
+   {offset:.1,transform:'perspective(1500px) translateY(28px) rotateY(0deg)',width:`${width}px`,easing:'cubic-bezier(.2,.75,.25,1)'},
+   {offset:.3,transform:rotate(0),width:`${width}px`},
+   {offset:.43,transform:rotate(0),width:`${width}px`,easing:'cubic-bezier(.4,0,.2,1)'},
+   {offset:.92,transform:rotate(finalAngle),width:`${finalWidth}px`},
+   {offset:1,transform:rotate(finalAngle),width:`${finalWidth}px`}
+  ],{duration,easing:'linear',fill:'both'});animations.push(animation);
+  // Opacity belongs to the faces: fading the 3D parent flattens it in Chromium.
+  for(const face of thought.children)animations.push(face.animate([
+   {offset:0,opacity:0},{offset:.1,opacity:0},{offset:.3,opacity:1},{offset:1,opacity:1}
+  ],{duration,easing:'linear',fill:'both'}));
+  // Keep only the moving reverse visible. Swap to the identical sidebar at rest.
+  if(!mobile)animations.push(note.animate([{opacity:0},{opacity:0}],{duration,fill:'both'}));
+  // Reveal the real pages behind the cover, replacing its reverse at rest.
+  animations.push(surface.animate([
+   {offset:0,opacity:0,clipPath:`inset(0 0 0 ${spine}px round 18px)`},
+   {offset:.35,opacity:0,clipPath:`inset(0 0 0 ${spine}px round 18px)`},
+   {offset:.44,opacity:1,clipPath:`inset(0 0 0 ${spine}px round 18px)`,easing:'cubic-bezier(.4,0,.2,1)'},
+   {offset:.9,opacity:1,clipPath:'inset(0 0 0 0px round 18px)'},
+   {offset:1,opacity:1,clipPath:'inset(0 0 0 0px round 18px)'}
   ],{duration,easing:'linear',fill:'both'}));
   animations.push(paper.animate([
-   {offset:0,transform:'translateX(20px)',opacity:0},
-   {offset:.53,transform:'translateX(20px)',opacity:0},
-   {offset:.8,transform:'translateX(0)',opacity:1},
-   {offset:1,transform:'translateX(0)',opacity:1}
+   {offset:0,opacity:0},{offset:.48,opacity:0},{offset:.86,opacity:1},{offset:1,opacity:1}
   ],{duration,easing:'linear',fill:'both'}));
-  const current=++generation,animation=surface.animate([
-   {offset:0,opacity:0},
-   {offset:.46,opacity:0},
-   {offset:.54,opacity:1},
-   {offset:1,opacity:1}
-  ],{duration,easing:'linear',fill:'both'});animations.push(animation);
   animation.finished.then(()=>{if(current===generation)settle();}).catch(()=>{});
  }
  function close(){
   if(phase==='closed'||phase==='closing')return;
-  const style=getComputedStyle(surface),start={transform:style.transform,opacity:style.opacity,filter:style.filter,clipPath:style.clipPath,borderRadius:style.borderRadius};
+  // Escape during the introduction closes immediately, without a half-built card.
+  if(phase==='opening'){phase='closing';settle();return;}
   stop();phase='closing';dialog.dataset.motion='closing';
   if(!motionAllowed()){settle();return;}
-  const geometry=frames(),duration=420;
-  waves(geometry,duration,true);surface.style.pointerEvents='none';
+  surface.style.pointerEvents='none';surface.inert=true;
   const current=++generation,animation=surface.animate([
-   {...start,offset:0},
-   {...geometry.steps[2],offset:.5},
-   {...geometry.steps[0],offset:1}
-  ],{duration,easing:'cubic-bezier(.35,0,.55,1)',fill:'both'});animations.push(animation);
+   {transform:'translateY(0)',opacity:1},{transform:'translateY(18px)',opacity:0}
+  ],{duration:260,easing:'cubic-bezier(.4,0,1,1)',fill:'both'});animations.push(animation);
   animation.finished.then(()=>{if(current===generation)settle();}).catch(()=>{});
  }
  dialog.addEventListener('cancel',event=>{event.preventDefault();close();},{signal:abort.signal});
- dialog.addEventListener('close',()=>{stop();phase='closed';surface.style.pointerEvents='';dialog.dataset.motion='closed';launcher.setAttribute('aria-expanded','false');launcher.focus({preventScroll:true});},{signal:abort.signal});
+ dialog.addEventListener('close',()=>{stop();phase='closed';surface.style.pointerEvents='';surface.inert=false;dialog.dataset.motion='closed';launcher.setAttribute('aria-expanded','false');launcher.focus({preventScroll:true});},{signal:abort.signal});
  const preferenceChanged=()=>{if((phase==='opening'||phase==='closing')&&!motionAllowed())settle();};
  reduce.addEventListener('change',preferenceChanged,{signal:abort.signal});
  const observer=new MutationObserver(preferenceChanged);observer.observe(document.body,{attributes:true,attributeFilter:['class']});

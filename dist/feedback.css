@@ -14,7 +14,7 @@
 .ifb-energy[hidden]{display:none}
 .ifb-energy-path{stroke-dasharray:.25 1;stroke-linecap:round}
 .ifb-energy-trail{stroke-linecap:round;opacity:0}
-.ifb-dialog::backdrop{background:#233c5c45;backdrop-filter:blur(3px)}
+.ifb-dialog::backdrop{background:#233c5c0d}
 .ifb-book{display:grid;grid-template-columns:225px minmax(0,1fr);position:relative;isolation:isolate;perspective:1600px}
 .ifb-note{padding:31px 25px;display:flex;flex-direction:column;background:linear-gradient(95deg,#eff7f1 70%,#e1eee5);border-right:1px solid #d2e3d9}
 .ifb-brand{display:flex;gap:4px;align-items:center;font:650 24px 'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-1px;color:#254875}
@@ -99,19 +99,28 @@ body:has(#innerly-feedback-widget){padding-bottom:76px}
 @keyframes ifb-idle-flow{0%{stroke-dashoffset:36;opacity:.22}50%{opacity:.6}100%{stroke-dashoffset:0;opacity:.22}}
 .ifb-launcher:hover .ifb-idle-waves{stroke:#618fb6}
 .ifb-paper{transform-origin:left center;backface-visibility:hidden}
-.ifb-thought-cover{position:absolute;z-index:3;overflow:hidden;border-radius:18px;box-shadow:0 14px 35px #284e5230;transform-origin:center;pointer-events:none;backface-visibility:hidden;background:#e2f0e8}
-.ifb-thought-cover .ifb-note{height:100%;display:flex;background:linear-gradient(120deg,#edf7ef,#d9eade);border:1px solid #c5dace;border-radius:inherit}
-.ifb-thought-cover .ifb-note-title{color:#35604d}
-.ifb-thought-cover .ifb-note-title em{color:#69977e}
-@media(max-width:600px){.ifb-thought-cover .ifb-note{padding:23px}.ifb-thought-cover .ifb-note-title{font-size:23px;margin-top:20px}.ifb-thought-cover .ifb-orbits{height:125px;flex-shrink:0;margin:16px 0}.ifb-thought-cover .ifb-note>p:not(.ifb-note-title){font-size:13px;margin-bottom:16px}}
 @media(prefers-reduced-motion:reduce){.ifb-idle-waves{animation:none;opacity:.3}}
 
-/* The complete mint cover gathers into the sidebar as the form is revealed. */
-.ifb-thought-cover{background:linear-gradient(115deg,#eaf5ed,#dceee2);transform-origin:center}
-.ifb-thought-cover .ifb-note{width:225px;max-width:none;height:100%;margin:0 auto;background:transparent;border:0;border-radius:0;padding:31px 25px}
-.ifb-thought-cover .ifb-note-title{color:#254875}
-.ifb-thought-cover .ifb-note-title em{color:#6d8baf}
+/* A two-sided thought cover opens into the left-hand page. */
+.ifb-thought-cover{position:absolute;z-index:3;transform-origin:left center;transform-style:preserve-3d;pointer-events:none}
+.ifb-cover-front,.ifb-cover-back{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:0 18px 18px 0}
+.ifb-cover-front{background:linear-gradient(145deg,#e4f1ec,#b7d9d0);border:1px solid #a9cbbf;box-shadow:inset 7px 0 12px #416a6b14}
+.ifb-cover-front:after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,#ffffff40 49%,transparent 68%);pointer-events:none}
+.ifb-cover-front .ifb-note{width:100%;height:100%;display:flex;background:transparent;border:0;padding:30px;position:relative}
+.ifb-cover-front .ifb-brand{font-size:23px}
+.ifb-cover-front .ifb-note-title{order:2;font-size:28px;line-height:1.4;margin:14px 0 12px;max-width:320px}
+.ifb-cover-front .ifb-note-title em{color:#597e82}
+.ifb-cover-front .ifb-orbits{order:1;flex:1;min-height:100px;max-height:240px;width:220px;margin:auto;align-self:center}
+.ifb-cover-front .ifb-orbits i{inset:20% 25%;border-color:#719cbd}
+.ifb-cover-front .ifb-orbits i:nth-child(2){inset:33% 9%;border-color:#6e9e8f}
+.ifb-cover-front .ifb-orbits i:nth-child(3){inset:38% 2%;border-color:#b8a36e}
+.ifb-cover-front .ifb-orbits b{display:none}
+.ifb-cover-mind{position:absolute;left:50%;top:50%;width:78px;height:78px;transform:translate(-50%,-50%);padding:8px;background:#f5faf5c9;border:1px solid #ffffffa6;border-radius:24px;box-shadow:0 9px 30px #36596314}
+.ifb-cover-front .ifb-note>p:not(.ifb-note-title){order:3;margin:0 0 24px;font-size:14px}
+.ifb-cover-front .ifb-note-foot{order:4;margin:0}
+.ifb-cover-back{transform:rotateY(180deg);border-radius:18px 0 0 18px;background:linear-gradient(95deg,#eff7f1 70%,#e1eee5)}
+.ifb-cover-back .ifb-note{display:flex;width:225px;height:100%;margin-left:auto}
 #innerly-feedback-widget .ifb-dialog>.ifb-close{z-index:4}
 .ifb-dialog[data-motion=opening]>.ifb-close,.ifb-dialog[data-motion=closing]>.ifb-close{opacity:0;pointer-events:none}
 #innerly-feedback-widget .ifb-dialog:focus{outline:none}
-@media(max-width:600px){.ifb-thought-cover .ifb-note{width:250px;justify-content:center;padding:25px}.ifb-thought-cover .ifb-note-foot{margin-top:18px}.ifb-thought-cover .ifb-note-title{margin-top:22px}.ifb-thought-cover .ifb-orbits{height:145px;margin:20px 0}}
+@media(max-width:600px){.ifb-cover-front{border-radius:16px}.ifb-cover-front .ifb-note{padding:26px}.ifb-cover-front .ifb-note-title{font-size:26px}.ifb-cover-front .ifb-orbits{max-height:260px}}
