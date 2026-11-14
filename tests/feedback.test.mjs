@@ -14,7 +14,7 @@ test('feedback email contains only the explicitly supplied message and optional 
 test('every public html entry includes the shared feedback widget exactly once',()=>{
  for(const file of readdirSync(new URL('../dist/',import.meta.url)).filter(f=>f.endsWith('.html'))){
   const html=readFileSync(new URL(`../dist/${file}`,import.meta.url),'utf8');
-  assert.equal((html.match(/src="feedback.mjs\?v=1"/g)||[]).length,1,file);
+  assert.equal((html.match(/src="feedback.mjs\?v=2"/g)||[]).length,1,file);
  }
 });
 test('feedback opens a clearly labelled email draft in both supported interface languages',()=>{

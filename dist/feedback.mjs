@@ -27,15 +27,16 @@ export function feedbackMarkup(l='en'){
 }
 export function mountFeedback(){
  if(document.querySelector('#innerly-feedback'))return;
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./feedback.css?v=1',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./feedback.css?v=2',import.meta.url).href;document.head.append(css);
  const root=document.createElement('div');root.id='innerly-feedback-widget';document.body.append(root);
- let locale,launcher,dialog,form;
+ let locale,launcher,dialog,form,hasOpened=false;
+ try{hasOpened=sessionStorage.getItem('innerly.feedback.opened.v1')==='1';}catch{}
  function render(){
   const l=document.documentElement.lang==='hi'?'hi':'en';if(locale===l)return;
   const previous=form?{kind:form.elements['feedback-kind'].value,message:form.elements.message.value,name:form.elements.name.value}:null;
   locale=l;root.innerHTML=feedbackMarkup(l);launcher=root.querySelector('.ifb-launcher');dialog=root.querySelector('dialog');form=root.querySelector('form');
   if(previous){form.elements['feedback-kind'].value=previous.kind;form.elements.message.value=previous.message;form.elements.name.value=previous.name;}
-  launcher.onclick=()=>{render();dialog.showModal();requestAnimationFrame(()=>requestAnimationFrame(()=>{if(dialog.open)dialog.classList.add('is-open');}));};
+  launcher.onclick=()=>{render();dialog.classList.toggle('ifb-first-open',!hasOpened);dialog.showModal();hasOpened=true;try{sessionStorage.setItem('innerly.feedback.opened.v1','1');}catch{}requestAnimationFrame(()=>requestAnimationFrame(()=>{if(dialog.open)dialog.classList.add('is-open');}));};
   root.querySelector('.ifb-close').onclick=()=>dialog.close();
   dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
   dialog.addEventListener('close',()=>{dialog.classList.remove('is-open');launcher.focus({preventScroll:true});});
