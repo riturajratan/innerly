@@ -4,7 +4,7 @@ import {simulatedComparison} from './report-benchmark.mjs?v=1';
 
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const say=(l,en,hi)=>l==='hi'?hi:en;
-const colors={support:'#548f84',focus:'#d89b46',varies:'#9a8ec8'};
+const colors={support:'#6b9e83',focus:'#cb827d',varies:'#bfa24f'};
 const frequencyColors=['#a5b7d8','#829dcc','#6689bf','#4c70ac','#31568f'];
 export const questionViews=['answers','strengths','growth','frequency','history','world'];
 const names={en:['All 36 answers','Your strengths','Growth opportunities','Answer frequency','Your changes','World comparison · mock'],hi:['सभी 36 जवाब','आपकी मजबूतियाँ','बेहतरी के अवसर','जवाबों की आवृत्ति','आपके बदलाव','दुनिया से तुलना · mock']};
