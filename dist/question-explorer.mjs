@@ -40,7 +40,7 @@ export function comparisonLineChart(index,value,l='en'){
   <circle class="qe-position-dot" cx="${selected.x}" cy="${selected.y}" r="5.5"/>
  </svg><span class="qe-position-label" aria-hidden="true" style="left:clamp(84px,${selected.x/392*100}%,calc(100% - 54px));top:calc(${selected.y/180*100}% - 37px)">${say(l,'YOU ARE HERE','आप यहाँ हैं')}</span>
  <span class="qe-curve-y" aria-hidden="true">${[0,20,40].map(count=>`<span style="top:${y(count)/180*100}%">${count}</span>`).join('')}</span></span>
- <span class="qe-curve-axis" aria-hidden="true">${labels.map((label,i)=>`<span class="${i===value?'is-selected':''}">${esc(label).replace('Sometimes','Some<wbr>times')}</span>`).join('')}</span></span>`;
+ <span class="qe-curve-axis" aria-hidden="true">${labels.map((label,i)=>`<span class="${i===value?'is-selected':''}">${esc(label)}</span>`).join('')}</span></span>`;
 }
 function questionLineCard(item,l,world=false){
  const data=simulatedComparison(item.index,item.value);
