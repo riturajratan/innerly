@@ -1,5 +1,5 @@
 import {validWorkbookReport,completeWorkbook,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=mh-14';
-import {consolidatedSummaryMarkup,reportSnapshot,reportAreas,reportCategories,areaGraph,icon,escapeHTML as esc} from './report-concept-view.mjs?v=10';
+import {consolidatedSummaryMarkup,reportSnapshot,reportAreas,reportCategories,areaGraph,icon,escapeHTML as esc} from './report-concept-view.mjs?v=11';
 import {questionExplorerMarkup,benchmarkReading,responseRuler} from './question-explorer.mjs?v=7';
 
 const say=(l,en,hi)=>l==='hi'?hi:en;

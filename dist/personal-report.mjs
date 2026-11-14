@@ -1,5 +1,5 @@
-import {reportSnapshot} from './report-concept-view.mjs?v=10';
-import {personalQuestionMarkup} from './personal-report-view.mjs?v=10';
+import {reportSnapshot} from './report-concept-view.mjs?v=11';
+import {personalQuestionMarkup} from './personal-report-view.mjs?v=11';
 import {mountQuestionExplorer} from './question-explorer.mjs?v=7';
 
 export function mountPersonalReport(root,report,history=[],language='en'){
