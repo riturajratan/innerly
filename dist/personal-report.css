@@ -100,3 +100,42 @@ body.mh-personal-report{background:#f8fafc;color:#1b355b}.mh-personal-report #ap
 .mh-large .qe-curve-axis{font-size:15px}
 @media(max-width:480px){.qe-row,.qe-world-row{padding-left:12px;padding-right:12px}.qe-row-head{gap:6px}.qe-row-head>span{font-size:11px}.qe-position-reading{gap:8px}.qe-position-reading>span>b{font-size:17px}.qe-position-reading>.qe-position-percent>b{font-size:29px}.qe-line-card-foot{margin-left:-12px;margin-right:-12px}.qe-position-reading>.qe-position-percent{max-width:90px}.qe-frequency-chart{padding:12px 6px}.qe-frequency-chart>button{padding:10px 5px}}
 @media print{.qe-curve-axis{font-size:9px}.qe-position-label{font-size:8px;width:78px;min-height:20px}.qe-position-reading>span>b{font-size:12px}.qe-position-reading small,.qe-line-card-foot{font-size:9px}.qe-row-head>span,.qe-curve-context,.qe-curve-context>b{font-size:8px}.qe-frequency-chart{overflow:visible}.qe-history-scroll{overflow:visible}.qe-history-chart{min-width:0}}
+
+/* Keep the mobile report readable without squeezing text into desktop cards. */
+.qe-frequency-track>i{height:var(--frequency-share)}
+.report-main,.question-explorer,.qe-panel-heading,.qe-position-reading>span{min-width:0}
+.qe-question-select select{font-size:16px}
+.qe-history-records>span{font-size:13px}.qe-history-records b{font-size:14px}
+.qe-world-note p,.qe-benchmark-detail>p{font-size:14px}
+@media(max-width:700px){
+ .report-main{width:100%;padding-inline:16px}
+ .question-explorer{margin-top:32px;scroll-margin-top:12px}
+ .question-explorer .section-heading{gap:12px}.question-explorer .section-heading h2{font-size:28px}
+ .qe-tabs{gap:8px;padding:8px;border-radius:15px 15px 0 0}
+ .qe-tabs>button{display:grid;grid-template-columns:25px minmax(0,1fr);align-items:center;gap:8px;min-height:80px;padding:11px 10px;font-size:15px;line-height:1.4}
+ .qe-tab-top{display:contents}.qe-tab-icon{width:25px;height:29px;border-radius:7px}.qe-tab-icon svg{width:18px;height:18px}.qe-tab-number{display:none}.qe-tab-label{line-height:1.4}
+ .question-explorer [role=tabpanel]{padding:20px 10px 10px}
+ .qe-panel-heading{padding-inline:4px}.qe-panel-heading>h3{font-size:23px}.qe-panel-heading>p{font-size:15px;line-height:1.75}
+ .qe-rows,.qe-world-grid{grid-template-columns:minmax(0,1fr);gap:16px}
+ .qe-row,.qe-world-row{padding:18px 14px 0}.qe-row>.qe-question-title,.qe-world-row>.qe-question-title{font-size:18px;line-height:1.5;min-height:0;margin:14px 0 24px}
+ .qe-row-head>span{font-size:12px}.qe-curve-context{font-size:13px;gap:5px}.qe-curve-context>b{font-size:11px}
+ .qe-curve-axis{font-size:14px;line-height:1.5;gap:2px;margin-bottom:20px}.qe-curve-y{font-size:13px}.qe-position-label{font-size:12px}
+ .qe-position-reading small,.qe-position-percent>small{font-size:12px;letter-spacing:0}.qe-position-reading>span>b{font-size:18px}.qe-position-reading>.qe-position-percent{max-width:104px}
+ .qe-line-card-foot{font-size:13px;min-height:48px;margin-inline:-14px;padding-inline:14px}
+ .qe-frequency-chart{display:flex;flex-direction:column;gap:8px;padding:8px;overflow:visible}
+ .qe-frequency-chart>button{display:grid;grid-template-columns:minmax(75px,.9fr) minmax(0,1fr) 50px;grid-template-rows:auto auto;align-items:center;gap:4px 8px;padding:12px 8px;min-height:72px;text-align:left}
+ .qe-frequency-chart>button>b{grid-column:1;grid-row:1/3;text-align:left;font-size:14px;font-weight:600;overflow-wrap:anywhere}
+ .qe-frequency-track{grid-column:2;grid-row:1;width:100%;max-width:none;height:16px;display:block;border-radius:8px}
+ .qe-frequency-track>i{width:var(--frequency-share);height:100%;min-width:0;transform-origin:left}
+ .qe-frequency-chart>button>strong{grid-column:3;grid-row:1/3;font-size:23px;text-align:right}.qe-frequency-chart>button>strong small{display:block;font-size:12px}
+ .qe-frequency-chart>button>span:last-child{grid-column:2;grid-row:2;font-size:12px;text-align:left;line-height:1.5}
+ .qe-explainer,.qe-empty-note,.qe-history-statement{font-size:14px;line-height:1.75}
+ .qe-world-note{padding:16px}.qe-world-note p{font-size:14px;line-height:1.75}.qe-mock-badge{font-size:11px}
+ .personal-benchmark summary{font-size:14px;line-height:1.6}
+ .next-section>.section-heading{flex-wrap:wrap}.next-section .plan-counter{margin:0}.plan-copy>p{font-size:15px}.plan-benefit{font-size:14px}.try-check b{font-size:11px}
+ .intro-bottom>p{font-size:15px;line-height:1.7}.intro-meta>span:last-child{font-size:12px}.sample-badge{font-size:10px}
+}
+@media(max-width:360px){.qe-tabs>button{grid-template-columns:minmax(0,1fr);min-height:68px}.qe-tab-top{display:none}.qe-row,.qe-world-row{padding-inline:12px}.qe-line-card-foot{margin-inline:-12px;padding-inline:12px}.qe-curve-axis{font-size:13px}.question-explorer [role=tabpanel]{padding-inline:8px}}
+
+@media(max-width:700px){.response-chart-scroll{overflow:visible}.response-chart-scroll .response-chart{min-width:0}.response-chart .chart-grid text,.response-chart .chart-mark text{font-size:17px}}
+@media(max-width:700px){.qe-curve-axis>span:not(:last-child){white-space:nowrap;overflow-wrap:normal;word-break:normal}.qe-curve-axis>span:last-child{word-break:normal;overflow-wrap:normal}}

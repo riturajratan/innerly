@@ -12,7 +12,7 @@ const html=source
  .replace(/<meta property="og:title" content="[^"]*">/,'<meta property="og:title" content="Innerly — Interactive sample report">')
  .replace(/<meta property="og:url" content="[^"]*">/,'<meta property="og:url" content="https://www.riturajratan.com/innerly/report-demo.html">')
  .replace(/<link rel="preload" as="image"[^>]*>/,'')
- .replace('<button id="mh-history">','<button id="mh-history" hidden>')
+ .replaceAll('Start My Test','Start a new test').replaceAll('data-action="begin"','data-action="new-test"')
  .replace(/<main id="app"[^>]*>.*?<\/main>/s,`<main id="app" tabindex="-1">${sampleReportMarkup({...sample,language:'en'})}</main>`)
  .replace(/<script type="application\/ld\+json">.*?<\/script>/,'');
 if(!html.includes('data-report-demo="true"'))throw new Error('Sample report page could not be configured.');

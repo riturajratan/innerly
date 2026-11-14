@@ -1,5 +1,5 @@
-import {mountQuestionExplorer,benchmarkReading} from './question-explorer.mjs?v=5';
-import {sampleProfiles,conceptSampleReport,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable,focusItems} from './report-concept-view.mjs?v=6';
+import {mountQuestionExplorer,benchmarkReading} from './question-explorer.mjs?v=6';
+import {consolidatedSummaryMarkup,sampleProfiles,conceptSampleReport,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable} from './report-concept-view.mjs?v=8';
 import {workbookQuestions} from './innerly-v1-model.mjs?v=mh-14';
 
 let answers=[...sampleProfiles.everyday.answers],snapshot=reportSnapshot(answers),selected=0,filter='support',lastTrigger=null;
@@ -7,26 +7,15 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],dia
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let tried=new Set(),dialogArea=-1;
 const refreshQuestionExplorer=mountQuestionExplorer(document,{getSnapshot:()=>snapshot,getReport:()=>conceptSampleReport(answers),language:'en',signal:new AbortController().signal});
-function updateFilters(){
- $$('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===filter)));
- $('#focus-title').textContent=categories[filter].name;
- $('#focus-items').innerHTML=focusItems(snapshot,filter);
- $('#focus-items').dataset.category=filter;
-}
 function updateReport(changedQuestion=null){
  snapshot=reportSnapshot(answers);
- let offset=0;
- for(const [key,category] of Object.entries(categories)){
-  const count=snapshot.counts[key],length=Math.max(0,count/36*100-1.7),segment=$(`[data-donut="${key}"]`);
-  segment.setAttribute('stroke-dasharray',`${length} ${100-length}`);segment.setAttribute('stroke-dashoffset',-offset);segment.style.opacity=count?'1':'0';offset+=count/36*100;
-  $(`[data-count="${key}"]`).textContent=count;
- }
- $('.donut-chart').setAttribute('aria-label',`${snapshot.counts.support} supportive responses, ${snapshot.counts.focus} growth opportunities, ${snapshot.counts.varies} sometimes responses`);
+ $('[data-consolidated-summary]').innerHTML=consolidatedSummaryMarkup(snapshot,'en',{sample:true});
  for(const [i,area] of snapshot.areas.entries()){
   for(const [key,category] of Object.entries(categories)){
    const count=area.items.filter(item=>item.category===key).length,segment=$(`[data-stack="${i}-${key}"]`);
    segment.style.width=`${count/6*100}%`;segment.hidden=count===0;segment.title=`${count} ${category.name}`;segment.querySelector('b').textContent=count||'';
   }
+
   $$(`[data-line="${i}"]`).forEach(line=>line.setAttribute('d',graphPath(area)));
   $(`[data-insights="${i}"]`).innerHTML=insightMarkup(area);
   $(`#area-${i} .area-open`).dataset.question=area.next.index;
@@ -42,7 +31,6 @@ function updateReport(changedQuestion=null){
    }
   }
  }
- updateFilters();
  $('#plan-list').innerHTML=planMarkup(snapshot);
  $$('[data-tried]').forEach(input=>{input.checked=tried.has(input.dataset.tried);});
  updateTried();$('#response-table').innerHTML=responseTable(snapshot);refreshQuestionExplorer();
@@ -78,7 +66,7 @@ document.addEventListener('click',e=>{
  const trigger=e.target.closest('[data-question], [data-filter], button[data-chart-mode], [data-area-jump], [data-answer], [data-question-prev], [data-question-next], [data-print], .close-dialog');
  if(!trigger)return;
  if(trigger.hasAttribute('data-question')){showQuestion(Number(trigger.dataset.question),trigger);return;}
- if(trigger.hasAttribute('data-filter')){filter=trigger.dataset.filter;updateFilters();$('#report-status').textContent=`Showing ${categories[filter].name}. ${snapshot.counts[filter]} responses.`;return;}
+ if(trigger.hasAttribute('data-filter')){filter=trigger.dataset.filter;const view={support:'strengths',focus:'growth',varies:'answers'}[filter],tab=$(`[data-question-view="${view}"]`);tab.click();$('#question-insights').scrollIntoView({behavior:reduced.matches?'instant':'smooth',block:'start'});tab.focus({preventScroll:true});return;}
  if(trigger.hasAttribute('data-chart-mode')){document.body.dataset.chartMode=trigger.dataset.chartMode;$$('[data-chart-mode]').filter(el=>el.tagName==='BUTTON').forEach(b=>b.setAttribute('aria-pressed',String(b===trigger)));return;}
  if(trigger.hasAttribute('data-area-jump')){jumpToArea(Number(trigger.dataset.areaJump));return;}
  if(trigger.hasAttribute('data-answer')){

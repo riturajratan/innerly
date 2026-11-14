@@ -1,0 +1,31 @@
+.mh-saved-list article{align-items:center;justify-content:space-between;padding:22px;border-radius:16px;background:#fff;border-color:#dce5f0}
+.mh-saved-copy{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
+.mh-saved-copy>span{font-size:14px;color:#60758e}.mh-saved-copy>strong{font-size:19px;color:#254875;line-height:1.5}.mh-saved-copy>small{font-size:14px;color:#60758e}
+.mh-saved-actions{display:flex;align-items:center;gap:10px;flex:none}
+.mh-saved-actions .mh-saved-open{display:inline-flex;justify-content:center;align-items:center;gap:12px;min-height:46px;padding:10px 16px;border:1px solid #254875;border-radius:10px;background:#254875;color:#fff;font:600 15px/1.5 'DM Sans',sans-serif;text-align:center}
+.report-delete-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 14px;border:1px solid #e1c8c5;border-radius:10px;background:#fff8f6;color:#9b4e46;font:500 14px/1.5 'DM Sans',sans-serif;cursor:pointer}
+.report-delete-button:hover{background:#fcecea;border-color:#c68d85}
+.personal-report-actions{align-items:flex-start;flex-wrap:wrap;gap:18px}
+.personal-report-actions>div:first-child{display:flex;flex-wrap:wrap;gap:10px;flex-basis:100%;font-size:14px;line-height:1.5}
+.personal-report-actions>div:first-child strong{font-size:15px}
+.personal-action-buttons{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.personal-action-buttons :is(.plain-button,.primary-button){min-height:44px;font:600 14px/1.5 'DM Sans',sans-serif;padding:10px 14px;border:1px solid #d6e1ed;border-radius:10px;white-space:normal;text-align:center;justify-content:center}
+.personal-action-buttons .primary-button{border-color:#edc75e}
+.personal-action-buttons .plain-button>span{display:inline}
+.sample-toolbar{flex-wrap:wrap;gap:14px}.sample-toolbar>.plain-button{font-size:14px;min-height:44px;gap:8px}.sample-toolbar .profile-label{max-width:none}.sample-toolbar .profile-label select{font-size:16px;min-height:44px}
+@media(max-width:700px){
+ .mh-saved-list article{flex-direction:column;align-items:stretch;gap:18px;padding:20px}
+ .mh-saved-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .mh-saved-actions .mh-saved-open{font-size:15px;flex-direction:row}
+ .personal-action-buttons{display:grid;grid-template-columns:1fr 1fr;width:100%;gap:9px}
+ .personal-action-buttons :is(.plain-button,.primary-button,.report-delete-button){min-height:48px;font-size:14px;padding:10px 9px}
+ .personal-report-actions{padding:16px}.personal-report-actions>div:first-child>span:last-child{display:block!important;font-size:13px}
+ .sample-toolbar>div:first-child{flex-basis:100%}.sample-toolbar .profile-label{flex:1}.sample-toolbar .profile-label select{width:100%}
+}
+@media print{.personal-report-actions,.mh-saved-actions{display:none!important}}
+
+.mh-saved-actions :is(.mh-saved-open,.report-delete-button){min-height:46px;gap:9px;white-space:nowrap;line-height:1.5;cursor:pointer}
+.mh-saved-actions button svg,.report-delete-button svg{width:19px;height:19px;flex:0 0 19px;display:block}
+.mh-saved-actions button:focus-visible,.report-delete-button:focus-visible{outline:3px solid #7497bf;outline-offset:3px}
+@media(max-width:360px){.mh-saved-list article{padding:16px}.mh-saved-actions{gap:8px}.mh-saved-actions :is(.mh-saved-open,.report-delete-button){padding:10px 8px;font-size:13px;gap:7px}}
+@media(max-width:700px){.mh-saved-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.mh-saved-actions button{min-width:0;width:100%;box-sizing:border-box}}

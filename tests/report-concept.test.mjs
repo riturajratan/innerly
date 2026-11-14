@@ -44,3 +44,21 @@ test('the direct page includes every question, accessible graph controls and exp
  assert.match(html,/id="dialog-graph"/);assert.match(html,/id="response-table"/);
  assert.doesNotMatch(html,/NaN|undefined|data-action="save"/);
 });
+
+test('consolidated highlights follow actual answer categories and handle empty groups',async()=>{
+ const {consolidatedHighlights,consolidatedSummaryMarkup}=await import('../dist/report-concept-view.mjs');
+ const mixed=reportSnapshot(sampleProfiles.everyday.answers),before=structuredClone(mixed),highlights=consolidatedHighlights(mixed);
+ assert.equal(highlights.strength.category,'support');assert.equal(highlights.attention.category,'focus');
+ const edited=[...sampleProfiles.everyday.answers];edited[highlights.strength.index]=0;
+ assert.notEqual(consolidatedHighlights(reportSnapshot(edited)).strength.index,highlights.strength.index);
+ const sometimes=reportSnapshot(Array(36).fill(2));
+ assert.equal(consolidatedHighlights(sometimes).strength,null);
+ assert.equal(consolidatedHighlights(sometimes).attention.category,'varies');
+ assert.match(consolidatedSummaryMarkup(sometimes),/does not mean you have no strengths/);
+ // Build an all-support profile from the model's own response interpretation.
+ const allSupport=reportSnapshot(mixed.items.map(item=>reportSnapshot(Array(36).fill(0)).items[item.index].category==='support'?0:4));
+ assert.equal(allSupport.counts.support,36);assert.equal(consolidatedHighlights(allSupport).attention,null);
+ assert.match(consolidatedSummaryMarkup(allSupport),/No growth signals in this check-in/);
+ for(const l of ['en','hi'])assert.doesNotMatch(consolidatedSummaryMarkup(reportSnapshot(sampleProfiles.everyday.answers,l),l),/undefined|NaN|Infinity/);
+ assert.deepEqual(mixed,before);
+});
