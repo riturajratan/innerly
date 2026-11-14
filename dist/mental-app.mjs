@@ -2,9 +2,10 @@ import {mountThoughtWaves} from './planning.mjs?v=14';
 import {previewResponseDetail} from './response-graphs.mjs?v=report-3';
 import {sampleReportMarkup} from './sample-report-view.mjs?v=report-summary-1';
 import {sampleReportData} from './sample-report.mjs?v=report-3';
-import {personalReportMarkup,usesPersonalReport} from './personal-report-view.mjs?v=3';
-import {mountPersonalReport} from './personal-report.mjs?v=3';
-import {INNERLY_V1_VERSION,INNERLY_V1_STORAGE,readWorkbookReports,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=mh-14';
+import {personalReportMarkup,usesPersonalReport} from './personal-report-view.mjs?v=4';
+import {mountPersonalReport} from './personal-report.mjs?v=4';
+import {INNERLY_V1_VERSION,INNERLY_V1_STORAGE,readWorkbookReports,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=storage-1';
+import {saveLocalReport,removeLocalReport} from './report-storage.mjs?v=1';
 import {workbookDimensionReading} from './innerly-v1-views.mjs?v=report-summary-1';
 import {workbookQuestionReading,workbookTimelineDetail,workbookFocusStatus} from './innerly-v1-charts.mjs?v=report-4';
 import {dimensionProfile} from './innerly-v1-insights.mjs?v=report-3';
@@ -13,10 +14,10 @@ import {topicReading} from './reflection60-views.mjs?v=mh-14';
 import {LANGUAGE_STORAGE,resolveQuestionLanguage,languageDirection,languageName,displayLanguage,questionUI,wellbeingLocales,coverageNotice,responseState,growthCaption} from './mental-language.mjs?v=mh-14';
 import {DRAFT_STORAGE,readDraft,makeDraft,resumeQuestion,nextContinuousQuestion} from './checkin-draft.mjs?v=mh-14';
 import {feelingReading} from './feeling-explorer.mjs?v=mh-14';
-import {bindHomeInteractions} from './innerly-home.mjs?v=home-preview-6';
+import {bindHomeInteractions} from './innerly-home.mjs?v=home-preview-7';
 import {MENTAL_STORAGE,readSavedCheckins} from './mental-model.mjs?v=mh-14';
 import {QUESTION_TOTAL,completedCount,completeFlow as isComplete,validQuestionResponse as validResponse,makeFlowReport as makeCheckin,nextFlowQuestion as nextUnanswered,growthState} from './checkin-flow.mjs?v=mh-14';
-import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=home-preview-6';
+import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=home-preview-7';
 import {clerkPublishableKey} from './auth-config.mjs?v=auth-1';
 import {createClerkAuth} from './clerk-auth.mjs?v=auth-1';
 import {rememberAuthReturn,takeAuthReturn,AUTH_RETURN_STORAGE} from './auth-continuation.mjs?v=auth-1';
@@ -96,6 +97,7 @@ function graphTooltip(event){
 }
 function questionBankForTooltip(index){const l=displayLanguage(language);return {text:workbookQuestions[index].texts[l],choices:workbookChoices(l)};}
 function reportStorage(r){return r.version===INNERLY_V1_VERSION?INNERLY_V1_STORAGE:r.version===REFLECTION60_VERSION?REFLECTION60_STORAGE:MENTAL_STORAGE;}
+function updateSavedReports(key,rows){const reader=key===INNERLY_V1_STORAGE?readWorkbookReports:key===REFLECTION60_STORAGE?readReflectionReports:readSavedCheckins;saved=[...reader(JSON.stringify(rows)),...saved.filter(r=>reportStorage(r)!==key)];}
 function showDialog(markup){lastFocus=document.activeElement;dialog.innerHTML=`<button class="mh-dialog-close" aria-label="${qt('Close dialog','Close','बंद करें')}" data-close>×</button>${markup}`;dialog.showModal();}
 function closeDialog(){dialog.close();lastFocus?.focus?.();}
 function startFresh(){answerLanguage=language;answers=Array(QUESTION_TOTAL).fill(null);report=null;draftEnabled=false;draftSynced=false;view='quiz';render();}
@@ -111,9 +113,11 @@ function finish(){
  cancelGuide();
  if(!isComplete(answers)){const i=nextUnanswered(answers);if(view!=='quiz'){view='quiz';render();}app.querySelector('#mh-form-message').textContent=qt('A few answers are still missing.','A few answers are still missing. Let us finish those.','कुछ जवाब बाकी हैं। उन्हें पूरा करें।');goToQuestion(i);return;}
  report=makeCheckin(answers,{id:crypto.randomUUID(),createdAt:new Date().toISOString(),language});let removed=true;
- if(draftEnabled){try{localStorage.removeItem(DRAFT_STORAGE);}catch{removed=false;}}
+ const stored=storeCurrentReport();
+ if(stored&&draftEnabled){try{localStorage.removeItem(DRAFT_STORAGE);}catch{removed=false;}}
  draftEnabled=false;draftSynced=false;previewSelection={};reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};view='report';render();
- if(!removed)app.querySelector('#mh-report-status').textContent=say(language,'Your report is ready, but this browser could not remove the saved draft.','Report तैयार है, लेकिन इस browser में सेव draft हट नहीं सका।');
+ if(!stored)app.querySelector('#mh-report-status').textContent=say(language,'Your report is ready, but it could not be saved in this browser. Keep this page open and retry Save or use Print / PDF. Existing reports have not been removed.','Report तैयार है, लेकिन इस browser में सेव नहीं हो सकी। पेज खुला रखें और Save फिर आज़माएँ या Print / PDF इस्तेमाल करें। पुरानी reports हटाई नहीं गई हैं।');
+ else if(!removed)app.querySelector('#mh-report-status').textContent=say(language,'Your report is saved. The earlier draft also remains in this browser.','आपकी report सेव है। पिछला draft भी इस browser में मौजूद है।');
 }
 function setActiveQuestion(i){
  const list=app.querySelector('.mh-question-list'),target=list?.querySelector(`#mh-q-${i}`);if(!target)return;
@@ -165,7 +169,7 @@ function saveReport(){
 }
 function storeCurrentReport(){
  if(reportDemo)return false;
- try{const next=[report,...saved.filter(r=>r.id!==report.id)],key=reportStorage(report);localStorage.setItem(key,JSON.stringify(next.filter(r=>reportStorage(r)===key).slice(0,50)));saved=next;return true;}catch{return false;}
+ try{const key=reportStorage(report);updateSavedReports(key,saveLocalReport(localStorage,key,report));return true;}catch{return false;}
 }
 function clearAuthReturn(){if(reportDemo)return;try{sessionStorage.removeItem(AUTH_RETURN_STORAGE);}catch{}}
 function updateAuthHeader(state){
@@ -263,7 +267,7 @@ app.addEventListener('click',e=>{
  if(button.dataset.screenDetail){for(const b of app.querySelectorAll('[data-screen-detail]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-score-reading').innerHTML=screeningDetail(report,button.dataset.screenDetail,displayLanguage(language));return;}
  if(button.dataset.historyPoint){const r=button.dataset.historyPoint===report.id?report:saved.find(r=>r.id===button.dataset.historyPoint);if(r){showDialog(`<h2>${say(language,'A check-in snapshot','Check-in की झलक')}</h2><p>${new Date(r.createdAt).toLocaleDateString(language)} · PHQ-4 ${r.scores.total}/12</p>${screenBars(r.scores,displayLanguage(language))}<p>${say(language,'This describes that two-week period, not a prediction.','यह उस दो-सप्ताह की अवधि के बारे में है, आगे का अनुमान नहीं।')}</p>`);}return;}
  if(button.dataset.open){report=saved.find(r=>r.id===button.dataset.open);if(report){language=report.language;view='report';reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};render();}return;}
- if(button.dataset.delete){const id=button.dataset.delete;showDialog(`<h2>${say(language,'Delete this saved check-in?','यह सेव check-in हटाएँ?')}</h2><p>${say(language,'This removes its answers and report from this browser. Downloaded copies are not affected.','इसके जवाब और report इस browser से हटेंगे। Download की गई copies नहीं हटेंगी।')}</p><button class="mh-primary" id="mh-delete-confirm">${say(language,'Delete this check-in','यह check-in हटाएँ')}</button>`);dialog.querySelector('#mh-delete-confirm').onclick=()=>{try{const key=reportStorage(saved.find(r=>r.id===id)),next=saved.filter(r=>r.id!==id);localStorage.setItem(key,JSON.stringify(next.filter(r=>reportStorage(r)===key)));saved=next;closeDialog();render();}catch{dialog.querySelector('p').textContent=say(language,'Deletion failed. Please try again.','हटाया नहीं जा सका। फिर कोशिश करें।');}};return;}
+ if(button.dataset.delete){const id=button.dataset.delete;showDialog(`<h2>${say(language,'Delete this saved check-in?','यह सेव check-in हटाएँ?')}</h2><p>${say(language,'This removes its answers and report from this browser. Downloaded copies are not affected.','इसके जवाब और report इस browser से हटेंगे। Download की गई copies नहीं हटेंगी।')}</p><button class="mh-primary" id="mh-delete-confirm">${say(language,'Delete this check-in','यह check-in हटाएँ')}</button>`);dialog.querySelector('#mh-delete-confirm').onclick=()=>{try{const key=reportStorage(saved.find(r=>r.id===id));updateSavedReports(key,removeLocalReport(localStorage,key,id));closeDialog();render();}catch{dialog.querySelector('p').textContent=say(language,'Deletion failed. Please try again.','हटाया नहीं जा सका। फिर कोशिश करें।');}};return;}
  switch(button.dataset.action){case'dimension-overview':{const target=app.querySelector(`[data-infographic][data-workbook-dimension="${reportSelection.dimension}"]`);target?.focus({preventScroll:true});target?.scrollIntoView({behavior:motion(),block:'center'});break;}case'report-offer':showReportOffer();break;case'unlock-preview':unlockReportPreview();break;case'begin':begin();break;case'home':view='home';render();break;case'resume':resume();break;case'break':takeBreak();break;case'discard':discardDraft();break;case'review':reviewAnswers();break;case'unanswered':cancelGuide();goToQuestion(resumeQuestion(answers),'instant');break;case'finish':finish();break;case'preview':{const p=app.querySelector('#mh-report-preview');p.tabIndex=-1;p.focus({preventScroll:true});p.scrollIntoView({behavior:motion(),block:'start'});break;}case'save':saveReport();break;case'print':window.print();break;}
 });
 dialog.addEventListener('click',e=>{const jump=e.target.closest('[data-jump]');if(jump){closeDialog();goToQuestion(Number(jump.dataset.jump),'instant');return;}if(e.target.closest('[data-close]'))closeDialog();});dialog.addEventListener('cancel',()=>lastFocus?.focus?.());

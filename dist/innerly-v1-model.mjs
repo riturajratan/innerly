@@ -31,4 +31,4 @@ export function makeWorkbookReport(answers,{id,createdAt,language='en'}={}){
  return {id,version:INNERLY_V1_VERSION,createdAt,language:code,answers:[...answers]};
 }
 export const validWorkbookReport=r=>!!r&&r.version===INNERLY_V1_VERSION&&supportedLanguage(r.language)&&typeof r.id==='string'&&!!r.id&&r.id.length<=100&&typeof r.createdAt==='string'&&Number.isFinite(Date.parse(r.createdAt))&&completeStoredWorkbook(r.answers);
-export function readWorkbookReports(raw){try{const rows=JSON.parse(raw);if(!Array.isArray(rows))return [];const seen=new Set();return rows.filter(r=>validWorkbookReport(r)&&!seen.has(r.id)&&seen.add(r.id)).slice(0,50).map(r=>({id:r.id,version:r.version,createdAt:r.createdAt,language:r.language,answers:[...r.answers]}));}catch{return [];}}
+export function readWorkbookReports(raw){try{const rows=JSON.parse(raw);if(!Array.isArray(rows))return [];const seen=new Set();return rows.filter(r=>validWorkbookReport(r)&&!seen.has(r.id)&&seen.add(r.id)).map(r=>({id:r.id,version:r.version,createdAt:r.createdAt,language:r.language,answers:[...r.answers]}));}catch{return [];}}
