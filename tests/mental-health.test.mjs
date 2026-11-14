@@ -51,9 +51,9 @@ test('reports distinguish translated screens, context, fictional examples and re
  assert.doesNotMatch(flow,/Over the last two weeks/);assert.match(flow,/Never|Almost Always/);
  assert.match(quizMarkup(Array(36).fill(null),'hi'),/clinical|नैदानिक|निदान|चिकित्सकीय/);
 });
-test('public entry is mental-health focused, with legacy personality kept separate',async()=>{
+test('public entry is mental-health focused without legacy personality navigation',async()=>{
  const html=await readFile(new URL('../dist/index.html',import.meta.url),'utf8');
- assert.match(html,/mental-app\.mjs/);assert.match(html,/36 questions/);assert.match(html,/personality\.html/);assert.doesNotMatch(html,/accuracy rate|testimonials|country-selector/);
+ assert.match(html,/mental-app\.mjs/);assert.match(html,/36 questions/);assert.doesNotMatch(html,/href="personality\.html"/);assert.doesNotMatch(html,/accuracy rate|testimonials|country-selector/);
  const app=await readFile(new URL('../dist/mental-app.mjs',import.meta.url),'utf8');assert.doesNotMatch(app,/fetch\(|XMLHttpRequest|sendBeacon/);
  assert.match(app,/mh-save-confirm/);assert.match(app,/if\(!report&&answers\.some/);
 });
