@@ -1,4 +1,4 @@
-import {consolidatedAnalyticsMarkup} from './consolidated-analytics.mjs?v=1';
+import {consolidatedAnalyticsMarkup} from './consolidated-analytics.mjs?v=2';
 import {answerInterpretation} from './answer-interpretations.mjs?v=1';
 import {simulatedComparison} from './report-benchmark.mjs?v=1';
 

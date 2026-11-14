@@ -1,5 +1,6 @@
+import {mountAnswerMap} from './answer-map.mjs?v=1';
 import {mountQuestionExplorer,benchmarkReading} from './question-explorer.mjs?v=7';
-import {consolidatedSummaryMarkup,sampleProfiles,conceptSampleReport,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable} from './report-concept-view.mjs?v=13';
+import {consolidatedSummaryMarkup,sampleProfiles,conceptSampleReport,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable} from './report-concept-view.mjs?v=14';
 import {workbookQuestions} from './innerly-v1-model.mjs?v=mh-14';
 
 let answers=[...sampleProfiles.everyday.answers],snapshot=reportSnapshot(answers),selected=0,filter='support',lastTrigger=null;
@@ -7,9 +8,13 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],dia
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let tried=new Set(),dialogArea=-1;
 const refreshQuestionExplorer=mountQuestionExplorer(document,{getSnapshot:()=>snapshot,getReport:()=>conceptSampleReport(answers),language:'en',signal:new AbortController().signal});
+const answerMap=mountAnswerMap(document,{getSnapshot:()=>snapshot,language:'en',onOpenQuestion:showQuestion});
 function updateReport(changedQuestion=null){
+ answerMap.reset();
+ const mapFocus=lastTrigger?.dataset.mapAnswer;
  snapshot=reportSnapshot(answers);
  $('[data-consolidated-summary]').innerHTML=consolidatedSummaryMarkup(snapshot,'en',{sample:true});
+ if(mapFocus!==undefined)lastTrigger=$(`[data-map-answer="${mapFocus}"]`);
  for(const [i,area] of snapshot.areas.entries()){
   for(const [key,category] of Object.entries(categories)){
    const count=area.items.filter(item=>item.category===key).length,segment=$(`[data-stack="${i}-${key}"]`);

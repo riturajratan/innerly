@@ -1,5 +1,6 @@
-import {reportSnapshot} from './report-concept-view.mjs?v=13';
-import {personalQuestionMarkup} from './personal-report-view.mjs?v=13';
+import {mountAnswerMap} from './answer-map.mjs?v=1';
+import {reportSnapshot} from './report-concept-view.mjs?v=14';
+import {personalQuestionMarkup} from './personal-report-view.mjs?v=14';
 import {mountQuestionExplorer} from './question-explorer.mjs?v=7';
 
 export function mountPersonalReport(root,report,history=[],language='en'){
@@ -7,6 +8,7 @@ export function mountPersonalReport(root,report,history=[],language='en'){
  const dialog=root.querySelector('#personal-question-dialog');let selected=0,lastTrigger=null;
  const reduce=matchMedia('(prefers-reduced-motion: reduce)'),behavior=()=>reduce.matches||document.body.classList.contains('mh-paused')?'instant':'smooth';
  mountQuestionExplorer(root,{getSnapshot:()=>snapshot,getReport:()=>report,getHistory:()=>history,language:l,signal});
+ mountAnswerMap(root,{getSnapshot:()=>snapshot,language:l,onOpenQuestion:openQuestion,signal});
  function openQuestion(index,trigger){
   if(!Number.isInteger(index)||index<0||index>=36)return;
   selected=index;if(trigger&&!dialog.contains(trigger))lastTrigger=trigger;

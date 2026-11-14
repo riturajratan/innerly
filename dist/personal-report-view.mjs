@@ -1,6 +1,6 @@
 import {answerInterpretation} from './answer-interpretations.mjs?v=1';
 import {validWorkbookReport,completeWorkbook,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=mh-14';
-import {consolidatedSummaryMarkup,reportSnapshot,reportAreas,reportCategories,areaGraph,icon,escapeHTML as esc} from './report-concept-view.mjs?v=13';
+import {consolidatedSummaryMarkup,reportSnapshot,reportAreas,reportCategories,areaGraph,icon,escapeHTML as esc} from './report-concept-view.mjs?v=14';
 import {questionExplorerMarkup,benchmarkReading,responseRuler} from './question-explorer.mjs?v=7';
 
 const say=(l,en,hi)=>l==='hi'?hi:en;
