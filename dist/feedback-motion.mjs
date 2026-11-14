@@ -25,21 +25,33 @@ export function createFeedbackMotion({dialog,launcher,surface,energy}){
  function waves({origin:o,box:b},duration,closing=false){
   const target={x:b.left+Math.min(112,b.width/2),y:b.top+b.height*.5};
   const colors=['#729ac6','#82b3a0','#c9b362'];
+  const control1={x:o.x-90,y:o.y-45},control2={x:target.x+180,y:target.y+100};
   energy.setAttribute('viewBox',`0 0 ${innerWidth} ${innerHeight}`);energy.removeAttribute('hidden');
-  energy.innerHTML=`<g fill="none">${colors.map((color,i)=>`<path class="ifb-energy-path" pathLength="1" d="M${o.x} ${o.y-6} C${o.x-110-i*15} ${o.y-40},${target.x+180} ${target.y+60+i*30},${target.x} ${target.y}" stroke="${color}" stroke-width="1.7"/>`).join('')}</g><g transform="translate(${o.x} ${o.y})"><g class="ifb-rising-thoughts" fill="none">${colors.map((color,i)=>`<ellipse rx="34" ry="16" transform="rotate(${i*60-35})" stroke="${color}" stroke-width="1.1"/>`).join('')}</g></g><g class="ifb-energy-source" transform="translate(${o.x} ${o.y})"><circle r="25" fill="#f3f8ff"/><image href="assets/innerly-mark.svg?v=5" x="-21" y="-21" width="42" height="42"/></g>`;
+  energy.innerHTML=`<g fill="none">${colors.map((color,i)=>{
+   const d=`M${o.x} ${o.y-6} C${control1.x-i*12} ${control1.y-i*6},${control2.x} ${control2.y+i*22},${target.x} ${target.y}`;
+   return `<path class="ifb-energy-trail" d="${d}" stroke="${color}" stroke-width="1"/><path class="ifb-energy-path" pathLength="1" d="${d}" stroke="${color}" stroke-width="1.7"/>`;
+  }).join('')}</g><g transform="translate(${o.x} ${o.y})"><g class="ifb-rising-thoughts" fill="none">${colors.map((color,i)=>`<ellipse rx="34" ry="16" transform="rotate(${i*60-35})" stroke="${color}" stroke-width="1.1"/>`).join('')}</g></g><g class="ifb-energy-source" transform="translate(${o.x} ${o.y})"><circle r="23" fill="#f3f8ff"/><image href="assets/innerly-mark.svg?v=5" x="-19" y="-19" width="38" height="38"/></g>`;
+  energy.querySelectorAll('.ifb-energy-trail').forEach(path=>animations.push(path.animate([
+   {opacity:0},{opacity:.2,offset:.18},{opacity:.2,offset:.72},{opacity:0}
+  ],{duration:duration*.64,easing:'linear',fill:'both'})));
   energy.querySelectorAll('.ifb-energy-path').forEach((path,i)=>{
-   animations.push(path.animate(closing?[
-    {strokeDashoffset:-1,opacity:0},{strokeDashoffset:-.65,opacity:.6,offset:.2},{strokeDashoffset:0,opacity:0}
-   ]:[
-    {strokeDashoffset:1,opacity:0},{strokeDashoffset:.7,opacity:.7,offset:.2},{strokeDashoffset:0,opacity:.6,offset:.7},{strokeDashoffset:-.3,opacity:0}
-   ],{duration:duration*.6,delay:i*35,easing:'ease-in-out',fill:'both'}));
+   const from=closing?-1:.25,to=closing?.25:-1;
+   animations.push(path.animate([
+    {strokeDashoffset:from,opacity:0},
+    {strokeDashoffset:from+(to-from)*.16,opacity:.72,offset:.16},
+    {strokeDashoffset:from+(to-from)*.82,opacity:.72,offset:.82},
+    {strokeDashoffset:to,opacity:0}
+   ],{duration:duration*.57,delay:i*45,easing:'linear',fill:'both'}));
   });
-  animations.push(energy.querySelector('.ifb-rising-thoughts').animate([
-   {transform:'translate(0,0) scale(.45)',opacity:0},
-   {transform:`translate(${(target.x-o.x)*.5}px,${(target.y-o.y)*.5}px) scale(1.4)`,opacity:.85,offset:.5},
-   {transform:`translate(${target.x-o.x}px,${target.y-o.y}px) scale(2.2)`,opacity:0}
-  ],{duration:duration*.55,easing:'ease-out',fill:'both'}));
-  animations.push(energy.querySelector('.ifb-energy-source').animate([{opacity:1},{opacity:1,offset:.55},{opacity:0}],{duration:duration*.6,fill:'both'}));
+  // Sample one continuous curve so the rings do not change direction at a midpoint.
+  const ringFrames=Array.from({length:25},(_,i)=>{
+   const progress=i/24,t=closing?1-progress:progress,u=1-t;
+   const x=u*u*u*o.x+3*u*u*t*control1.x+3*u*t*t*control2.x+t*t*t*target.x;
+   const y=u*u*u*o.y+3*u*u*t*control1.y+3*u*t*t*control2.y+t*t*t*target.y;
+   return {offset:progress,transform:`translate(${x-o.x}px,${y-o.y}px) scale(${.55+1.65*t})`,opacity:.7*Math.sin(Math.PI*progress)};
+  });
+  animations.push(energy.querySelector('.ifb-rising-thoughts').animate(ringFrames,{duration:duration*.62,easing:'linear',fill:'both'}));
+  animations.push(energy.querySelector('.ifb-energy-source').animate([{opacity:1},{opacity:1,offset:.6},{opacity:0}],{duration:duration*.62,fill:'both'}));
  }
  function open(first=false){
   if(phase!=='closed')return;
@@ -52,15 +64,17 @@ export function createFeedbackMotion({dialog,launcher,surface,energy}){
   thought=document.createElement('div');thought.className='ifb-thought-cover';thought.setAttribute('aria-hidden','true');
   Object.assign(thought.style,{width:`${width}px`,height:`${height}px`,left:'0',top:'0'});
   thought.append(note.cloneNode(true));dialog.append(thought);
-  const dx=geometry.origin.x-geometry.box.left-width/2,dy=geometry.origin.y-geometry.box.top-height/2;
+  const waveOrigin=Math.max(0,Math.min(100,(geometry.origin.x-geometry.box.left)/width*100));
+  const closedEdge=`ellipse(0% 0% at ${waveOrigin}% 100%)`,openEdge=`ellipse(145% 145% at ${waveOrigin}% 100%)`;
+  // Keep the card and its type at full size; a single curved sweep reveals it.
   animations.push(thought.animate([
-   {offset:0,transform:`translate(${dx}px,${dy}px) scale(.07)`,width:`${width}px`,opacity:0,borderRadius:'40px'},
-   {offset:.13,transform:`translate(${dx*.7}px,${dy*.72}px) scale(.24)`,width:`${width}px`,opacity:.92,borderRadius:'30px'},
-   {offset:.3,transform:'translate(0,0) scale(1)',width:`${width}px`,opacity:1,borderRadius:'18px'},
-   {offset:.5,transform:'translate(0,0) scale(1)',width:`${width}px`,opacity:1,borderRadius:'18px'},
-   {offset:.88,transform:'translate(0,0) scale(1)',width:`${targetWidth}px`,opacity:mobile?0:1,borderRadius:mobile?'18px':'18px 0 0 18px'},
-   {offset:1,transform:'translate(0,0) scale(1)',width:`${targetWidth}px`,opacity:0,borderRadius:'18px 0 0 18px'}
-  ].map(frame=>({...frame,easing:'ease-in-out'})),{duration,easing:'linear',fill:'both'}));
+   {offset:0,clipPath:closedEdge,width:`${width}px`,opacity:1,borderRadius:'18px'},
+   {offset:.16,clipPath:closedEdge,width:`${width}px`,opacity:1,borderRadius:'18px',easing:'cubic-bezier(.2,.6,.3,1)'},
+   {offset:.37,clipPath:openEdge,width:`${width}px`,opacity:1,borderRadius:'18px'},
+   {offset:.5,clipPath:openEdge,width:`${width}px`,opacity:1,borderRadius:'18px',easing:'ease-in-out'},
+   {offset:.88,clipPath:openEdge,width:`${targetWidth}px`,opacity:mobile?0:1,borderRadius:mobile?'18px':'18px 0 0 18px'},
+   {offset:1,clipPath:openEdge,width:`${targetWidth}px`,opacity:0,borderRadius:'18px 0 0 18px'}
+  ],{duration,easing:'linear',fill:'both'}));
   animations.push(paper.animate([
    {offset:0,transform:'translateX(20px)',opacity:0},
    {offset:.53,transform:'translateX(20px)',opacity:0},

@@ -1,4 +1,4 @@
-import {createFeedbackMotion} from './feedback-motion.mjs?v=1';
+import {createFeedbackMotion} from './feedback-motion.mjs?v=2';
 const say=(l,en,hi)=>l==='hi'?hi:en;
 export const FEEDBACK_STORAGE='innerly.feedback.pending.v1';
 export function validateFeedback({name='',email='',message=''}={},l='en'){
@@ -39,7 +39,7 @@ export function feedbackMarkup(l='en'){
 }
 export function mountFeedback(){
  if(document.querySelector('#innerly-feedback'))return;
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./feedback.css?v=3',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./feedback.css?v=4',import.meta.url).href;document.head.append(css);
  const root=document.createElement('div');root.id='innerly-feedback-widget';document.body.append(root);
  let locale,launcher,dialog,form,motion,hasOpened=false,submitted=false;
  try{hasOpened=sessionStorage.getItem('innerly.feedback.waves-opened.v1')==='1';}catch{}

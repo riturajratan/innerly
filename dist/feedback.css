@@ -4,7 +4,7 @@
 #innerly-feedback-widget button,#innerly-feedback-widget input,#innerly-feedback-widget textarea{font-family:inherit}
 #innerly-feedback-widget button{cursor:pointer}
 #innerly-feedback-widget .ifb-launcher{position:fixed;z-index:60;right:24px;bottom:24px;display:flex;align-items:center;gap:9px;min-height:56px;padding:8px 18px 8px 9px;background:#f3f7fd;color:#254875;border:1px solid #c7d9ec;border-radius:30px;font-size:14px;font-weight:600;box-shadow:0 5px 20px #25487520;transition:transform .2s,box-shadow .2s}
-#innerly-feedback-widget .ifb-launcher:hover{transform:translateY(-3px);box-shadow:0 9px 25px #25487530}
+#innerly-feedback-widget .ifb-launcher:hover{box-shadow:0 9px 25px #25487530}
 .ifb-mind{display:grid;place-items:center;width:38px;height:38px;flex-shrink:0}
 .ifb-mind img{display:block;width:38px;height:38px}
 #innerly-feedback-widget .ifb-dialog{position:fixed;inset:auto 24px 96px auto;margin:0;padding:0;width:710px;max-width:calc(100vw - 48px);max-height:calc(100dvh - 120px);border:0;border-radius:18px;background:transparent;color:#254875;overflow:visible;box-shadow:none;transform:none;opacity:1}
@@ -12,7 +12,8 @@
 .ifb-surface{position:relative;z-index:1;max-height:calc(100dvh - 120px);overflow:auto;border-radius:18px;box-shadow:0 22px 80px #1d365b35;transform-origin:50% 50%;background:#fff;will-change:transform,opacity,clip-path}
 .ifb-energy{position:fixed;inset:0;width:100vw;height:100dvh;overflow:visible;pointer-events:none;z-index:2}
 .ifb-energy[hidden]{display:none}
-.ifb-energy-path{stroke-dasharray:.65 .35;stroke-linecap:round}
+.ifb-energy-path{stroke-dasharray:.25 1;stroke-linecap:round}
+.ifb-energy-trail{stroke-linecap:round;opacity:0}
 .ifb-dialog::backdrop{background:#233c5c45;backdrop-filter:blur(3px)}
 .ifb-book{display:grid;grid-template-columns:225px minmax(0,1fr);position:relative;isolation:isolate;perspective:1600px}
 .ifb-note{padding:31px 25px;display:flex;flex-direction:column;background:linear-gradient(95deg,#eff7f1 70%,#e1eee5);border-right:1px solid #d2e3d9}
