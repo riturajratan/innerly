@@ -243,3 +243,14 @@ body.mh-home-page{background:#fff;color:#172c50}
 .in-home .in-hero-meta>span,.in-home .in-hero-facts span,.in-home .in-scene-note,.in-home .in-example-scale span,.in-home .in-paper-head>span,.in-home .in-reflection-path small,.in-home .in-reflection-path>div>span,.in-home .in-journey-steps small{color:#5c6c87}
 .in-home .in-topic-tabs button{color:#5c6c87}
 .in-home .in-invitation .in-eyebrow{color:#b4c3e0!important}
+
+/* A distinct, gentle colour for each selected everyday topic. */
+.in-topic-tabs [data-home-topic=thoughts]{--topic-tint:#f0ecfb;--topic-border:#baa9de;--topic-ink:#68519a}
+.in-topic-tabs [data-home-topic=emotions]{--topic-tint:#fff6d9;--topic-border:#d9bd69;--topic-ink:#856919}
+.in-topic-tabs [data-home-topic=relationships]{--topic-tint:#fceef2;--topic-border:#d5a0b1;--topic-ink:#9a5068}
+.in-topic-tabs [data-home-topic=pressure]{--topic-tint:#eaf5ed;--topic-border:#96bca4;--topic-ink:#477957}
+.in-topic-tabs button{transition:background .25s,border-color .25s,color .25s,box-shadow .25s}
+.in-topic-tabs button:hover{background:var(--topic-tint);border-color:var(--topic-border);color:var(--topic-ink)}
+.in-topic-tabs button[aria-pressed=true]{background:var(--topic-tint);border-color:var(--topic-border);color:var(--topic-ink);box-shadow:0 3px 10px color-mix(in srgb,var(--topic-border) 20%,transparent)}
+.in-topic-tabs button[aria-pressed=true] svg,.in-topic-tabs button:hover svg{color:var(--topic-ink)}
+.in-topic-tabs button:focus-visible{outline:3px solid var(--topic-ink);outline-offset:4px}
