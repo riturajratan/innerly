@@ -38,6 +38,8 @@ jobs:
           node scripts/render-report-demo.mjs
           node scripts/render-report-preview.mjs
           node --check dist/report-concept.mjs
+          node --check dist/personal-report.mjs
+          node --check dist/question-explorer.mjs
           node --check dist/mental-app.mjs
           node --check dist/clerk-auth.mjs
           node --check dist/app.js

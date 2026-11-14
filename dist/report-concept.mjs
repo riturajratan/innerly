@@ -1,10 +1,12 @@
-import {sampleProfiles,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable,focusItems} from './report-concept-view.mjs?v=1';
+import {mountQuestionExplorer,benchmarkReading} from './question-explorer.mjs?v=1';
+import {sampleProfiles,conceptSampleReport,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable,focusItems} from './report-concept-view.mjs?v=2';
 import {workbookQuestions} from './innerly-v1-model.mjs?v=mh-14';
 
 let answers=[...sampleProfiles.everyday.answers],snapshot=reportSnapshot(answers),selected=0,filter='support',lastTrigger=null;
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],dialog=$('#question-dialog');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let tried=new Set(),dialogArea=-1;
+const refreshQuestionExplorer=mountQuestionExplorer(document,{getSnapshot:()=>snapshot,getReport:()=>conceptSampleReport(answers),language:'en',signal:new AbortController().signal});
 function updateFilters(){
  $$('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===filter)));
  $('#focus-title').textContent=categories[filter].name;
@@ -43,7 +45,7 @@ function updateReport(changedQuestion=null){
  updateFilters();
  $('#plan-list').innerHTML=planMarkup(snapshot);
  $$('[data-tried]').forEach(input=>{input.checked=tried.has(input.dataset.tried);});
- updateTried();$('#response-table').innerHTML=responseTable(snapshot);
+ updateTried();$('#response-table').innerHTML=responseTable(snapshot);refreshQuestionExplorer();
 }
 function updateTried(){const count=$$('[data-tried]:checked').length;$('#tried-count').textContent=count;}
 function showQuestion(index,trigger){
@@ -54,6 +56,7 @@ function showQuestion(index,trigger){
  $('#question-number').textContent=`${item.id} · QUESTION ${selected+1} OF 36`;
  $('#question-title').textContent=workbookQuestions[selected].texts.en;
  $('#question-reading').innerHTML=questionReading(item);
+ $('#sample-benchmark-content').innerHTML=benchmarkReading(selected,item.value);
  const areaIndex=Math.floor(selected/6);
  if(dialogArea!==areaIndex){
   $('#dialog-graph').innerHTML=areaGraph(snapshot.areas[areaIndex],areaIndex);
