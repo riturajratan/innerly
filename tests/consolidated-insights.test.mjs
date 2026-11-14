@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {consolidatedAnalytics} from '../dist/consolidated-analytics.mjs';
 import {answerInterpretation} from '../dist/answer-interpretations.mjs';
 import {workbookQuestions} from '../dist/innerly-v1-model.mjs';
 import {consolidatedDetails,overallReportSummary} from '../dist/consolidated-insights.mjs';
@@ -76,7 +77,7 @@ test('consolidated cards explain answers, preserve question links, and do not re
   for(const profile of Object.values(sampleProfiles)){
    const snapshot=reportSnapshot(profile.answers,l),html=consolidatedSummaryMarkup(snapshot,l);
    for(const question of workbookQuestions)assert.ok(!html.includes(question.texts[l]));
-   for(const item of [...consolidatedDetails(snapshot).strengths,...consolidatedDetails(snapshot).attention]){
+   for(const item of [...consolidatedDetails(snapshot).strengths.slice(0,2),...consolidatedDetails(snapshot).attention.slice(0,2)]){
     assert.ok(html.includes(`data-question="${item.index}"`));
     assert.ok(html.includes(answerInterpretation(item,l).title));
    }
@@ -89,14 +90,14 @@ test('consolidated cards explain answers, preserve question links, and do not re
 test('overall summary follows dominant answer patterns without changing the snapshot',()=>{
  const snapshot=reportSnapshot(sampleProfiles.everyday.answers),before=structuredClone(snapshot);
  const summary=overallReportSummary(snapshot);
- assert.match(summary,/understanding yourself and making considered decisions/);
- assert.match(summary,/working with your thoughts and coping with pressure/);
+ assert.match(summary,/self-awareness as a support/);
+ assert.match(summary,/thinking patterns worth more attention/);
  assert.ok(summary.split(/\s+/).length<=45);
  assert.deepEqual(snapshot,before);
  for(const areaIndex of [1,4]){
   const answers=supportive.map((v,index)=>Math.floor(index/6)===areaIndex?4-v:v);
   const result=overallReportSummary(reportSnapshot(answers));
-  assert.match(result,areaIndex===1?/There is room to grow around working with your thoughts\./:/There is room to grow around connecting with others\./);
+  assert.match(result,areaIndex===1?/thinking patterns worth more attention\./:/relationships worth more attention\./);
  }
 });
 test('overall summary handles uniformly supportive, challenging and sometimes answers honestly in both languages',()=>{
@@ -110,10 +111,10 @@ test('overall summary handles uniformly supportive, challenging and sometimes an
    if(l==='hi')assert.match(summary,/[\u0900-\u097F]/);
   }
   if(l==='en'){
-   assert.match(allSupport,/helpful habits across all six areas/);
+   assert.match(allSupport,/Helpful habits appear across all six areas/);
    assert.doesNotMatch(allSupport,/room to grow/);
-   assert.match(allFocus,/does not capture every strength/);
-   assert.match(allSometimes,/show up sometimes across all six areas/);
+   assert.match(allFocus,/cannot capture every strength/);
+   assert.match(allSometimes,/occasional patterns across all six areas/);
    assert.doesNotMatch(allSometimes,/room to grow|helpful habits/);
   }
  }
@@ -124,7 +125,8 @@ test('brief summary and exact answer metrics precede compact strength and growth
   const html=consolidatedSummaryMarkup(snapshot,'en',{sample});
   assert.ok(html.indexOf('cs-overall-copy')<html.indexOf('cs-metrics'));
   assert.ok(html.indexOf('cs-metrics')<html.indexOf('id="cs-patterns"'));
-  assert.ok(html.indexOf('id="cs-patterns"')<html.indexOf('cs-chapter-nav'));
+  assert.ok(html.indexOf('id="cs-patterns"')<html.indexOf('id="cs-analytics"'));
+  assert.ok(html.indexOf('id="cs-analytics"')<html.indexOf('cs-guidance-details'));
   assert.doesNotMatch(html,/cs-highlights|donut-wrap/);
   for(const category of ['support','focus','varies']){
    const count=snapshot.counts[category],percent=Math.round(count/36*100);
@@ -132,7 +134,47 @@ test('brief summary and exact answer metrics precede compact strength and growth
    assert.ok(html.includes(`${count} / 36 · ${percent}%`));
   }
   const cards=[...html.matchAll(/<button class="cs-insight-card[\s\S]*?<\/button>/g)];
-  assert.equal(cards.length,8);
+  assert.equal(cards.length,4);
   for(const [card] of cards){assert.doesNotMatch(card,/<p>/);assert.match(card,/aria-description=/);}
+ }
+});
+
+
+test('analytics preserve every answer, per-area interpretation and raw response frequency',()=>{
+ for(const profile of Object.values(sampleProfiles)){
+  const snapshot=reportSnapshot(profile.answers),before=structuredClone(snapshot),data=consolidatedAnalytics(snapshot);
+  assert.equal(data.total,36);
+  assert.equal(data.frequencies.reduce((a,b)=>a+b,0),36);
+  assert.deepEqual(data.frequencies,Array.from({length:5},(_,value)=>profile.answers.filter(a=>a===value).length));
+  assert.deepEqual(data.rows.flatMap(row=>row.items.map(item=>item.index)),Array.from({length:36},(_,i)=>i));
+  for(const category of ['support','focus','varies'])assert.equal(data.rows.reduce((n,row)=>n+row.counts[category],0),snapshot.counts[category]);
+  assert.ok(data.rows.every(row=>Object.values(row.counts).reduce((a,b)=>a+b,0)===6));
+  assert.deepEqual(snapshot,before);
+ }
+ const tied=consolidatedAnalytics(reportSnapshot(Array.from({length:36},(_,i)=>i%2?4:0)));
+ assert.deepEqual(tied.mostCommon,[0,4]);
+});
+test('editing one reverse-worded answer updates its map colour and the raw frequency independently',()=>{
+ const answers=[...sampleProfiles.everyday.answers],before=consolidatedAnalytics(reportSnapshot(answers));
+ answers[31]=0;
+ const after=consolidatedAnalytics(reportSnapshot(answers));
+ assert.equal(before.rows[5].items[1].category,'focus');assert.equal(after.rows[5].items[1].category,'support');
+ assert.equal(after.frequencies[4],before.frequencies[4]-1);assert.equal(after.frequencies[0],before.frequencies[0]+1);
+ for(const i of [1,2,3])assert.equal(after.frequencies[i],before.frequencies[i]);
+});
+test('the default consolidated view prioritises real data and keeps detailed guidance behind disclosures',()=>{
+ for(const l of ['en','hi']){
+  const html=consolidatedSummaryMarkup(reportSnapshot(sampleProfiles.everyday.answers,l),l);
+  assert.equal((html.match(/class="cs-answer-cell /g)||[]).length,36);
+  assert.equal((html.match(/class="cs-frequency-row"/g)||[]).length,5);
+  assert.match(html,/<details class="cs-deeper cs-guidance-details"><summary>/);
+  assert.match(html,/<details class="cs-deeper cs-mock-details"><summary>/);
+  assert.doesNotMatch(html,/<details[^>]+open/);
+  const visible=html.replace(/<details class="cs-deeper[\s\S]*?<\/details>/g,'');
+  assert.doesNotMatch(visible,/cs-journey-card|cs-benefit-card|cs-priority-list/);
+  if(l==='en'){
+   const words=visible.replace(/<[^>]+>/g,' ').match(/[A-Za-z]+/g)||[];
+   assert.ok(words.length<250,`${words.length} default-view words`);
+  }
  }
 });
