@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {answerInterpretation} from '../dist/answer-interpretations.mjs';
 import {workbookQuestions} from '../dist/innerly-v1-model.mjs';
-import {consolidatedDetails} from '../dist/consolidated-insights.mjs';
+import {consolidatedDetails,overallReportSummary} from '../dist/consolidated-insights.mjs';
 import {reportSnapshot,sampleProfiles,consolidatedSummaryMarkup,reportConceptPage} from '../dist/report-concept-view.mjs';
 import {makeWorkbookReport} from '../dist/innerly-v1-model.mjs';
 import {personalReportMarkup} from '../dist/personal-report-view.mjs';
@@ -82,5 +82,57 @@ test('consolidated cards explain answers, preserve question links, and do not re
    }
    assert.match(html,/cs-icon-tile/);
   }
+ }
+});
+
+
+test('overall summary follows dominant answer patterns without changing the snapshot',()=>{
+ const snapshot=reportSnapshot(sampleProfiles.everyday.answers),before=structuredClone(snapshot);
+ const summary=overallReportSummary(snapshot);
+ assert.match(summary,/understanding yourself and making considered decisions/);
+ assert.match(summary,/working with your thoughts and coping with pressure/);
+ assert.ok(summary.split(/\s+/).length<=45);
+ assert.deepEqual(snapshot,before);
+ for(const areaIndex of [1,4]){
+  const answers=supportive.map((v,index)=>Math.floor(index/6)===areaIndex?4-v:v);
+  const result=overallReportSummary(reportSnapshot(answers));
+  assert.match(result,areaIndex===1?/There is room to grow around working with your thoughts\./:/There is room to grow around connecting with others\./);
+ }
+});
+test('overall summary handles uniformly supportive, challenging and sometimes answers honestly in both languages',()=>{
+ for(const l of ['en','hi']){
+  const allSupport=overallReportSummary(reportSnapshot(supportive,l),l);
+  const allFocus=overallReportSummary(reportSnapshot(supportive.map(v=>4-v),l),l);
+  const allSometimes=overallReportSummary(reportSnapshot(Array(36).fill(2),l),l);
+  assert.equal(new Set([allSupport,allFocus,allSometimes]).size,3);
+  for(const summary of [allSupport,allFocus,allSometimes]){
+   assert.doesNotMatch(summary,/undefined|NaN|Infinity/);
+   if(l==='hi')assert.match(summary,/[\u0900-\u097F]/);
+  }
+  if(l==='en'){
+   assert.match(allSupport,/helpful habits across all six areas/);
+   assert.doesNotMatch(allSupport,/room to grow/);
+   assert.match(allFocus,/does not capture every strength/);
+   assert.match(allSometimes,/show up sometimes across all six areas/);
+   assert.doesNotMatch(allSometimes,/room to grow|helpful habits/);
+  }
+ }
+});
+test('brief summary and exact answer metrics precede compact strength and growth cards',()=>{
+ const snapshot=reportSnapshot(sampleProfiles.everyday.answers);
+ for(const sample of [false,true]){
+  const html=consolidatedSummaryMarkup(snapshot,'en',{sample});
+  assert.ok(html.indexOf('cs-overall-copy')<html.indexOf('cs-metrics'));
+  assert.ok(html.indexOf('cs-metrics')<html.indexOf('id="cs-patterns"'));
+  assert.ok(html.indexOf('id="cs-patterns"')<html.indexOf('cs-chapter-nav'));
+  assert.doesNotMatch(html,/cs-highlights|donut-wrap/);
+  for(const category of ['support','focus','varies']){
+   const count=snapshot.counts[category],percent=Math.round(count/36*100);
+   assert.ok(html.includes(`${sample?'data-filter':'data-personal-group'}="${category}"`));
+   assert.ok(html.includes(`${count} / 36 · ${percent}%`));
+  }
+  const cards=[...html.matchAll(/<button class="cs-insight-card[\s\S]*?<\/button>/g)];
+  assert.equal(cards.length,8);
+  for(const [card] of cards){assert.doesNotMatch(card,/<p>/);assert.match(card,/aria-description=/);}
  }
 });
