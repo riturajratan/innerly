@@ -38,3 +38,7 @@ body[data-chart-mode=line] .question-insight-panel .chart-mark .response-bar{opa
 .answer-options button{font-size:15px;min-height:46px}
 @media(max-width:620px){.summary-legend button{font-size:13px}.summary-legend button>span:nth-child(2){max-width:none}.summary-card{display:block}.summary-card .donut-wrap{max-width:240px;margin:12px auto}.summary-legend{gap:7px}.summary-legend button{flex-wrap:nowrap}.summary-card .fine-print{font-size:12px;margin-top:14px}.landscape-row-name{font-size:14px}.landscape-row-name>span{font-size:11px}.stack-legend{font-size:12px}.answer-options button{font-size:14px}.area-caption,.insight p{font-size:14px}.insight>span{font-size:11px}.graph-note{font-size:12px}}
 @media print{.response-chart-scroll{overflow:visible}.response-chart-scroll .response-chart{min-width:0}.chart-grid text,.chart-mark text{font-size:11px}.summary-legend button{font-size:11px}}
+
+/* Let wide charts scroll inside the report instead of sizing the whole page. */
+.report-main{width:100%}
+.qe-question-select select{min-width:0}
