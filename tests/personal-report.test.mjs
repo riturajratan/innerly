@@ -80,7 +80,7 @@ test('mock percentages use clearly synthetic frequency distributions and include
  assert.equal(simulatedComparison(36,2),null);assert.equal(simulatedComparison(0,'skip'),null);
  const report=make(),world=questionViewMarkup(reportSnapshot(report.answers),report,[],'world');
  assert.equal((world.match(/class="qe-world-row"/g)||[]).length,36);
- assert.equal((world.match(/mock cumulative/g)||[]).length,36);
+ assert.equal((world.match(/at \/ below · mock/g)||[]).length,36);
  assert.match(world,/100 FICTIONAL RESPONSES PER QUESTION/);assert.match(world,/do not tell you where you stand in the world/);
  assert.match(benchmarkReading(0,0),/NOT A WORLD RANK/);
 });

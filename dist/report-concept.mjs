@@ -1,5 +1,5 @@
-import {mountQuestionExplorer,benchmarkReading} from './question-explorer.mjs?v=1';
-import {sampleProfiles,conceptSampleReport,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable,focusItems} from './report-concept-view.mjs?v=2';
+import {mountQuestionExplorer,benchmarkReading} from './question-explorer.mjs?v=2';
+import {sampleProfiles,conceptSampleReport,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable,focusItems} from './report-concept-view.mjs?v=3';
 import {workbookQuestions} from './innerly-v1-model.mjs?v=mh-14';
 
 let answers=[...sampleProfiles.everyday.answers],snapshot=reportSnapshot(answers),selected=0,filter='support',lastTrigger=null;

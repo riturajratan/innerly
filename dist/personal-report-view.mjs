@@ -1,6 +1,6 @@
 import {validWorkbookReport,completeWorkbook,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=mh-14';
-import {reportSnapshot,reportAreas,reportCategories,areaGraph,icon,escapeHTML as esc} from './report-concept-view.mjs?v=2';
-import {questionExplorerMarkup,benchmarkReading,responseRuler} from './question-explorer.mjs?v=1';
+import {reportSnapshot,reportAreas,reportCategories,areaGraph,icon,escapeHTML as esc} from './report-concept-view.mjs?v=3';
+import {questionExplorerMarkup,benchmarkReading,responseRuler} from './question-explorer.mjs?v=2';
 
 const say=(l,en,hi)=>l==='hi'?hi:en;
 export const usesPersonalReport=report=>validWorkbookReport(report)&&completeWorkbook(report.answers);
