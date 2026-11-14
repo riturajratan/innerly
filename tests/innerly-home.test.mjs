@@ -11,23 +11,25 @@ test('homepage connects every everyday topic to an exact active workbook questio
   assert.doesNotMatch(html,/data-answer=|type="radio"|data-skip=/);
  }
 });
-test('home sample views are distinct, labelled examples and never clinical scores',()=>{
+test('home report unfolds one exact sample answer into matching guidance',()=>{
  for(const l of ['en','hi']){
-  const views=['patterns','responses','steps'].map(v=>homeReportPreview(v,l));
-  assert.equal(new Set(views).size,3);assert.ok(views.every(v=>!v.includes('undefined')&&!v.includes('NaN')));
-  assert.equal((views[0].match(/data-preview-area=/g)||[]).length,6);
-  assert.equal((views[0].match(/data-segment=/g)||[]).length,18);
-  assert.equal((views[1].match(/data-preview-answer=/g)||[]).length,5);
-  assert.match(views[2],/How it can help|इससे क्या मदद/);
+  const html=homeReportPreview(l);
+  assert.doesNotMatch(html,/undefined|NaN|data-preview-area|data-preview-view|data-segment/);
+  assert.equal((html.match(/data-preview-answer=/g)||[]).length,5);
+  assert.doesNotMatch(html,/data-preview-open/);assert.match(html,/data-preview-replay/);
+  assert.match(html,/fictional example|काल्पनिक उदाहरण/);
   for(const [question,text] of questionnaireLocale(l).questions.entries()){
-   const detail=homeReportPreview('responses',l,{question});
-   assert.ok(detail.includes(esc(text)));
+   assert.ok(homeReportPreview(l,{question}).includes(esc(text)));
   }
   const answers=sampleReportData(l).report.answers;
-  answers[12]=4;
-  assert.match(homeReportPreview('responses',l,{answers}),/class="in-preview-result" data-result="support"/);
-  answers[12]=0;
-  assert.match(homeReportPreview('responses',l,{answers}),/class="in-preview-result" data-result="focus"/);
+  for(const [value,category] of [[4,'support'],[2,'varies'],[0,'focus']]){
+   answers[12]=value;
+   const report=homeReportPreview(l,{answers});
+   assert.match(report,new RegExp(`class="in-preview-result" data-result="${category}"`));
+   assert.ok(report.includes(`style="width:${value*25}%"`));
+   assert.match(report,/ONE SMALL STEP|एक छोटा कदम/);
+   assert.match(report,/What it could help with|इससे क्या मदद/);
+  }
  }
 });
 test('mental wellbeing homepage has a clear start path, honest scope and independent controls',()=>{
@@ -36,7 +38,8 @@ test('mental wellbeing homepage has a clear start path, honest scope and indepen
   assert.equal((html.match(/data-action="begin"/g)||[]).length,6);
   assert.match(html,/id="thought-waves"[\s\S]+data-thought-waves/);
   assert.equal((html.match(/data-home-topic=/g)||[]).length,4);
-  assert.equal((html.match(/data-preview-view=/g)||[]).length,3);
+  assert.equal((html.match(/data-preview-answer=/g)||[]).length,5);
+  assert.match(html,/href="report-preview.html"/);
   assert.match(html,/mh-report-preview/);assert.match(html,/SAMPLE REPORT|उदाहरण रिपोर्ट/);
   assert.match(html,/20/);assert.match(html,/English and Hindi|English और हिन्दी/);
   assert.doesNotMatch(html,/country-select|data-country|accuracy rate|million|testimonials|data-skip=/);

@@ -1,5 +1,5 @@
 import {workbookReportPreview} from './innerly-v1-preview.mjs?v=report-4';
-import {innerlyHome} from './innerly-home.mjs?v=home-preview-7';
+import {innerlyHome} from './innerly-home.mjs?v=home-preview-8';
 import {INNERLY_V1_VERSION,questionnaireLocale} from './innerly-v1-model.mjs?v=mh-14';
 import {workbookReportMarkup,workbookSample} from './innerly-v1-views.mjs?v=report-summary-1';
 import {REFLECTION60_VERSION} from './reflection60-model.mjs';

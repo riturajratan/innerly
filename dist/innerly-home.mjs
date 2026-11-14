@@ -1,12 +1,12 @@
 import {thoughtWavesMarkup} from './thought-waves-view.mjs?v=5';
 import {sampleReportData} from './sample-report.mjs';
 import {questionGuidance} from './innerly-v1-guidance.mjs';
-import {questionnaireLocale,workbookDimensions,workbookQuestions} from './innerly-v1-model.mjs?v=mh-14';
+import {questionnaireLocale,workbookQuestions} from './innerly-v1-model.mjs?v=mh-14';
 const say=(l,en,hi)=>l==='hi'?hi:en;
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const arrow='<span aria-hidden="true">→</span>';
 const start=l=>`<button class="mh-primary" data-action="begin">${say(l,'Start My Test','अपना टेस्ट शुरू करें')} ${arrow}</button>`;
-export function homeIcon(kind){const paths={loop:'M7 10c-4 0-5 6-1 8 3 2 6-2 9-6 2-3 5-4 7-1 3 5-3 9-6 5M9 5v5H4',sun:'M12 4V2m0 20v-2M4 12H2m20 0h-2M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0',connection:'M11 7C7 1 0 7 4 12l8 8 8-8c4-5-3-11-7-5M8 12h8',leaf:'M5 20C4 12 7 5 20 3c1 12-5 18-15 17ZM5 20l10-10',shield:'M12 2 3 6v6c0 5 9 10 9 10s9-5 9-10V6ZM8 12l3 3 5-6',clock:'M12 6v6l4 2M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',chart:'M4 21V11m8 10V4m8 17v-7',book:'M3 3h7l2 2 2-2h7v17h-7l-2 2-2-2H3ZM12 5v17',check:'m5 12 4 4L20 5',spark:'m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${paths[kind]||paths.leaf}"/></svg>`;}
+export function homeIcon(kind){const paths={arrow:'M4 12h16m-6-6 6 6-6 6',loop:'M7 10c-4 0-5 6-1 8 3 2 6-2 9-6 2-3 5-4 7-1 3 5-3 9-6 5M9 5v5H4',sun:'M12 4V2m0 20v-2M4 12H2m20 0h-2M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0',connection:'M11 7C7 1 0 7 4 12l8 8 8-8c4-5-3-11-7-5M8 12h8',leaf:'M5 20C4 12 7 5 20 3c1 12-5 18-15 17ZM5 20l10-10',shield:'M12 2 3 6v6c0 5 9 10 9 10s9-5 9-10V6ZM8 12l3 3 5-6',clock:'M12 6v6l4 2M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',chart:'M4 21V11m8 10V4m8 17v-7',book:'M3 3h7l2 2 2-2h7v17h-7l-2 2-2-2H3ZM12 5v17',check:'m5 12 4 4L20 5',spark:'m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${paths[kind]||paths.leaf}"/></svg>`;}
 export const homeTopics={
  thoughts:{label:['Thoughts','आपके विचार'],title:['When your mind keeps going.','जब विचार चलते ही रहें।'],description:['Notice the thoughts you return to.','उन विचारों पर ध्यान दें जो बार-बार आते हैं।'],question:6,icon:'loop'},
  emotions:{label:['Emotions','भावनाएँ'],title:['A feeling. A pause. A response.','एक भावना। एक विराम। एक प्रतिक्रिया।'],description:['Explore what happens between feeling and reacting.','भावना आने और प्रतिक्रिया देने के बीच क्या होता है, समझें।'],question:12,icon:'sun'},
@@ -29,85 +29,43 @@ function relationshipMoment(key='unheard',l='en'){
 const previewAnswers=sampleReportData().report.answers;
 const defaultQuestion=12;
 const previewCategories={
- support:['Strengths','ताकतें'],
- focus:['Areas to work on','सुधार की गुंजाइश'],
- varies:['Patterns to notice','ध्यान देने लायक पैटर्न']
+ support:['A strength to lean on','आपकी एक मददगार आदत'],
+ focus:['Room to grow','बेहतरी की गुंजाइश'],
+ varies:['A pattern to explore','समझने लायक पैटर्न']
 };
-const previewAreas=[
- ['Self-awareness','खुद की समझ'],
- ['Thinking patterns','सोचने के तरीके'],
- ['Emotional balance','भावनाओं का संतुलन'],
- ['Decisions','निर्णय'],
- ['Relationships','रिश्ते'],
- ['Stress & resilience','तनाव और उससे उबरना']
-];
-
-export function homeReportPreview(view='patterns',l='en',{question=defaultQuestion,answers=previewAnswers,change}={}){
- const i=l==='hi'?1:0;
- const locale=questionnaireLocale(l),labels=locale.choices.slice(0,5);
- const entries=workbookQuestions.map(({id},index)=>questionGuidance({index,id,value:answers[index]},l));
- const selected=entries[question],areaIndex=workbookQuestions[question].dimension;
- const areaEntries=workbookDimensions[areaIndex].items.map(index=>entries[index]);
- const next=areaEntries.find(entry=>entry.category==='focus')??areaEntries.find(entry=>entry.category==='varies')??selected;
- const tabs=[
-  ['patterns','Insights','पैटर्न'],
-  ['responses','Sample answers','उदाहरण जवाब'],
-  ['steps','Next step','अगला कदम']
- ];
-
- let detail;
- if(view==='responses'){
-  detail=`<label class="in-preview-question-label"><span>${say(l,'Choose a question','एक सवाल चुनें')}</span>
-   <select data-preview-question>${areaEntries.map(entry=>`<option value="${entry.index}" ${entry.index===question?'selected':''}>${esc(entry.label)}</option>`).join('')}</select>
-  </label>
-  <p class="in-preview-question">“${esc(locale.questions[question])}”</p>
-  <div class="in-preview-options" role="group" aria-label="${say(l,'Try a sample answer','एक उदाहरण जवाब आज़माएँ')}">
-   ${labels.map((label,value)=>`<button type="button" data-preview-answer="${value}" aria-pressed="${value===selected.value}">${esc(label)}</button>`).join('')}
+function previewReading(question,answers,l,previous){
+ const locale=questionnaireLocale(l),value=answers[question];
+ const item=questionGuidance({index:question,id:workbookQuestions[question].id,value},l);
+ return `<div class="in-preview-reading" data-result="${item.category}">
+  <div class="in-book-page-head"><span>${say(l,'YOUR REPORT, UNFOLDED','आपकी रिपोर्ट की एक झलक')}</span>${homeIcon('spark')}</div>
+  <h3>${esc(item.label)}</h3>
+  <div class="in-answer-chart" role="img" aria-label="${esc(`${say(l,'Sample answer','उदाहरण जवाब')}: ${locale.choices[value]}`)}">
+   <div class="in-answer-chart-caption"><span>${say(l,'Your answer','आपका जवाब')}</span><strong>${esc(locale.choices[value])}</strong></div>
+   <div class="in-answer-track"><span class="in-answer-fill" style="width:${value*25}%"></span><span class="in-answer-marker" style="left:${value*25}%"></span>${[0,1,2,3,4].map(v=>`<i style="left:${v*25}%"></i>`).join('')}</div>
+   <div class="in-answer-axis"><span>${esc(locale.choices[0])}</span><span>${esc(locale.choices[4])}</span></div>
   </div>
-  <p class="in-preview-result" data-result="${selected.category}">${say(l,'Shown under','रिपोर्ट में')} <strong>${previewCategories[selected.category][i]}</strong></p>`;
- }else if(view==='steps'){
-  detail=`<div class="in-preview-practice">
-   <strong>${esc(next.label)}</strong><p>${esc(next.step)}</p>
-   <strong>${say(l,'How it can help','इससे क्या मदद मिल सकती है')}</strong><p>${esc(next.benefit)}</p>
-  </div>`;
- }else{
-  detail=`<dl class="in-preview-insights">${Object.entries(previewCategories).map(([category,names])=>{
-   const matches=areaEntries.filter(entry=>entry.category===category);
-   if(!matches.length)return '';
-   return `<div data-result="${category}"><dt>${names[i]}</dt><dd>${matches.map(entry=>esc(entry.label)).join(' · ')}</dd></div>`;
-  }).join('')}</dl>`;
- }
-
- return `<div class="in-preview-dashboard">
-  <div class="in-preview-chart">
-   <h3>${say(l,'Patterns across six areas','छह पहलुओं के पैटर्न')}</h3>
-   <p>${say(l,'Choose an area to explore its results.','नतीजे देखने के लिए कोई पहलू चुनें।')}</p>
-   <div class="in-preview-chart-rows" role="group" aria-label="${say(l,'Sample report areas','उदाहरण रिपोर्ट के पहलू')}">
-    ${workbookDimensions.map(({index,items})=>{
-     const counts=Object.keys(previewCategories).map(category=>items.filter(item=>entries[item].category===category).length);
-     const summary=Object.values(previewCategories).map((names,j)=>`${names[i]} ${counts[j]}`).join(', ');
-     return `<button type="button" data-preview-area="${index}" ${change&&index===areaIndex?'data-preview-changed':''} aria-pressed="${index===areaIndex}" aria-controls="in-preview-area-detail" aria-label="${esc(`${previewAreas[index][i]}, ${summary}`)}">
-      <span>${previewAreas[index][i]}</span><span class="in-preview-track" aria-hidden="true">${Object.keys(previewCategories).map((category,j)=>`<span data-result="${category}" data-segment="${index}-${category}" style="flex-grow:${counts[j]}"></span>`).join('')}</span>
-     </button>`;
-    }).join('')}
-   </div>
-   <ul class="in-preview-legend">${Object.entries(previewCategories).map(([category,names])=>`<li data-result="${category}">${names[i]}</li>`).join('')}</ul>
+  <div class="in-preview-result" data-result="${item.category}">${homeIcon(item.category==='support'?'check':item.category==='focus'?'leaf':'loop')}<strong>${previewCategories[item.category][l==='hi'?1:0]}</strong></div>
+  <p class="in-answer-change">${previous!==undefined?`${esc(locale.choices[previous])} → ${esc(locale.choices[value])}`:say(l,'One answer. One part of your picture.','एक जवाब। आपकी तस्वीर का एक हिस्सा।')}</p>
+  <div class="in-preview-step"><span>${say(l,'ONE SMALL STEP','एक छोटा कदम')}</span><p>${esc(item.step)}</p></div>
+  <div class="in-preview-benefit">${homeIcon('leaf')}<p><strong>${say(l,'What it could help with','इससे क्या मदद मिल सकती है')}</strong>${esc(item.benefit)}</p></div>
+ </div>`;
+}
+export function homeReportPreview(l='en',{question=defaultQuestion,answers=previewAnswers}={}){
+ const locale=questionnaireLocale(l);
+ return `<div class="in-preview-unfold">
+  <div class="in-preview-prompt">
+   <p class="in-preview-kicker"><span>01</span> ${say(l,'A SMALL ANSWER','एक छोटा जवाब')}</p>
+   <h3>${say(l,'Try an answer.<br>See what unfolds.','एक जवाब चुनें।<br>खुद को थोड़ा समझें।')}</h3>
+   <blockquote>“${esc(locale.questions[question])}”</blockquote>
+   <div class="in-preview-options" role="group" aria-label="${say(l,'Try a sample answer','एक उदाहरण जवाब आज़माएँ')}">${locale.choices.slice(0,5).map((label,value)=>`<button type="button" data-preview-answer="${value}" aria-pressed="${value===answers[question]}" aria-controls="in-book-reading"><span aria-hidden="true"></span>${esc(label)}</button>`).join('')}</div>
+   <p class="in-preview-hint">${homeIcon('arrow')}${say(l,'Change your answer. Watch the insight change.','जवाब बदलें। उससे जुड़ी समझ बदलते देखें।')}</p>
+   <p class="in-preview-disclaimer">${say(l,'A fictional example from our 36 questions. Your full report brings all your answers together.','हमारे 36 सवालों में से एक काल्पनिक उदाहरण। पूरी रिपोर्ट में आपके सभी जवाब एक साथ आते हैं।')}</p>
   </div>
-  <div id="in-preview-area-detail" class="in-preview-area-detail">
-   <h3>${previewAreas[areaIndex][i]}</h3>
-   <div class="in-preview-views" role="group" aria-label="${say(l,'Explore this area','इस पहलू को समझें')}">
-    ${tabs.map(([key,en,hi])=>`<button type="button" data-preview-view="${key}" aria-pressed="${view===key}" aria-controls="in-preview-detail-body">${say(l,en,hi)}</button>`).join('')}
+  <div class="in-book-scene">
+   <div class="in-report-book is-open">
+    <div id="in-book-reading" class="in-book-page">${previewReading(question,answers,l)}</div>
    </div>
-   <div id="in-preview-detail-body">${detail}</div>
-   ${change?`<div class="in-preview-demo" data-result="${selected.category}">
-    <strong>${esc(selected.label)}</strong>
-    <p>${esc(labels[change.value])} → ${esc(labels[selected.value])}</p>
-    <p>${previewCategories[change.category][i]} → <b>${previewCategories[selected.category][i]}</b></p>
-   </div>`:view==='patterns'&&question===defaultQuestion?`<div class="in-preview-demo" data-result="${selected.category}">
-    <strong>${esc(selected.label)}</strong>
-    <p>${say(l,'Sample answer','उदाहरण जवाब')} · ${esc(labels[selected.value])}</p>
-    <p>${previewCategories[selected.category][i]}</p>
-   </div>`:''}
+   <button class="in-preview-replay" data-preview-replay type="button">↻ ${say(l,'Replay the example','उदाहरण फिर देखें')}</button>
   </div>
  </div>`;
 }
@@ -131,8 +89,8 @@ export function innerlyHome({language='en',mission=''}={}){
   </div>
   <div class="in-report-workspace">
    <div class="in-paper-head"><strong>${homeIcon('chart')} ${say(l,'Wellbeing report','वेलबीइंग रिपोर्ट')}</strong><span>${say(l,'SAMPLE REPORT','उदाहरण रिपोर्ट')}</span></div>
-   <div id="in-report-sample">${homeReportPreview('patterns',l)}</div>
-   <div class="in-preview-footer"><a class="in-sample-report-link" href="report-demo.html?lang=${l}">${say(l,'Explore the full sample report','पूरी उदाहरण रिपोर्ट देखें')} ↗</a>${start(l)}</div>
+   <div id="in-report-sample">${homeReportPreview(l)}</div>
+   <div class="in-preview-footer"><a class="in-sample-report-link" href="report-preview.html">${say(l,'Explore the full sample report','पूरी उदाहरण रिपोर्ट देखें')} ↗</a>${start(l)}</div>
   </div>
  </section>
  <section class="in-explore" id="in-explore"><div class="in-section-heading"><p class="in-eyebrow">${say(l,'REAL LIFE. SIMPLE QUESTIONS.','आपकी ज़िंदगी। आसान सवाल।')}</p><h2>${say(l,'Let’s start with<br><span>what feels familiar.</span>','शुरुआत वहाँ से,<br><span>जो अपना लगे।</span>')}</h2></div><div class="in-topic-tabs" role="group" aria-label="${say(l,'Explore everyday experiences','रोज़मर्रा के अनुभव देखें')}">${Object.entries(homeTopics).map(([key,c],j)=>`<button data-home-topic="${key}" aria-pressed="${j===0}" aria-controls="in-topic-panel">${homeIcon(c.icon)}${c.label[i]}</button>`).join('')}</div><div id="in-topic-panel" class="in-topic-panel">${homeTopicPanel('thoughts',l)}</div></section>
@@ -146,82 +104,44 @@ export function bindHomeInteractions(root,language,onUpdate=()=>{}){
  for(const button of root.querySelectorAll('[data-home-topic]'))button.onclick=()=>{for(const other of root.querySelectorAll('[data-home-topic]'))other.setAttribute('aria-pressed',String(other===button));root.querySelector('#in-topic-panel').innerHTML=homeTopicPanel(button.dataset.homeTopic,l);onUpdate();};
  const panel=root.querySelector('#in-report-sample');
  if(!panel)return;
- let view='patterns',question=defaultQuestion;
- const answers=[...previewAnswers];
+ const answers=[...previewAnswers],question=defaultQuestion;
  const motion=matchMedia('(prefers-reduced-motion: reduce)');
  const announcement=document.createElement('div');
- announcement.className='mh-sr';
- announcement.setAttribute('role','status');
- panel.after(announcement);
-
- let demoTimer;
+ announcement.className='mh-sr';announcement.setAttribute('role','status');panel.after(announcement);
+ const book=panel.querySelector('.in-report-book'),page=panel.querySelector('.in-book-page');
  const animationAllowed=()=>!motion.matches&&document.getElementById('mh-motion')?.getAttribute('aria-pressed')!=='true';
- const observer=typeof IntersectionObserver==='function' ? new IntersectionObserver(([entry])=>{
+ let demoTimer,answerTimer;
+ function changeAnswer(value){
+  if(!panel.isConnected)return;
+  const previous=answers[question];answers[question]=value;
+  page.innerHTML=previewReading(question,answers,l,previous===value?undefined:previous);
+  panel.querySelectorAll('[data-preview-answer]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.previewAnswer)===value)));
+  announcement.textContent=`${questionnaireLocale(l).choices[value]}. ${panel.querySelector('.in-preview-result').textContent}`;
+  if(previous===value||!animationAllowed())return;
+  page.querySelector('.in-answer-fill').animate([{width:`${previous*25}%`},{width:`${value*25}%`}],{duration:950,easing:'cubic-bezier(.2,.7,.2,1)'});
+  page.querySelector('.in-answer-marker').animate([{left:`${previous*25}%`},{left:`${value*25}%`}],{duration:950,easing:'cubic-bezier(.2,.7,.2,1)'});
+  page.querySelector('.in-preview-result').animate([{opacity:.25,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,delay:350,fill:'backwards'});
+ }
+ const observer=typeof IntersectionObserver==='function'?new IntersectionObserver(([entry])=>{
   clearTimeout(demoTimer);
-  if(entry.intersectionRatio<.45)return;
-  demoTimer=setTimeout(()=>{
-   observer.disconnect();
-   if(panel.isConnected)changeAnswer(3);
-  },1300);
- },{threshold:.45}) : null;
- observer?.observe(panel.querySelector('.in-preview-chart'));
+  if(entry.intersectionRatio<.35)return;
+  observer.disconnect();
+  if(!animationAllowed())return;
+  demoTimer=setTimeout(()=>{if(animationAllowed())changeAnswer(3);},1300);
+ },{threshold:.35}):null;
+ observer?.observe(book);
 
- function cancelDemo(){
-  observer?.disconnect();
-  clearTimeout(demoTimer);
- }
-
- function render(focusSelector,change){
-  panel.innerHTML=homeReportPreview(view,l,{question,answers,change});
-  if(focusSelector)panel.querySelector(focusSelector)?.focus({preventScroll:true});
- }
-
- function changeAnswer(value,focusSelector){
-  const previous=new Map([...panel.querySelectorAll('[data-segment]')]
-   .map(segment=>[segment.dataset.segment,getComputedStyle(segment).flexGrow]));
-  const id=workbookQuestions[question].id;
-  const before=questionGuidance({index:question,id,value:answers[question]},l);
-  const after=questionGuidance({index:question,id,value},l);
-  answers[question]=value;
-  const change=before.category===after.category?undefined:before;
-  render(focusSelector,change);
-  announcement.textContent=panel.querySelector('.in-preview-demo, .in-preview-result')?.textContent??'';
-  if(!change||!animationAllowed())return;
-  for(const segment of panel.querySelectorAll('[data-segment]')){
-   const from=previous.get(segment.dataset.segment),to=segment.style.flexGrow;
-   if(from!==to)segment.animate([{flexGrow:from},{flexGrow:to}],{duration:1050,easing:'ease-in-out'});
-  }
-  panel.querySelector('[data-preview-changed]').animate([
-   {boxShadow:'0 0 0 3px #819ed0'},
-   {boxShadow:'0 0 0 0 transparent'}
-  ],{duration:1500,easing:'ease-out'});
- }
-
- panel.addEventListener('focusin',cancelDemo,{once:true});
- panel.onchange=event=>{
-  if(!event.target.matches('[data-preview-question]'))return;
-  cancelDemo();
-  question=Number(event.target.value);
-  render('[data-preview-question]');
- };
+ function cancelDemo(){observer?.disconnect();clearTimeout(demoTimer);clearTimeout(answerTimer);}
+ panel.addEventListener('focusin',cancelDemo);
  panel.onclick=event=>{
-  const button=event.target.closest('button');
-  if(!button)return;
+  const button=event.target.closest('button');if(!button)return;
   cancelDemo();
-  const data=button.dataset;
-  if(data.previewArea!==undefined){
-   const area=workbookDimensions[Number(data.previewArea)];
-   if(!area.items.includes(question)){
-    question=area.items.find(index=>questionGuidance({
-     index,id:workbookQuestions[index].id,value:answers[index]
-    },l).category==='focus')??area.items[0];
-   }
-   render(`[data-preview-area="${data.previewArea}"]`);
-  }else if(data.previewView!==undefined){
-   view=data.previewView;
-   render(`[data-preview-view="${view}"]`);
-  }else if(data.previewAnswer!==undefined){
-   changeAnswer(Number(data.previewAnswer),`[data-preview-answer="${data.previewAnswer}"]`);
+  if(button.hasAttribute('data-preview-answer'))changeAnswer(Number(button.dataset.previewAnswer));
+  else if(button.hasAttribute('data-preview-replay')){
+   answers[question]=2;page.innerHTML=previewReading(question,answers,l);
+   panel.querySelectorAll('[data-preview-answer]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.previewAnswer==='2')));
+   if(!animationAllowed())return;
+   demoTimer=setTimeout(()=>{if(animationAllowed())changeAnswer(3);},1100);
   }
  };
 }

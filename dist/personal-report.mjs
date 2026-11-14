@@ -1,6 +1,6 @@
-import {reportSnapshot} from './report-concept-view.mjs?v=5';
-import {personalQuestionMarkup} from './personal-report-view.mjs?v=4';
-import {mountQuestionExplorer} from './question-explorer.mjs?v=4';
+import {reportSnapshot} from './report-concept-view.mjs?v=6';
+import {personalQuestionMarkup} from './personal-report-view.mjs?v=5';
+import {mountQuestionExplorer} from './question-explorer.mjs?v=5';
 
 export function mountPersonalReport(root,report,history=[],language='en'){
  const abort=new AbortController(),signal=abort.signal,l=language==='hi'?'hi':'en',snapshot=reportSnapshot(report.answers,l);

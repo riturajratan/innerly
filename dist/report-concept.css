@@ -21,3 +21,20 @@ dialog{padding:0;max-width:850px;width:calc(100% - 40px);border:1px solid #dce5f
 @media(max-width:620px){.question-insight-panel{border-left:0;border-top:1px solid var(--border)}.question-insight-panel .question-reading{border-top:0}.dialog-graph-heading{padding-top:20px}.question-insight-panel .response-chart{max-height:160px}.question-answer{padding-bottom:14px}}
 body[data-chart-mode=line] .question-insight-panel .chart-mark .response-bar{opacity:0}
 @media(max-width:620px){.report-intro h1{font-size:clamp(38px,12vw,48px)}}
+
+/* Keep every frequency label and question identifier readable on narrow screens. */
+.response-chart-scroll{max-width:100%;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#bfcede transparent}
+.response-chart-scroll .response-chart{min-width:450px;width:100%;max-height:none}
+.chart-grid text,.chart-mark text,.question-insight-panel .chart-grid text{font-size:13px;fill:#536c89}
+.question-insight-panel .response-chart-scroll{margin:0 15px}
+.question-insight-panel .response-chart{margin:15px 0;width:100%;max-height:none}
+.summary-legend button{font-size:14px;line-height:1.5}
+.stack-legend{font-size:13px;gap:12px}
+.landscape-row-name{font-size:15px;line-height:1.5}
+.landscape-row-name>span{font-size:11px}
+.stack-track b{font-size:12px}
+.chart-footnote,.graph-note{font-size:12px;line-height:1.7}
+.category-pill{font-size:12px}.reading-note{font-size:13px;color:#5a708b}
+.answer-options button{font-size:15px;min-height:46px}
+@media(max-width:620px){.summary-legend button{font-size:13px}.summary-legend button>span:nth-child(2){max-width:none}.summary-card{display:block}.summary-card .donut-wrap{max-width:240px;margin:12px auto}.summary-legend{gap:7px}.summary-legend button{flex-wrap:nowrap}.summary-card .fine-print{font-size:12px;margin-top:14px}.landscape-row-name{font-size:14px}.landscape-row-name>span{font-size:11px}.stack-legend{font-size:12px}.answer-options button{font-size:14px}.area-caption,.insight p{font-size:14px}.insight>span{font-size:11px}.graph-note{font-size:12px}}
+@media print{.response-chart-scroll{overflow:visible}.response-chart-scroll .response-chart{min-width:0}.chart-grid text,.chart-mark text{font-size:11px}.summary-legend button{font-size:11px}}

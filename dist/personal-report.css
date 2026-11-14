@@ -47,11 +47,13 @@ body.mh-personal-report{background:#f8fafc;color:#1b355b}.mh-personal-report #ap
 .qe-position-guide{stroke:currentColor;stroke-width:1.2;stroke-dasharray:3 5;opacity:.5}
 .qe-position-halo{fill:currentColor;opacity:.15;transform-box:fill-box;transform-origin:center}
 .qe-position-dot{fill:currentColor;stroke:#fff;stroke-width:2.5}
-.qe-position-label rect{fill:currentColor;opacity:.18}
-.qe-position-label text{fill:color-mix(in srgb,currentColor 60%,#263d32);font:600 9px 'DM Sans',sans-serif;letter-spacing:.5px}
-.qe-curve-y{font:11px 'DM Sans',sans-serif;fill:#99a8ba}
-.qe-curve-axis{font:12px 'DM Sans',sans-serif;fill:#93a1b3}
-.qe-curve-axis .is-selected{fill:color-mix(in srgb,currentColor 70%,#263d32);font-weight:700}
+.qe-graph-canvas{display:block;position:relative}
+.qe-position-label{position:absolute;transform:translateX(-50%);display:grid;place-items:center;min-height:26px;width:108px;border-radius:6px;background:color-mix(in srgb,currentColor 13%,#fff);color:color-mix(in srgb,var(--question-color) 60%,#263d32);font:700 11px 'DM Sans',sans-serif;letter-spacing:.3px}
+.qe-curve-y{position:absolute;inset:0;color:#5f7188;font:12px 'DM Sans',sans-serif}
+.qe-curve-y>span{position:absolute;right:94%;transform:translateY(-50%)}
+.qe-curve-axis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;text-align:center;color:#5e7189;font:13px/1.4 'DM Sans',sans-serif;margin:-5px 0 22px}
+.qe-curve-axis>span{min-width:0;overflow-wrap:normal}
+.qe-curve-axis .is-selected{color:color-mix(in srgb,var(--question-color) 60%,#263d32);font-weight:700}
 .qe-position-reading{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:0 0 17px;margin-top:-3px}
 .qe-position-reading>span{display:flex;flex-direction:column;gap:6px}
 .qe-position-reading small{color:#96a4b7;font-size:8px;font-weight:400;letter-spacing:.6px}
@@ -74,3 +76,27 @@ body.mh-personal-report{background:#f8fafc;color:#1b355b}.mh-personal-report #ap
 @media(max-width:480px){.qe-rows{grid-template-columns:1fr}.question-explorer [role=tabpanel]{padding:19px 15px}.qe-row,.qe-world-row{padding:17px 14px 0}.qe-row>.qe-question-title,.qe-world-row>.qe-question-title{min-height:0;font-size:17px;margin:15px 0 18px}.qe-curve-context{font-size:9px;gap:5px}.qe-curve-context>b{font-size:7px;letter-spacing:0}.qe-line-card-foot{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}.qe-row-head>span{font-size:9px}.personal-action-buttons{width:100%;justify-content:space-between;gap:7px}.personal-action-buttons .plain-button{font-size:10px}.personal-action-buttons .primary-button{font-size:10px;gap:6px}.mh-personal-report .mh-brand{font-size:25px}.mh-personal-report>.mh-header{flex-wrap:wrap;justify-content:space-between}.mh-personal-report .mh-header nav{order:3;width:100%;justify-content:center}.mh-personal-report .mh-header nav button{font-size:12px;padding:8px 12px}.qe-mock-badge{font-size:7px}.qe-frequency-chart>button>span:last-child{line-height:1.6}.qe-history-chart{margin-left:-8px;width:calc(100% + 16px)}.qe-panel-heading>p{font-size:14px}.qe-explainer{line-height:1.7}.mh-personal-report .personal-report-actions .sample-toolbar>div>span:last-child{display:none}}
 @media(prefers-reduced-motion:reduce){.question-explorer *{animation:none!important;transition:none!important}}
 @media print{.mh-personal-report>.mh-header{position:static;padding:0 0 15px}.mh-personal-report>.mh-header nav,.mh-personal-report .mh-header-tools,.mh-personal-report>.mh-footer,.mh-personal-report>#mh-language-note,.personal-report-actions,#mh-report-status,.qe-tabs{display:none!important}.mh-personal-report #app{margin:0;padding:0}.question-explorer{break-before:page}.question-explorer [role=tabpanel]{border:0;padding:0}.qe-rows{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.qe-row{break-inside:avoid}.qe-world-note{break-inside:avoid}.qe-world-grid{grid-template-columns:1fr 1fr}.qe-world-row{break-inside:avoid}.qe-world-note h3{font-size:22px}.mh-personal-report .response-table-wrap th:last-child{min-width:0}.mh-personal-report .response-table-wrap td{font-size:8px}.mh-personal-report .report-main{width:100%;max-width:none}.qe-panel-heading>h3{font-size:22px}}
+
+/* Labels stay in CSS pixels instead of shrinking with an SVG viewBox. */
+.qe-row-head>b{font-size:12px;color:#60738d}
+.qe-row-head>span{font-size:11px;line-height:1.5}
+.qe-curve-context{font-size:12px;gap:8px;color:#5b708a;flex-wrap:wrap}
+.qe-curve-context>b{font-size:10px;letter-spacing:.1px}
+.qe-position-reading small{font-size:11px;color:#61758e;letter-spacing:.3px;line-height:1.5}
+.qe-position-reading>span>b{font-size:18px;line-height:1.5}
+.qe-position-percent>small{font-size:11px;color:#61758e;letter-spacing:0}
+.qe-position-percent>b>small{font-size:18px}
+.qe-line-card-foot{font-size:12px;color:#526b8b;min-height:48px;line-height:1.5}
+.qe-mock-badge{font-size:10px;line-height:1.6}
+.qe-frequency-chart{grid-template-columns:repeat(5,minmax(85px,1fr));overflow-x:auto;gap:12px}
+.qe-frequency-chart>button>b{font-size:14px;line-height:1.5}
+.qe-frequency-chart>button>span:last-child{font-size:12px;line-height:1.5}
+.qe-frequency-chart>button>strong small{font-size:12px}
+.qe-history-scroll{max-width:100%;overflow-x:auto}
+.qe-history-chart{min-width:560px;width:100%;margin-left:0}
+.qe-history-chart text{font-size:13px;fill:#526b88}
+.qe-history-records{font-size:13px;line-height:1.7}
+.mh-large .qe-row>.qe-question-title,.mh-large .qe-world-row>.qe-question-title{font-size:21px}
+.mh-large .qe-curve-axis{font-size:15px}
+@media(max-width:480px){.qe-row,.qe-world-row{padding-left:12px;padding-right:12px}.qe-row-head{gap:6px}.qe-row-head>span{font-size:11px}.qe-position-reading{gap:8px}.qe-position-reading>span>b{font-size:17px}.qe-position-reading>.qe-position-percent>b{font-size:29px}.qe-line-card-foot{margin-left:-12px;margin-right:-12px}.qe-position-reading>.qe-position-percent{max-width:90px}.qe-frequency-chart{padding:12px 6px}.qe-frequency-chart>button{padding:10px 5px}}
+@media print{.qe-curve-axis{font-size:9px}.qe-position-label{font-size:8px;width:78px;min-height:20px}.qe-position-reading>span>b{font-size:12px}.qe-position-reading small,.qe-line-card-foot{font-size:9px}.qe-row-head>span,.qe-curve-context,.qe-curve-context>b{font-size:8px}.qe-frequency-chart{overflow:visible}.qe-history-scroll{overflow:visible}.qe-history-chart{min-width:0}}
