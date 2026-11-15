@@ -1,6 +1,6 @@
-import {mountAnswerMap} from './answer-map.mjs?v=1';
-import {reportSnapshot} from './report-concept-view.mjs?v=14';
-import {personalQuestionMarkup} from './personal-report-view.mjs?v=14';
+import {mountAnswerMap} from './answer-map.mjs?v=2';
+import {reportSnapshot} from './report-concept-view.mjs?v=15';
+import {personalQuestionMarkup} from './personal-report-view.mjs?v=15';
 import {mountQuestionExplorer} from './question-explorer.mjs?v=7';
 
 export function mountPersonalReport(root,report,history=[],language='en'){

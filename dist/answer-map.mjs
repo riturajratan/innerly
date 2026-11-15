@@ -10,7 +10,8 @@ export function answerMapPreview(item,language='en'){
 
 export function answerMapPreviewMarkup(item,language='en',id='cs-map-preview'){
  const hi=language==='hi',t=(en,hin)=>hi?hin:en,preview=answerMapPreview(item,language),esc=escapeHTML;
- return `<div class="cs-map-preview-heading"><span><i aria-hidden="true"></i>${esc(preview.heading)}</span><button type="button" data-map-close aria-label="${t('Close insight','Insight बंद करें')}">×</button></div><h4 id="${id}-title">${esc(preview.title)}</h4><p id="${id}-meaning">${esc(preview.meaning)}</p><div class="cs-map-preview-footer"><span>${preview.id} · ${t('Your answer','आपका जवाब')}: <b>${esc(preview.response)}</b></span><button type="button" data-map-detail>${t('View answer detail','जवाब विस्तार से देखें')} <span aria-hidden="true">→</span></button></div>`;
+ const step=preview.category==='focus'?`<div class="cs-map-preview-step" id="${id}-step"><span class="cs-map-step-label"><span aria-hidden="true">↗</span>${t('Try this today','आज यह आज़माएँ')}</span><p>${esc(preview.practice)}</p></div>`:'';
+ return `<div class="cs-map-preview-heading"><span><i aria-hidden="true"></i>${esc(preview.heading)}</span><button type="button" data-map-close aria-label="${t('Close insight','Insight बंद करें')}">×</button></div><h4 id="${id}-title">${esc(preview.title)}</h4><p id="${id}-meaning">${esc(preview.meaning)}</p>${step}<div class="cs-map-preview-footer"><span>${preview.id} · ${t('Your answer','आपका जवाब')}: <b>${esc(preview.response)}</b></span><button type="button" data-map-detail>${t('View answer detail','जवाब विस्तार से देखें')} <span aria-hidden="true">→</span></button></div>`;
 }
 
 let previewId=0;
@@ -49,8 +50,10 @@ export function mountAnswerMap(root,{getSnapshot,language='en',onOpenQuestion,si
   trigger=cell;index=next;pinned=lock;
   panel.className=`cs-map-preview ${item.category}`;
   panel.innerHTML=answerMapPreviewMarkup(item,language,panel.id);
+  const description=`${panel.id}-meaning${item.category==='focus'?` ${panel.id}-step`:''}`;
+  panel.setAttribute('aria-describedby',description);
   panel.hidden=false;panel.dataset.pinned=String(lock);
-  cell.setAttribute('aria-expanded','true');cell.setAttribute('aria-controls',panel.id);cell.setAttribute('aria-describedby',`${panel.id}-meaning`);cell.classList.add('is-previewed');
+  cell.setAttribute('aria-expanded','true');cell.setAttribute('aria-controls',panel.id);cell.setAttribute('aria-describedby',description);cell.classList.add('is-previewed');
   position();
  }
  function scheduleClose(){clearTimeout(closeTimer);if(!pinned)closeTimer=setTimeout(()=>hide(),180);}
