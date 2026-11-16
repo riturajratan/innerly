@@ -1,6 +1,6 @@
 import {mountAnswerMap} from './answer-map.mjs?v=2';
 import {reportSnapshot} from './report-concept-view.mjs?v=15';
-import {personalQuestionMarkup} from './personal-report-view.mjs?v=15';
+import {personalQuestionMarkup} from './personal-report-view.mjs?v=16';
 import {mountQuestionExplorer} from './question-explorer.mjs?v=7';
 
 export function mountPersonalReport(root,report,history=[],language='en'){
@@ -15,6 +15,13 @@ export function mountPersonalReport(root,report,history=[],language='en'){
   dialog.innerHTML=personalQuestionMarkup(snapshot,index,l);
   if(!dialog.open)dialog.showModal();else dialog.querySelector('.close-dialog').focus();
  }
+ const details=root.querySelector('#report-details');
+ function revealDetails(){if(details)details.open=true;}
+ root.addEventListener('click',e=>{
+  const link=e.target.closest('a[href^="#"]');
+  if(link){const target=root.querySelector(link.getAttribute('href'));if(target&&details?.contains(target))revealDetails();}
+  if(e.target.closest('[data-personal-group],[data-area-jump]'))revealDetails();
+ },{signal});
  root.addEventListener('click',e=>{
   const b=e.target.closest('[data-question],[data-area-jump],button[data-chart-mode],[data-personal-group],[data-personal-prev],[data-personal-next],.close-dialog');if(!b)return;
   if(b.hasAttribute('data-question')){openQuestion(Number(b.dataset.question),b);return;}

@@ -3,8 +3,8 @@ import {mountThoughtWaves} from './planning.mjs?v=14';
 import {previewResponseDetail} from './response-graphs.mjs?v=report-3';
 import {sampleReportMarkup} from './sample-report-view.mjs?v=report-summary-1';
 import {sampleReportData} from './sample-report.mjs?v=report-3';
-import {personalReportMarkup,usesPersonalReport} from './personal-report-view.mjs?v=15';
-import {mountPersonalReport} from './personal-report.mjs?v=15';
+import {personalReportMarkup,usesPersonalReport} from './personal-report-view.mjs?v=16';
+import {mountPersonalReport} from './personal-report.mjs?v=16';
 import {INNERLY_V1_VERSION,INNERLY_V1_STORAGE,readWorkbookReports,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=storage-1';
 import {saveLocalReport,removeLocalReport} from './report-storage.mjs?v=1';
 import {workbookDimensionReading} from './innerly-v1-views.mjs?v=report-summary-1';
@@ -65,6 +65,15 @@ function render(focus=true){
  thoughtWaves?.destroy();thoughtWaves=null;
  personalReport?.destroy();personalReport=null;
  const showPersonalReport=view==='report'&&!reportDemo&&usesPersonalReport(report);
+ if(showPersonalReport){
+  const pending=['personal-report-base-style','personal-report-style'].map(id=>document.getElementById(id)).filter(style=>style&&!style.sheet);
+  if(pending.length){
+   app.setAttribute('aria-busy','true');
+   app.innerHTML='<p role="status" style="padding:48px 24px;text-align:center">'+say(language,'Preparing your reflection…','आपकी रिपोर्ट तैयार हो रही है…')+'</p>';
+   Promise.all(pending.map(style=>new Promise(resolve=>{style.addEventListener('load',resolve,{once:true});style.addEventListener('error',resolve,{once:true});style.disabled=false;}))).then(()=>{app.removeAttribute('aria-busy');if(view==='report'&&pending.every(style=>style.sheet))render(focus);else if(view==='report')app.innerHTML='<p role="status">'+say(language,'Please reload to load the report styles.','रिपोर्ट खोलने के लिए पेज दोबारा लोड करें।')+'</p>';});
+   return;
+  }
+ }
  document.body.classList.toggle('mh-personal-report',showPersonalReport);
  for(const id of ['personal-report-base-style','personal-report-style']){const stylesheet=document.getElementById(id);if(stylesheet)stylesheet.disabled=!showPersonalReport;}
  clearAuthReturn();hideGraphTooltip();updateAuthHeader(auth.state);
