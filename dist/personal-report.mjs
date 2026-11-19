@@ -6,6 +6,17 @@ import {mountQuestionExplorer} from './question-explorer.mjs?v=7';
 export function mountPersonalReport(root,report,history=[],language='en'){
  const abort=new AbortController(),signal=abort.signal,l=language==='hi'?'hi':'en',snapshot=reportSnapshot(report.answers,l);
  const dialog=root.querySelector('#personal-question-dialog');let selected=0,lastTrigger=null;
+ const header=document.querySelector('.innerly-header'),toolbar=root.querySelector('.personal-report-actions');
+ const updateStickyOffset=()=>{
+  const height=header?.getBoundingClientRect().height||0;
+  root.style.setProperty('--report-header-height',`${height}px`);
+  root.style.setProperty('--report-scroll-offset',`${height+(toolbar?.getBoundingClientRect().height||0)+20}px`);
+ };
+ updateStickyOffset();
+ const stickyObserver=typeof ResizeObserver==='function'?new ResizeObserver(updateStickyOffset):null;
+ if(header)stickyObserver?.observe(header);if(toolbar)stickyObserver?.observe(toolbar);
+ window.addEventListener('resize',updateStickyOffset,{signal});
+
  const reduce=matchMedia('(prefers-reduced-motion: reduce)'),behavior=()=>reduce.matches||document.body.classList.contains('mh-paused')?'instant':'smooth';
  mountQuestionExplorer(root,{getSnapshot:()=>snapshot,getReport:()=>report,getHistory:()=>history,language:l,signal});
  mountAnswerMap(root,{getSnapshot:()=>snapshot,language:l,onOpenQuestion:openQuestion,signal});
@@ -39,5 +50,5 @@ export function mountPersonalReport(root,report,history=[],language='en'){
  // The host's print lifecycle expands and restores the full answer record.
  let observer;const timers=[];
  if(!reduce.matches&&!document.body.classList.contains('mh-paused')&&'IntersectionObserver' in window){observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('entering');observer.unobserve(entry.target);timers.push(setTimeout(()=>entry.target.classList.remove('entering'),1400));}},{threshold:.15});root.querySelectorAll('.response-chart,.donut-wrap').forEach(el=>observer.observe(el));}
- return {destroy(){abort.abort();observer?.disconnect();timers.forEach(clearTimeout);if(dialog.open)dialog.close();delete document.body.dataset.chartMode;}};
+ return {destroy(){stickyObserver?.disconnect();root.style.removeProperty('--report-header-height');root.style.removeProperty('--report-scroll-offset');abort.abort();observer?.disconnect();timers.forEach(clearTimeout);if(dialog.open)dialog.close();delete document.body.dataset.chartMode;}};
 }

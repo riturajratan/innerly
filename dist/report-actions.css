@@ -29,3 +29,14 @@
 .mh-saved-actions button:focus-visible,.report-delete-button:focus-visible{outline:3px solid #7497bf;outline-offset:3px}
 @media(max-width:360px){.mh-saved-list article{padding:16px}.mh-saved-actions{gap:8px}.mh-saved-actions :is(.mh-saved-open,.report-delete-button){padding:10px 8px;font-size:13px;gap:7px}}
 @media(max-width:700px){.mh-saved-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.mh-saved-actions button{min-width:0;width:100%;box-sizing:border-box}}
+
+/* Keep report actions accessible beneath the responsive site header. */
+.mh-personal-report .personal-report-actions{position:sticky;top:var(--report-header-height,88px);z-index:25;background:#edf3fb;box-shadow:0 6px 18px #213d6410}
+.mh-personal-report .report-main :is(section[id],article[id],details[id]){scroll-margin-top:var(--report-scroll-offset,260px)}
+@media(max-width:700px){
+ .mh-personal-report .personal-report-actions{padding:10px 12px;gap:8px}
+ .mh-personal-report .personal-report-actions>div:first-child{display:none}
+ .mh-personal-report .personal-action-buttons{display:flex;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;gap:8px;padding:4px;width:100%;scrollbar-width:thin}
+ .mh-personal-report .personal-action-buttons>button{flex:0 0 auto;white-space:nowrap;min-height:44px}
+}
+@media print{.mh-personal-report .personal-report-actions{display:none!important}}
