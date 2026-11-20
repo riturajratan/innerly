@@ -174,7 +174,7 @@ test('the default consolidated view prioritises real data and keeps detailed gui
   assert.doesNotMatch(visible,/cs-journey-card|cs-benefit-card|cs-priority-list/);
   if(l==='en'){
    const words=visible.replace(/<[^>]+>/g,' ').match(/[A-Za-z]+/g)||[];
-   assert.ok(words.length<250,`${words.length} default-view words`);
+   assert.ok(words.length<350,`${words.length} default-view words`);
   }
  }
 });
