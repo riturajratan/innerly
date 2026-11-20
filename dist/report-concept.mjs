@@ -1,6 +1,6 @@
 import {mountAnswerMap} from './answer-map.mjs?v=2';
 import {mountQuestionExplorer,benchmarkReading} from './question-explorer.mjs?v=7';
-import {consolidatedSummaryMarkup,sampleProfiles,conceptSampleReport,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable} from './report-concept-view.mjs?v=16';
+import {consolidatedSummaryMarkup,sampleProfiles,conceptSampleReport,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable} from './report-concept-view.mjs?v=17';
 import {workbookQuestions} from './innerly-v1-model.mjs?v=mh-14';
 
 let answers=[...sampleProfiles.everyday.answers],snapshot=reportSnapshot(answers),selected=0,filter='support',lastTrigger=null;
