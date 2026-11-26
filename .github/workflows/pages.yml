@@ -27,9 +27,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Configure Clerk public key
+      - name: Keep the previous origin available for local reports
         env:
-          CLERK_PUBLISHABLE_KEY: ${{ vars.CLERK_PUBLISHABLE_KEY }}
+          # Production authentication now belongs to knowyourmind.ai on Workers.
+          # Keep old browser reports accessible without loading the retired issuer.
+          CLERK_PUBLISHABLE_KEY: ""
         run: node scripts/render-auth-config.mjs
       - name: Check application and tests
         run: |

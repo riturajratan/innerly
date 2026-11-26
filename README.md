@@ -1,6 +1,7 @@
 # Know Your Mind — V1 wellbeing reflection
 
-**Deployment: GitHub Pages publishes `dist/` after checks on pushes to `main`.**
+**Deployment: Cloudflare Workers builds and deploys `main` for `knowyourmind.ai`.**
+GitHub Pages remains available at the previous origin for existing on-device reports.
 
 **Cloudflare backend migration:** `worker/`, `migrations/` and `wrangler.jsonc`
 add private account reports and Razorpay subscriptions with the existing Clerk

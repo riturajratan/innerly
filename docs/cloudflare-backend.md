@@ -64,8 +64,7 @@ dashboard variables. Secrets are configured separately and never committed.
 | `APP_ORIGIN` | Public var: exact origin, no trailing slash. |
 | `CLERK_PUBLISHABLE_KEY` | Public var: production key for the existing Clerk application after its domain is configured. |
 | `CLERK_ISSUER` | Public var: exact JWT issuer URL from that same Clerk instance. |
-| `CLERK_SECRET_KEY` | Worker secret: corresponding backend secret. Required by Clerk authenticateRequest. |
-| `CLERK_JWT_KEY` | Optional PEM public key: avoids JWKS network requests; update it on Clerk key rotation. |
+| `CLERK_JWT_KEY` | Public PEM signing key: required for Clerk verifyToken; update it on Clerk signing-key rotation. |
 | `REPORT_ENCRYPTION_KEY` | Worker secret: 32 random bytes, base64. Stable across deploys. |
 | `RAZORPAY_KEY_ID` | Worker secret: merchant API key ID, returned only to its checkout owner when needed. |
 | `RAZORPAY_KEY_SECRET` | Worker secret: matching merchant API secret. |
@@ -79,10 +78,12 @@ keys must not be replaced without a controlled data re-encryption migration;
 otherwise existing cloud reports cannot be decrypted. Application ciphertext is
 AES-256-GCM, bound to owner ID, report ID and questionnaire version.
 
-The current Clerk production application serves the older portfolio domain.
-Configure the new domain and callback/return URLs in that existing application,
-apply its displayed DNS records and verify login on the new origin. Keep its
-user identities. Never copy the old domain's issuer blindly. The Worker serves
+The existing Clerk production application now uses `knowyourmind.ai`; its
+application name, logo, favicon, home and sign-out URLs have been updated.
+The new authentication and email DNS records are verified. User identities
+remain in the original application. Session JWTs are verified using the public
+signing key, exact issuer and authorized origin; this backend has no Clerk admin
+secret. Tokens expire normally; key rotation requires a config update and deploy. The Worker serves
 `/auth-config.mjs` dynamically so frontend and backend share the same public key.
 Google production login remains off until separately configured.
 
@@ -203,6 +204,6 @@ storage as users' only copy.
 Official references: [Workers assets](https://developers.cloudflare.com/workers/static-assets/),
 [Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/),
 [D1](https://developers.cloudflare.com/d1/get-started/),
-[Clerk request authentication](https://clerk.com/docs/reference/backend/authenticate-request),
+[Clerk JWT verification](https://clerk.com/docs/reference/backend/verify-token),
 [Razorpay Subscriptions](https://razorpay.com/docs/payments/subscriptions/integration-guide),
 [Webhook validation](https://razorpay.com/docs/webhooks/validate-test).

@@ -4,11 +4,30 @@ Innerly is a static GitHub Pages app. Clerk handles accounts and authentication;
 the questionnaire remains available to guests. This integration uses ClerkJS 6
 and Clerk UI 1, loaded from the Frontend API associated with the public key.
 
-## Domain migration (26 November 2026)
+## Current production setup (26 November 2026)
 
-The website is being renamed **Know Your Mind** at `https://knowyourmind.ai/`.
-The previous verified setup below is historical; the new domain is not yet verified.
-See [domain-migration.md](domain-migration.md) for the current cutover requirements.
+- The existing application is now named **Know Your Mind**. Its logo and favicon
+  match the website. Application and production instance IDs are unchanged.
+- Production primary domain: `knowyourmind.ai`; frontend API:
+  `https://clerk.knowyourmind.ai`; hosted account portal:
+  `https://accounts.knowyourmind.ai`.
+- Home and after-sign-out URLs: `https://knowyourmind.ai/`.
+- The two authentication CNAMEs and four email records were added in Cloudflare
+  as DNS-only records. Clerk verified all six; SSL issuance and live login are
+  verified separately during deployment.
+- Workers receives its public publishable key, issuer and PEM signing key from
+  `wrangler.jsonc`. Backend session validation uses Clerk's `verifyToken`, checks
+  issuer, authorized origin, signature, expiry, session ID and user ID, and rejects
+  cookies without an explicit Bearer token. No Clerk admin secret is deployed.
+- Update `CLERK_JWT_KEY` and redeploy when Clerk rotates its signing key.
+- GitHub Pages remains a guest/local-report archive at the previous origin. Its
+  workflow no longer loads the old Clerk publishable key. Existing saved browser
+  reports are not moved automatically between origins.
+- Production remains email-only; Google sign-in stays disabled.
+- See [Cloudflare backend configuration](cloudflare-backend.md) for current setup.
+
+The older domain and key values below are a historical record, not instructions
+for the new deployment.
 
 ## Previous verified status
 

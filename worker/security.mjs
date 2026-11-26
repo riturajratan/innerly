@@ -1,4 +1,4 @@
-import { createClerkClient } from '@clerk/backend';
+import { verifyToken } from '@clerk/backend';
 
 export class HttpError extends Error {
   constructor(status, code) { super(code); this.status = status; this.code = code; }
@@ -20,17 +20,17 @@ export async function authenticate(request, env) {
   if (!['GET', 'HEAD'].includes(request.method) && request.headers.get('origin') !== origin) fail(403, 'origin_required');
   const token = request.headers.get('authorization')?.match(/^Bearer (\S+)$/)?.[1];
   if (!token || token.length > 12000) fail(401, 'sign_in_required');
-  if (!env.CLERK_PUBLISHABLE_KEY || !env.CLERK_ISSUER || !env.CLERK_SECRET_KEY) fail(503, 'login_not_configured');
+  if (!env.CLERK_PUBLISHABLE_KEY || !env.CLERK_ISSUER || !env.CLERK_JWT_KEY) fail(503, 'login_not_configured');
   let claims;
   try {
-    const clerk = createClerkClient({ publishableKey: env.CLERK_PUBLISHABLE_KEY, secretKey: env.CLERK_SECRET_KEY, telemetry: { disabled: true } });
-    const result = await clerk.authenticateRequest(request, {
-      jwtKey: env.CLERK_JWT_KEY, authorizedParties: [origin], acceptsToken: 'session_token', clockSkewInMs: 5000,
+    // This API accepts explicit session JWTs only. Verification needs the public
+    // signing key, never an administrator credential for Clerk's Backend API.
+    claims = await verifyToken(token, {
+      jwtKey: env.CLERK_JWT_KEY, issuer: env.CLERK_ISSUER,
+      authorizedParties: [origin], clockSkewInMs: 5000,
     });
-    if (!result.isAuthenticated) fail(401, 'invalid_session');
-    claims = result.toAuth().sessionClaims;
   } catch { fail(401, 'invalid_session'); }
-  if (!claims || claims.iss !== env.CLERK_ISSUER || claims.azp !== origin || !claims.sid || !/^user_[A-Za-z0-9]+$/.test(claims.sub || '') || claims.sts === 'pending') fail(401, 'invalid_session');
+  if (!claims || claims.iss !== env.CLERK_ISSUER || claims.azp !== origin || !/^sess_[A-Za-z0-9]+$/.test(claims.sid || '') || !/^user_[A-Za-z0-9]+$/.test(claims.sub || '') || claims.sts === 'pending') fail(401, 'invalid_session');
   return claims.sub;
 }
 

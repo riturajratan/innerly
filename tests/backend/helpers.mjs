@@ -24,7 +24,7 @@ export const timestamp = Math.floor(Date.now() / 1000);
 export const plan = { key: 'monthly_inr', label: 'Monthly cloud access', providerId: 'plan_ABC', amount: 29900, currency: 'INR', period: 'monthly', totalCount: 12 };
 export function environment(DB = database()) {
   return { DB, APP_ORIGIN: 'https://knowyourmind.ai', CLERK_ISSUER: 'https://clerk.knowyourmind.ai', CLERK_PUBLISHABLE_KEY: `pk_test_${Buffer.from('clerk.knowyourmind.ai$').toString('base64')}`,
-    CLERK_SECRET_KEY: 'sk_test_synthetic_only', REPORT_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
+    CLERK_JWT_KEY: jwtKey, REPORT_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
     BILLING_ENABLED: 'true', BILLING_PLANS: JSON.stringify([plan]), RAZORPAY_KEY_ID: 'rzp_test_example',
     RAZORPAY_KEY_SECRET: 'test-only', RAZORPAY_WEBHOOK_SECRET: 'test-webhook-only',
     ASSETS: { fetch: async () => new Response('static') },

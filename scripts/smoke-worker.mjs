@@ -16,7 +16,7 @@ const childEnv = { ...process.env, XDG_CONFIG_HOME: join(dir, 'config'), WRANGLE
 const config = {
   APP_ORIGIN: origin, CLERK_ISSUER: 'https://clerk.knowyourmind.ai',
   CLERK_PUBLISHABLE_KEY: `pk_test_${Buffer.from('clerk.knowyourmind.ai$').toString('base64')}`,
-  CLERK_SECRET_KEY: 'sk_test_synthetic_only', CLERK_JWT_KEY: jwtKey,
+  CLERK_JWT_KEY: jwtKey,
   REPORT_ENCRYPTION_KEY: Buffer.alloc(32, 9).toString('base64'), BILLING_ENABLED: 'false', BILLING_PLANS: '[]',
 };
 await writeFile(envFile, Object.entries(config).map(([key,value]) => `${key}=${JSON.stringify(value)}`).join('\n'), { mode: 0o600 });

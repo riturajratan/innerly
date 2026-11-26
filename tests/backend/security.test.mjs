@@ -11,6 +11,16 @@ test('Clerk SDK verifies a genuine signature, issuer, session and authorized ori
     await assert.rejects(authenticate(req(bad),env), e => e.status === 401);
   }
 });
+test('session verification uses only a public signing key and fails closed without one', async () => {
+  const env = environment();
+  assert.equal(env.CLERK_SECRET_KEY, undefined);
+  const req = new Request('https://knowyourmind.ai/api/me', { headers: { Authorization: `Bearer ${token()}` } });
+  assert.equal(await authenticate(req, env), 'user_Alice');
+  await assert.rejects(authenticate(req, { ...env, CLERK_JWT_KEY: '' }), e => e.status === 503);
+  for (const claims of [{azp:undefined},{sid:'not-a-session'},{sub:'machine_ABC'},{nbf:timestamp+300}]) {
+    await assert.rejects(authenticate(new Request(req.url,{headers:{Authorization:`Bearer ${token(claims)}`}}),env), e=>e.status===401);
+  }
+});
 test('write requests require same origin and explicit bearer token; cookies alone never authenticate', async () => {
   const env = { ...environment(), CLERK_JWT_KEY: jwtKey };
   await assert.rejects(authenticate(new Request('https://knowyourmind.ai/api/reports',{method:'POST',headers:{Authorization:`Bearer ${token()}`}}),env), e => e.status === 403);

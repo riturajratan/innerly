@@ -42,7 +42,7 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
         if (!path.startsWith('/api/')) return env.ASSETS.fetch(request);
         if (request.method === 'GET' && path === '/api/health') return json({ ok: true, service: 'knowyourmind' });
         if (request.method === 'GET' && path === '/api/config') return json({
-          loginEnabled: !!(env.CLERK_PUBLISHABLE_KEY && env.CLERK_ISSUER && env.CLERK_SECRET_KEY),
+          loginEnabled: !!(env.CLERK_PUBLISHABLE_KEY && env.CLERK_ISSUER && env.CLERK_JWT_KEY),
           cloudEnabled: !!(env.DB && env.REPORT_ENCRYPTION_KEY), billingEnabled: billingReady(env),
           consentVersion: CONSENT_VERSION, plans: publicPlans(env),
         });

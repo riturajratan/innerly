@@ -2,8 +2,7 @@
 APP_ORIGIN=http://localhost:8787
 CLERK_PUBLISHABLE_KEY=
 CLERK_ISSUER=
-CLERK_SECRET_KEY=
-# Optional PEM public key for networkless Clerk token verification.
+# Required PEM public signing key from Clerk; no admin secret is needed.
 CLERK_JWT_KEY=
 # Generate once: openssl rand -base64 32. Keep it stable, back it up securely.
 REPORT_ENCRYPTION_KEY=
