@@ -67,7 +67,7 @@
 @media print{.mh-reflection-support a[href^="tel"]:after{content:none}.mh-topic-row{break-inside:avoid}.mh-response-details li{break-inside:avoid}.mh-reflection-report .mh-demo-tabs{display:none}}
 
 /* Completion belongs to the answer, never to focus or the resume position. */
-.mh-question-list>.mh-question{filter:none;opacity:1;background:#fff;padding:28px 20px;margin:12px 0;border:1px solid #e0e8e6;border-radius:12px}
+.mh-question-list>.mh-question{filter:none;opacity:1;background:#fff;padding:20px 18px;margin:12px 0;border:1px solid #e0e8e6;border-radius:12px}
 .mh-question-list>.mh-question.answered{background:#eef8f0;border-color:#c4dfcb;box-shadow:inset 4px 0 0 #78aa86}
 .mh-question-list>.mh-question.answered legend{color:var(--ink)}
 .mh-question-list>.mh-question.is-current legend{color:var(--ink)}
@@ -108,3 +108,40 @@
 .mh-workbook-answers strong{font-size:16px;color:#397b82}
 .mh-reflection-summary>strong small{font-size:18px;white-space:nowrap}
 @media(max-width:600px){.mh-frequency-caption{font-size:12px;line-height:1.45;margin-top:10px;max-width:100%}.mh-large .mh-frequency-caption{font-size:14px}.mh-topic-row>span:first-child{align-items:flex-start}.mh-topic-row b small{display:block}}
+
+/* Stacked sticky header and compact, fully labelled question choices. */
+.mh-checkin .mh-progress{top:var(--site-header-height,88px);z-index:20}
+.mh-checkin .mh-question legend{font-size:22px;line-height:1.5;margin-bottom:12px}
+.mh-checkin .mh-scale-ends{display:none}
+.mh-checkin .mh-reflection-options{padding:4px 0 0;gap:12px}
+.mh-checkin .mh-reflection-options label{min-height:98px;gap:10px;padding:8px 0}
+.mh-checkin .mh-reflection-options .mh-choice-dot{width:64px;height:64px;min-width:64px}
+.mh-checkin .mh-reflection-options label:nth-child(2) .mh-choice-dot,.mh-checkin .mh-reflection-options label:nth-child(4) .mh-choice-dot{width:56px;height:56px;min-width:56px}
+.mh-checkin .mh-reflection-options label:nth-child(3) .mh-choice-dot{width:48px;height:48px;min-width:48px}
+.mh-checkin .mh-frequency-caption{margin-top:0;font-size:14px;line-height:1.4}
+.mh-checkin .mh-progress-layout{margin-bottom:6px!important}
+.mh-checkin .mh-progress-layout .mh-growth svg{width:90px;height:69px}
+.mh-checkin .mh-progress-summary>strong{font-size:36px}
+.mh-checkin .mh-progress-summary small{margin-top:2px}
+.mh-in-checkin #mh-language-note{display:none}
+.mh-large .mh-checkin .mh-question legend{font-size:26px}
+.mh-large .mh-checkin .mh-frequency-caption{font-size:17px}
+@media(max-width:700px){
+ .mh-question-list>.mh-question{padding:18px 12px}
+ .mh-checkin .mh-question legend{font-size:19px;line-height:1.5;margin-bottom:10px}
+ .mh-checkin .mh-reflection-options{gap:5px}
+ .mh-checkin .mh-reflection-options label{min-height:88px;gap:9px}
+ .mh-checkin .mh-reflection-options .mh-choice-dot{width:48px;height:48px;min-width:48px}
+ .mh-checkin .mh-reflection-options label:nth-child(2) .mh-choice-dot,.mh-checkin .mh-reflection-options label:nth-child(4) .mh-choice-dot{width:43px;height:43px;min-width:43px}
+ .mh-checkin .mh-reflection-options label:nth-child(3) .mh-choice-dot{width:38px;height:38px;min-width:38px}
+ .mh-checkin .mh-frequency-caption{font-size:12px}
+ .mh-checkin .mh-progress-layout .mh-growth svg{width:68px;height:54px}
+ .mh-checkin .mh-progress-layout .mh-growth{gap:7px}
+ .mh-checkin .mh-progress-summary>strong{font-size:29px}
+ .mh-checkin .mh-progress-summary>span,.mh-checkin .mh-growth-stages{display:none}
+ .mh-checkin .mh-progress{padding-block:5px}
+ .mh-checkin .mh-progress progress{height:7px;margin-top:4px}
+ .mh-checkin .mh-progress-tools{margin-top:3px}
+ .mh-large .mh-checkin .mh-question legend{font-size:23px}
+ .mh-large .mh-checkin .mh-frequency-caption{font-size:14px}
+}

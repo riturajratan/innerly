@@ -1,10 +1,11 @@
 import { DatabaseSync } from 'node:sqlite';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { createHmac, generateKeyPairSync, sign } from 'node:crypto';
 
 export function database() {
   const sqlite = new DatabaseSync(':memory:');
-  sqlite.exec(readFileSync(new URL('../../migrations/0001_accounts_reports_billing.sql', import.meta.url), 'utf8'));
+  const migrations = new URL('../../migrations/', import.meta.url);
+  for (const name of readdirSync(migrations).filter(name => name.endsWith('.sql')).sort()) sqlite.exec(readFileSync(new URL(name, migrations), 'utf8'));
   const statement = (sql, args = []) => ({
     bind: (...values) => statement(sql, values),
     async first() { return sqlite.prepare(sql).get(...args) || null; },

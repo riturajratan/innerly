@@ -2,6 +2,7 @@ import { source } from '../dist/innerly-v1-questions.mjs';
 import { clerkConfig } from '../dist/clerk-config.mjs';
 import { authenticate, HttpError, fail, jsonBody, objectFields, id, seconds, encryptReport, decryptReport, digest, rateLimit } from './security.mjs';
 import { publicPlans, billingReady, billingStatus, requireSubscription, razorpay, createSubscription, refreshSubscription, cancelSubscription, webhook } from './billing.mjs';
+import { signupWebhook } from './signup-notifications.mjs';
 
 const languages = new Set(['en','hi','zh','es','fr','ar','bn','pt','ru','ur','id','de','ja','mr','te','tr','ta','vi','ko','it']);
 export const CONSENT_VERSION = 'cloud-reports-v1';
@@ -47,6 +48,7 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
           consentVersion: CONSENT_VERSION, plans: publicPlans(env),
         });
         if (!env.DB) fail(503, 'database_not_configured');
+        if (path === '/api/webhooks/clerk' && request.method === 'POST') return json(await signupWebhook(request, env, fetcher, now()));
         const provider = razorpay(env, fetcher);
         if (path === '/api/webhooks/razorpay' && request.method === 'POST') return json(await webhook(request, env, provider, now()));
         const userId = await authenticateUser(request, env);

@@ -1,3 +1,4 @@
+import './header-layout.mjs?v=1';
 import {createReportExporter} from './report-export.mjs?v=brand-1';
 import {icon} from './report-concept-view.mjs?v=brand-1';
 import {mountThoughtWaves} from './planning.mjs?v=14';
@@ -156,7 +157,7 @@ function setActiveQuestion(i){
  target.classList.add('is-current');
 }
 function activateQuestionFrom(target){const question=target.closest?.('.mh-question');if(question)setActiveQuestion(Number(question.id.slice(5)));}
-function goToQuestion(i,scrollBehavior=motion()){const target=app.querySelector(`#mh-q-${i}`);if(target){setActiveQuestion(i);const legend=target.querySelector('legend');legend.tabIndex=-1;legend.focus({preventScroll:true});const offset=(app.querySelector('.mh-progress')?.getBoundingClientRect().height||0)+20;window.scrollTo({top:Math.max(0,window.scrollY+target.getBoundingClientRect().top-offset),behavior:scrollBehavior});}}
+function goToQuestion(i,scrollBehavior=motion()){const target=app.querySelector(`#mh-q-${i}`);if(target){setActiveQuestion(i);const legend=target.querySelector('legend');legend.tabIndex=-1;legend.focus({preventScroll:true});const offset=(document.querySelector('.mh-header')?.getBoundingClientRect().height||0)+(app.querySelector('.mh-progress')?.getBoundingClientRect().height||0)+16;window.scrollTo({top:Math.max(0,window.scrollY+target.getBoundingClientRect().top-offset),behavior:scrollBehavior});}}
 function persistDraft(){
  try{localStorage.setItem(DRAFT_STORAGE,JSON.stringify(makeDraft(answers,answerLanguage)));draftEnabled=true;draftSynced=true;return true;}catch{draftSynced=false;return false;}
 }

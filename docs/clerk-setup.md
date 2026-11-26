@@ -1,200 +1,83 @@
 # Clerk sign-in
 
-Innerly is a static GitHub Pages app. Clerk handles accounts and authentication;
-the questionnaire remains available to guests. This integration uses ClerkJS 6
-and Clerk UI 1, loaded from the Frontend API associated with the public key.
+Know Your Mind runs on Cloudflare Workers at **https://knowyourmind.ai/**.
+Guests can complete a local check-in without an account. ClerkJS 6 and Clerk UI 1
+provide the Google and email sign-in flow. The site has one Sign in / My account
+entry; there is no separate Cloud account navigation link.
 
-## Current production setup (26 November 2026)
+## Production configuration — 26 November 2026
 
-- The existing application is now named **Know Your Mind**. Its logo and favicon
-  match the website. Application and production instance IDs are unchanged.
-- Production primary domain: `knowyourmind.ai`; frontend API:
-  `https://clerk.knowyourmind.ai`; hosted account portal:
-  `https://accounts.knowyourmind.ai`.
-- Home and after-sign-out URLs: `https://knowyourmind.ai/`.
-- The two authentication CNAMEs and four email records were added in Cloudflare
-  as DNS-only records. Clerk verified all six; SSL issuance and live login are
-  verified separately during deployment.
-- Workers receives its public publishable key, issuer and PEM signing key from
-  `wrangler.jsonc`. Backend session validation uses Clerk's `verifyToken`, checks
-  issuer, authorized origin, signature, expiry, session ID and user ID, and rejects
-  cookies without an explicit Bearer token. No Clerk admin secret is deployed.
-- Update `CLERK_JWT_KEY` and redeploy when Clerk rotates its signing key.
-- GitHub Pages remains a guest/local-report archive at the previous origin. Its
-  workflow no longer loads the old Clerk publishable key. Existing saved browser
-  reports are not moved automatically between origins.
-- Production remains email-only; Google sign-in stays disabled.
-- See [Cloudflare backend configuration](cloudflare-backend.md) for current setup.
-
-The older domain and key values below are a historical record, not instructions
-for the new deployment.
-
-## Previous verified status
-
-Local sign-in is working. A **production instance was created with the user's
-approval on 10 November 2026** for `www.riturajratan.com/innerly/`. The email-only
-website integration is included in this release; its deployment status is
-tracked by the repository's GitHub Pages workflow.
-
-- Clerk application: **Innerly** (`app_3Lue4T0hoZDzw3d37cE1uRxTE6s`).
-- Development instance: `ins_3Lue4UJ3KmSBD5LlGL6xSX8KWjU`.
+The existing application and users were retained:
+- App: `app_3Lue4T0hoZDzw3d37cE1uRxTE6s`, name **Know Your Mind**.
 - Production instance: `ins_3Luh0pkr7SXTlwfBAnUN0eFh1pg`.
-- Production primary domain: `riturajratan.com`; application host:
-  `www.riturajratan.com`. Home and after-sign-out URLs are saved as
-  `https://www.riturajratan.com/innerly/`.
-- Frontend API: `https://thorough-moccasin-5426.clerk.accounts.dev`.
-- Verified email-code signup/sign-in is enabled; password is not required at signup.
-- Google sign-in is enabled using Clerk's development shared credentials.
-- `.env.local` contains the development Publishable Key only. No secret key was
-  read, copied, generated or added to the app.
-- Real SDK loading, email-code account creation, account management and sign-out
-  were verified locally. Google OAuth completion still needs a real Google
-  account test; the provider option itself is configured and renders correctly.
-- A reserved development test user, `innerly-qa-20261110+clerk_test@example.com`,
-  was created for verification. Clerk sends no email to this address in test mode.
-- 103 automated tests pass. A separate temporary test-double preview also
-  verified cancelling sign-in, preserving an unfinished check-in, restoring a
-  completed 36-answer report, and preserving a draft after sign-out.
-- All five production CNAME records were saved in Namecheap after explicit user
-  approval and verified by Clerk. Existing GitHub Pages A/CNAME records were
-  preserved. Clerk shows both SSL certificates as **Issued**. The hosted
-  `https://accounts.riturajratan.com/sign-in` page opens over HTTPS and displays
-  an email address field and Continue button, with no Google option. No
-  production account was created and no real email-code delivery was tested.
-- Production email-code signup and sign-in are enabled, with email verification
-  required and no password required at signup. Google is **disabled in
-  production**, as requested; local development still has Google enabled.
-- The production public key is configured and verified in the repository's
-  `CLERK_PUBLISHABLE_KEY` Actions variable. The Pages workflow injects it into
-  the deployed build. The tracked configuration starts empty; local development
-  uses `.env.local`. Missing public configuration leaves guest mode usable.
+- Development instance: `ins_3Lue4UJ3KmSBD5LlGL6xSX8KWjU`.
+- Primary domain: `knowyourmind.ai`.
+- Frontend API: `https://clerk.knowyourmind.ai`.
+- Hosted account portal: `https://accounts.knowyourmind.ai`.
+- Home and after-sign-out: `https://knowyourmind.ai/`.
+- Application logo and favicon match the website's existing head-and-wave mark.
+- Login methods: **Google + verified email code**, explicitly selected by the owner.
 
-## Production DNS
+All six DNS records were verified in Clerk. The hosted sign-in page opens over
+HTTPS and shows Google and email. Completion of a real production Google/email
+sign-in and email delivery still requires an owner test; UI rendering alone is
+not proof of end-to-end authentication.
 
-These values were read directly from the production Clerk Dashboard on
-10 November 2026 and saved with automatic TTL in Namecheap → Domain List →
-riturajratan.com → Manage → Advanced DNS. All five records show **Verified** in
-Clerk. There were no pre-existing records with these hosts.
+## Google OAuth
 
-| Host | CNAME target |
-| --- | --- |
-| `clerk` | `frontend-api.clerk.services` |
-| `accounts` | `accounts.clerk.services` |
-| `clkmail` | `mail.ydshqx4lmv0q.clerk.services` |
-| `clk._domainkey` | `dkim1.ydshqx4lmv0q.clerk.services` |
-| `clk2._domainkey` | `dkim2.ydshqx4lmv0q.clerk.services` |
+Reuse Google Cloud project `innerly-514510` and its existing web OAuth client,
+now named **Know Your Mind Web**. No OAuth secret was rotated.
 
-Both SSL certificates are issued. The hosted email login screen was verified.
-The records above are DNS names, not secrets. Do not put `/innerly/` into DNS.
+- Authorized JavaScript origin: `https://knowyourmind.ai`.
+- Redirect: `https://clerk.knowyourmind.ai/v1/oauth_callback`.
+- Scopes remain basic identity only: `openid`, email and profile.
+- Audience: External, **In production**.
+- Google app name/logo, homepage, privacy/terms links and authorized domain were
+  updated. Developer contact was corrected to the existing support email.
+- Google data-access verification is not required for these basic scopes.
+- Brand verification is still pending: the first check required domain ownership.
+  Google Search Console ownership was then verified using Cloudflare DNS on
+  26 November 2026. Google instructed waiting **24 hours** before requesting
+  brand verification again. Until approval and publication, Google may show the
+  domain rather than the app name/logo. Do not describe branding as approved.
 
-## Google setup deferred
+## Public-key backend verification
 
-The production Google connection is **Disabled**, following the user's choice
-to start with email login and add Google later. Its Client ID and Client Secret
-are empty; development shared credentials do not work in production. When
-Google is requested, create a Google OAuth web client for Innerly, then enter its
-credentials directly into Clerk (never in chat, frontend source or Git) and
-enable the connection.
+`wrangler.jsonc` supplies the public publishable key, issuer and PEM signing key.
+The API accepts explicit Bearer session JWTs, verifies signature/expiry and pins
+issuer, authorized origin, session ID and user ID. No Clerk administrator secret
+is deployed. Update `CLERK_JWT_KEY` and redeploy when Clerk rotates its signing key.
 
-- Authorized JavaScript origin: `https://www.riturajratan.com`.
-- Authorized redirect URI, copied from the production Google connection:
-  `https://clerk.riturajratan.com/v1/oauth_callback`.
-- Application homepage: `https://www.riturajratan.com/innerly/`.
-- Keep only the default identity scopes (`openid`, email and profile).
+Signup webhooks use a separate endpoint signing secret; see
+[signup notifications](signup-notifications.md). It is not a Clerk admin secret.
 
-The production publishable key shown by Clerk is
-`pk_live_Y2xlcmsucml0dXJhanJhdGFuLmNvbSQ`. This public identifier is configured in
-the GitHub Actions variable. It must not replace the working local development
-key. Domain verification and certificate issuance are complete.
+## DNS (Cloudflare, DNS only)
 
-## Configuration reference
+| Host | Type | Content |
+| --- | --- | --- |
+| clerk | CNAME | frontend-api.clerk.services |
+| accounts | CNAME | accounts.clerk.services |
+| clkmail | CNAME | mail.kw3coeqzzq02.clerk.services |
+| clk._domainkey | CNAME | dkim1.kw3coeqzzq02.clerk.services |
+| clk2._domainkey | CNAME | dkim2.kw3coeqzzq02.clerk.services |
+| _dmarc | TXT | v=DMARC1; p=none; |
 
-1. Sign in to [Clerk Dashboard](https://dashboard.clerk.com/) and select the
-   existing **Innerly** application above. Do not create a replacement app.
-2. Enable **Email**. For email-only login, enable email verification
-   codes; passwords and extra profile fields are not necessary for this version.
-   These methods are controlled in Clerk Dashboard, not hard-coded by this app.
-3. Begin with a development instance and its **Publishable Key** (`pk_test_…`).
-   No Clerk Secret Key is needed in the frontend or the Pages workflow.
-4. For the live site, create a production instance for `www.riturajratan.com`.
-   Configure Clerk's required DNS records and verify its certificates. The app
-   URL is `https://www.riturajratan.com/innerly/`, including the subpath.
-5. Keep production Google disabled for this email-only launch. When Google is
-   requested later, configure production OAuth credentials and use the exact
-   callback URI displayed by Clerk. Development's shared Google credentials are
-   insufficient for production. Verify each enabled method; do not assume all
-   settings were copied from development.
-6. Set application home and after-sign-out URLs to the app URL above. The app
-   also forces sign-in/sign-up returns to its own directory, with `?lang=…`.
-   Modal authentication avoids adding a route that GitHub Pages cannot serve.
+## Local development and earlier hosting
 
-## Run locally
+Use the development publishable key in ignored `.env.local`, then run
+`node --env-file=.env.local scripts/render-auth-config.mjs` and serve only `dist`.
+Do not use production Clerk credentials on localhost. `node
+scripts/render-auth-config.mjs` without a key restores guest-only static config.
 
-Copy `.env.example` to `.env.local` and set `CLERK_PUBLISHABLE_KEY` to the
-development **publishable** key. `.env.local` is ignored by Git.
+The old GitHub Pages origin remains available for browser-saved reports. Its
+workflow deliberately emits an empty Clerk key. Do not restore the retired
+`riturajratan.com` production key or point the new domain at Pages.
 
-```sh
-node --env-file=.env.local scripts/render-auth-config.mjs
-node scripts/render-mental-home.mjs
-python3 -m http.server 4298 --bind 127.0.0.1 --directory dist
-```
+Browser reports and drafts remain scoped to their original browser origin.
+Signing in does not transfer or upload them. Selected cloud reports need separate
+consent and configured encryption/access. No answers or scores are copied into
+Clerk profile metadata. Sign-out does not erase local browser saves.
 
-Serve only `dist`, never the repository root containing environment files. To
-restore the unconfigured build, run `node scripts/render-auth-config.mjs` without
-the environment variable.
-
-## GitHub Pages
-
-In repository **Settings → Secrets and variables → Actions → Variables**, set
-`CLERK_PUBLISHABLE_KEY` to the production `pk_live_…` key. This identifier is
-intended to be public. The Pages workflow generates the public module before
-rendering and testing. A missing key leaves guest mode available; an invalid key,
-secret key, or development key in the public deployment fails the build.
-
-Push or run the existing Pages workflow after configuring the variable. Changing
-the Dashboard or GitHub variable alone does not update the deployed JS module.
-
-## Data and session behavior
-
-- The header switches from **Sign in** to **My account** when Clerk has a session.
-  Account management uses Clerk's UI; sign-out uses Clerk's session API.
-- Accounts never gate starting, completing or viewing a local check-in.
-- No questionnaire response, score or report is sent to Clerk or placed in user
-  metadata. No backend, database or cross-device report sync is implemented.
-- Before an account action can reload the page, unsaved check-in data requires
-  explicit permission to save in this browser. Cancelling keeps it in memory;
-  storage failure stops navigation. Existing consented drafts keep autosaving.
-- A short-lived session-storage marker restores the quiz/report after redirects.
-  The marker contains navigation only, not answers or authentication tokens.
-- Browser saves remain device-wide, including after sign-out/account changes.
-  Login does not encrypt or make them private to an account. The account dialog
-  and report history explain this; saved reports can be deleted from My reports.
-- Provider failure leaves guest work usable and offers a retry. Session events
-  update only the header, so answering does not flicker or reset.
-- Account entry, explanations and errors support English/Hindi. Clerk's own UI
-  currently uses its default English text. Questionnaire translations are
-  unchanged; this does not claim 20-language account UI support.
-
-For future cloud reports, add a backend that verifies Clerk sessions, checks
-ownership on every request, and obtains separate consent for storing health data.
-Client-side login alone cannot protect server records.
-
-## Verify with a configured application
-
-Automated tests exercise config validation, script failure/timeout/retry,
-sign-in/sign-up return URLs, session changes, sign-out and continuation expiry.
-Those automated tests use a test double. The real development email flow was also
-checked manually as described above. Before any production launch:
-
-1. Have the owner test email-code delivery, signup, sign-out and sign-in with
-   their chosen email. Do not create production test users without permission.
-2. When Google is enabled later, complete its sign-in and verify the return
-   stays under `/innerly/`.
-3. Answer a few questions, select Sign in, cancel saving, and verify no answers
-   are lost. Repeat with saving and confirm the returned quiz resumes correctly.
-4. Complete a report, sign in, and verify the same saved report opens on return.
-5. Check mobile/header, account management, sign-out, and a blocked Clerk request.
-
-Official references: [JavaScript quickstart](https://clerk.com/docs/js-frontend/getting-started/quickstart),
-[SignIn component](https://clerk.com/docs/js-frontend/reference/components/authentication/sign-in),
-[production deployment](https://clerk.com/docs/guides/development/deployment/production).
+References: [changing domains](https://clerk.com/docs/guides/development/deployment/changing-domains),
+[verifyToken](https://clerk.com/docs/reference/backend/verify-token),
+[Google branding](https://support.google.com/cloud/answer/15549049).
