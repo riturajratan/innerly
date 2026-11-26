@@ -1,4 +1,4 @@
-import {responseGaugeMarkup} from './response-gauge.mjs?v=4';
+import {responseGaugeMarkup} from './response-gauge.mjs?v=5';
 import {thoughtWavesMarkup} from './thought-waves-view.mjs?v=5';
 import {sampleReportData} from './sample-report.mjs';
 import {questionGuidance} from './innerly-v1-guidance.mjs';

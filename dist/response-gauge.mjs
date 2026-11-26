@@ -20,7 +20,7 @@ export function responseGaugeMarkup(counts,language='en',{sample=false}={}){
   <svg viewBox="0 0 320 180" aria-hidden="true" focusable="false">
    <defs><linearGradient id="${gradientId}" gradientUnits="userSpaceOnUse" x1="40" y1="150" x2="280" y2="150">${stops.map((channels,i)=>`<stop offset="${offsets[i]}" stop-color="rgb(${channels.join(',')})"/>`).join('')}</linearGradient></defs>
    <path class="rg-track" d="M40 150 A120 120 0 0 1 280 150"/>
-   ${support?`<path class="rg-fill" style="stroke:url(#${gradientId})" d="M40 150 A120 120 0 0 1 280 150" pathLength="36" stroke-dasharray="${support} 36"/>`:''}
+   <path class="rg-fill" style="stroke:url(#${gradientId})" d="M40 150 A120 120 0 0 1 280 150"/>
    <g class="rg-ticks">${Array.from({length:37},(_,i)=>`<path d="M${point(180+i*5,138)} L${point(180+i*5,i%9===0?147:142)}"/>`).join('')}</g>
    <g class="rg-axis"><text x="18" y="174">0</text><text x="160" y="14" text-anchor="middle">18</text><text x="302" y="174" text-anchor="end">36</text></g>
    <g class="rg-needle" transform="rotate(${angle} 160 150)"><path d="M148 144 L252 150 L148 156 Z"/></g>
