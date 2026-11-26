@@ -1,9 +1,15 @@
 # Reports, Analytics and SEO release status
 
-Updated 26 November 2026. This feature batch is implemented locally and has not
-been deployed. Production still reports `cloudEnabled: false`. The D1 database
-and Worker binding already exist, but `REPORT_ENCRYPTION_KEY` is still missing.
-The owner confirmed the same Cloudflare dashboard error seen by the agent.
+Updated 26 November 2026, after production release `54068a4`. Cloudflare build
+`e30ea22c-f804-4051-b2fb-98655bb24b49` completed successfully (version `902b9922`).
+`REPORT_ENCRYPTION_KEY` is saved as an encrypted Worker secret. Live config confirms
+cloudEnabled=true and cloudAccess=free; billing remains disabled. No copy of the
+key was stored in chat or local files; maintain the existing Worker secret.
+
+The six-page sitemap and FAQ are live. The GA4 script loads after explicit consent
+on the production FAQ. GA4 Realtime receipt and Search Console sitemap submission
+remain unverified. Owner-controlled production report save/reload confirmation is
+pending; local real-workerd encryption/owner-isolation checks and 205 tests passed.
 
 ## Report history and comparison
 
@@ -35,7 +41,7 @@ Created in the existing maddyzone Analytics account (`44786250`):
 - Web stream: **Know Your Mind website**, `16423143447`.
 - URL: `https://knowyourmind.ai`; measurement ID: **G-RCRXJ28CSM**.
 - India reporting timezone and INR currency. Enhanced measurement is verified
-  off in the stream UI. No data has been received because installation is not live.
+  off in the stream UI. Installation is live; Analytics report receipt has not yet been independently confirmed.
 - The frontend loads gtag only after optional consent on six public pages.
   Private app views disable measurement. No identity, answer, report, query or
   fragment data enters analytics payloads. Advertising features are disabled.
@@ -68,12 +74,8 @@ metadata, structured data and links. Browser QA uses synthetic local identities,
 not production report contents. It covers report opening, explicit save,
 auto-save controls, account switching and desktop/mobile layouts.
 
-When Cloudflare account access returns:
+Remaining follow-up (deployment and encryption are now complete):
 
-1. Add a new 32-byte base64 `REPORT_ENCRYPTION_KEY` as an encrypted Worker secret
-   and securely back it up. Do not rotate a previously configured key.
-2. Deploy this reviewed feature batch and additive D1 migration through main's
-   existing build workflow. Check build success and public configuration.
 3. Complete an owner-controlled signed-in save, reload and cross-device read.
 4. Verify public analytics after consent and submit the updated sitemap.
 
