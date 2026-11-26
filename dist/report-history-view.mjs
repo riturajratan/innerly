@@ -3,7 +3,7 @@ import {consolidatedComparisonMarkup} from './report-comparison-summary.mjs';
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=r=>new Date(r.createdAt).toLocaleString(undefined,{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
 export function comparisonData(reports,{language,fromId,toId,question=0}={}){
- const valid=reports.filter(validWorkbookReport),code=language||valid[0]?.language||'en';
+ const valid=[...new Map(reports.filter(validWorkbookReport).map(r=>[r.id,r])).values()],counts=new Map();for(const r of valid)counts.set(r.language,(counts.get(r.language)||0)+1);const code=language||valid.find(r=>counts.get(r.language)>1)?.language||valid[0]?.language||'en';
  const rows=[...new Map(valid.filter(r=>r.language===code).map(r=>[r.id,r])).values()].sort((a,b)=>Date.parse(a.createdAt)-Date.parse(b.createdAt)||a.id.localeCompare(b.id));
  let to=rows.find(r=>r.id===toId)||rows.at(-1),from=rows.find(r=>r.id===fromId)||rows[0];
  if(from&&to&&rows.indexOf(from)>rows.indexOf(to))[from,to]=[to,from];
@@ -14,6 +14,7 @@ export function comparisonMarkup(reports,selection={}){
  const data=comparisonData(reports,selection),{rows,from,to,question,language,changed}=data;
  if(!rows.length)return '';
  const languages=[...new Set(reports.filter(validWorkbookReport).map(r=>r.language))];
+ if(rows.length<2)return `<section class="report-comparison comparison-invitation" aria-labelledby="comparison-invitation-title"><span class="comparison-seed" aria-hidden="true">🌱</span><p class="mh-kicker">YOUR NEXT CHAPTER</p><h2 id="comparison-invitation-title">One check-in. A starting point for you.</h2><p>Your first check-in is saved. Come back for another when it feels right, and see what has changed in your thoughts, feelings and everyday patterns.</p><div class="comparison-invitation-steps"><span>✓ Your starting point</span><span>○ Your next check-in</span><span>○ Your comparison</span></div><p class="comparison-invitation-note">Your comparison will appear after two saved check-ins in the same question language. There’s no rush—choose a pace that works for you.</p>${languages.length>1?`<label>Question language<select data-compare="language">${languages.map(l=>`<option value="${l}" ${l===language?'selected':''}>${new Intl.DisplayNames(['en'],{type:'language'}).of(l)}</option>`).join('')}</select></label>`:''}<button class="mh-primary" data-action="new-test">Start a new check-in →</button></section>`;
  const options=selected=>rows.map((r,i)=>`<option value="${esc(r.id)}" ${r.id===selected?.id?'selected':''}>${esc(date(r))} · Check-in ${i+1}</option>`).join('');
  const labels=workbookChoices(language),first=Date.parse(rows[0].createdAt),span=Date.parse(rows.at(-1).createdAt)-first;
  const x=r=>span?172+((Date.parse(r.createdAt)-first)/span)*500:422,y=v=>238-v*48;

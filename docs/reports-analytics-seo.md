@@ -1,3 +1,11 @@
+## Verified SEO and Analytics — 26 November 2026
+
+Search Console accepted `https://knowyourmind.ai/sitemap.xml`: **Success, 6 discovered pages**. The domain property is accessible in the owner account. All six live canonical pages return successfully with one title, one meta description and one H1; homepage JSON-LD parses correctly. Private history routes return `X-Robots-Tag: noindex, nofollow`.
+
+GA4 property 565919101 / G-RCRXJ28CSM receives events: Realtime showed 18 page_view events, including public homepage and FAQ views. Standard reports still show their initial processing message. Consent and private-view exclusion tests pass. Search sitelinks and rankings are selected by Google, not guaranteed by sitemap submission.
+
+Comparison UI now shows a return-check-in invitation for one report. Graphs and “Notice what has changed” require two distinct reports in the same questionnaire language; language selection defaults to an available comparable pair.
+
 ## Automatic saving update — 26 November 2026
 
 Replaces the earlier opt-in autosave flow: signed-in check-ins now sync encrypted partial drafts (`0004_checkin_drafts.sql`) and save completed, dated reports automatically. Guest drafts stay local. New tests have independent IDs; completed reports stay in history. Browser recovery queues retry network failures; account switches and revision conflicts prevent accidental cross-account uploads or stale overwrites. Privacy and FAQ copy reflect the automatic behavior.

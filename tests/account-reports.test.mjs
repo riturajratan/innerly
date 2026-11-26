@@ -58,3 +58,9 @@ test('paged account history is deduplicated and sorted while failures remain vis
  let page=0;const store=createAccountReportStore({api:async()=>{page++;if(page===1)return {reports:[report('later','2026-11-26T10:00:00.000Z')],nextCursor:'later'};if(page===2)return {reports:[report('earlier'),report('later','2026-11-26T10:00:00.000Z')],nextCursor:null};throw new Error('offline');}});
  store.setUser('alice');await store.load();await store.load(true);assert.deepEqual(store.state.reports.map(r=>r.id),['later','earlier']);await store.load();assert.equal(store.state.error,'offline');assert.equal(store.state.reports.length,2);
 });
+test('one report invites a return check-in; charts require two distinct compatible reports',()=>{
+ const first=report('first');const invitation=comparisonMarkup([first,first]);assert.match(invitation,/Your first check-in is saved/);assert.doesNotMatch(invitation,/Notice what has changed|<svg|data-compare="fromId"/);
+ const hi=report('hi','2026-11-26T10:00:00.000Z','hi');assert.doesNotMatch(comparisonMarkup([first,hi]),/<svg/);
+ const second=report('second');assert.match(comparisonMarkup([hi,first,second]),/Notice what has changed/);
+ assert.equal(comparisonMarkup([]),'');
+});
