@@ -9,24 +9,22 @@ function slackDestination(value) {
   } catch { fail(503, 'signup_notifications_not_configured'); }
 }
 const clean = (value, max = 160) => typeof value === 'string' ? value.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, max) : '';
+const slackText = value => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export function signupMessage(user) {
   const email = (user.email_addresses || []).find(item => item.id === user.primary_email_address_id && item.verification?.status === 'verified');
   const provider = (user.external_accounts || []).some(account => account.provider === 'oauth_google') ? 'Google' : 'Email';
   const name = clean([user.first_name, user.last_name].filter(value => typeof value === 'string').join(' '));
-  const detail = [
-    `Sign-in method: ${provider}`,
-    `Email: ${clean(email?.email_address, 254) || 'No verified primary email supplied'}`,
-    ...(name ? [`Name: ${name}`] : []),
-    `User ID: ${user.id}`,
-    `Signed up: ${new Date(user.created_at).toISOString()}`,
-  ].join('\n');
+  const signedUp = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }).format(new Date(user.created_at));
+  const field = (label, value) => ({ type: 'mrkdwn', text: `*${label}*\n${slackText(value)}`, verbatim: true });
   return {
     text: 'New Know Your Mind signup',
-    // Plain text prevents user-controlled names from pinging channels or linking.
+    // Escape user values and disable auto-linking/mentions; labels alone use markup.
     blocks: [
-      { type: 'header', text: { type: 'plain_text', text: 'New Know Your Mind signup', emoji: false } },
-      { type: 'section', text: { type: 'plain_text', text: detail, emoji: false } },
+      { type: 'header', text: { type: 'plain_text', text: '🌱 New Know Your Mind signup', emoji: true } },
+      { type: 'divider' },
+      { type: 'section', fields: [field('Name', name || 'Not provided'), field('Verified email', clean(email?.email_address, 254) || 'Not supplied'), field('Login method', provider), field('Signed up · IST', signedUp)] },
+      { type: 'section', text: { type: 'mrkdwn', text: `*Account ID*\n\`${user.id}\``, verbatim: true } },
       { type: 'context', elements: [{ type: 'plain_text', text: 'knowyourmind.ai · New accounts only', emoji: false }] },
     ],
     unfurl_links: false, unfurl_media: false,

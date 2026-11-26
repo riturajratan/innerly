@@ -27,7 +27,7 @@ test('verified signup sends only selected identity details and deduplicates by u
   assert.match(JSON.stringify(payload), /test@example.com/);
   assert.match(JSON.stringify(payload), /Google/);
   assert.doesNotMatch(JSON.stringify(payload), /private_metadata|answers/);
-  assert.equal(payload.blocks[1].text.type, 'plain_text');
+  assert.ok(payload.blocks[2].fields.every(field => field.verbatim === true));
   assert.equal(calls[0].options.redirect, 'manual');
   assert.deepEqual(await (await app.fetch(delivery({ eventId: 'msg_Redelivery' }), env)).json(), { duplicate: true });
   assert.equal(calls.length, 1);
@@ -88,7 +88,9 @@ test('names cannot inject Slack formatting and unverified email is excluded', as
   let payload; const { app, env } = setup(async (_, options) => { payload = JSON.parse(options.body); return new Response('ok'); });
   const data = { ...user, first_name: '<!channel>\nInjected', external_accounts: [], email_addresses: [{ id:'id_primary', email_address: 'unverified@example.com', verification: { status: 'unverified' } }] };
   assert.equal((await app.fetch(delivery({ data }), env)).status, 200);
-  assert.equal(payload.blocks[1].text.type, 'plain_text');
+  assert.ok(payload.blocks[2].fields.every(field => field.verbatim === true));
   assert.doesNotMatch(JSON.stringify(payload), /unverified@example.com/);
-  assert.match(payload.blocks[1].text.text, /Sign-in method: Email/);
+  assert.match(JSON.stringify(payload), /Login method.*Email/);
+  assert.doesNotMatch(JSON.stringify(payload), /<!channel>/);
+  assert.match(JSON.stringify(payload), /&lt;!channel&gt;/);
 });
