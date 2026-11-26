@@ -40,11 +40,21 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
             headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
           });
         }
-        if (!path.startsWith('/api/')) return env.ASSETS.fetch(request);
+        if (!path.startsWith('/api/')) {
+          const response = await env.ASSETS.fetch(request);
+          const params = new URL(request.url).searchParams;
+          if (['view','account','start','new'].some(key => params.has(key))) {
+            const privateView = new Response(response.body,response);
+            privateView.headers.set('X-Robots-Tag','noindex, nofollow');
+            return privateView;
+          }
+          return response;
+        }
         if (request.method === 'GET' && path === '/api/health') return json({ ok: true, service: 'knowyourmind' });
         if (request.method === 'GET' && path === '/api/config') return json({
           loginEnabled: !!(env.CLERK_PUBLISHABLE_KEY && env.CLERK_ISSUER && env.CLERK_JWT_KEY),
           cloudEnabled: !!(env.DB && env.REPORT_ENCRYPTION_KEY), billingEnabled: billingReady(env),
+          cloudAccess: env.CLOUD_REPORTS_ACCESS === 'free' ? 'free' : 'subscription',
           consentVersion: CONSENT_VERSION, plans: publicPlans(env),
         });
         if (!env.DB) fail(503, 'database_not_configured');
@@ -72,7 +82,7 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
             if (existing.content_hash !== contentHash) fail(409, 'report_id_reused');
             return json({ id: existing.id, saved: true });
           }
-          await requireSubscription(env.DB, userId, timestamp);
+          if (env.CLOUD_REPORTS_ACCESS !== 'free') await requireSubscription(env.DB, userId, timestamp);
           const reportId = crypto.randomUUID();
           const encrypted = await encryptReport(input.answers, env, `${userId}:${reportId}:${input.version}`);
           const result = await env.DB.prepare(`INSERT OR IGNORE INTO assessments
@@ -84,6 +94,21 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
             return json({ id: saved.id, saved: true });
           }
           return json({ id: reportId, saved: true }, 201);
+        }
+        if (path === '/api/reports/history' && request.method === 'GET') {
+          const cursor = new URL(request.url).searchParams.get('cursor') || '';
+          if (cursor && !id(cursor)) fail(400, 'invalid_cursor');
+          // Bounded pages avoid a request per report and keep account data private.
+          const boundary = cursor ? await env.DB.prepare('SELECT assessed_at FROM assessments WHERE id = ? AND user_id = ?').bind(cursor,userId).first() : null;
+          if (cursor && !boundary) fail(400, 'invalid_cursor');
+          const rows = await env.DB.prepare(`SELECT * FROM assessments
+            WHERE user_id = ? AND (? = '' OR assessed_at < ? OR (assessed_at = ? AND id < ?))
+            ORDER BY assessed_at DESC, id DESC LIMIT 26`).bind(userId,cursor,boundary?.assessed_at||'',boundary?.assessed_at||'',cursor).all();
+          const reports = await Promise.all(rows.results.slice(0,25).map(async row => ({
+            id: row.id, clientId: row.client_id, version: row.version, language: row.language, createdAt: row.assessed_at,
+            answers: await decryptReport(row.responses_ciphertext, env, `${userId}:${row.id}:${row.version}`),
+          })));
+          return json({ reports, nextCursor: rows.results.length > 25 ? rows.results[24].id : null });
         }
         if (path === '/api/reports' && request.method === 'GET') {
           const url = new URL(request.url);

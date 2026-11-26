@@ -12,7 +12,7 @@ const auth=createClerkAuth({publishableKey:clerkPublishableKey,window,document,o
   if(!signed){generation++;currentUser=null;$('account').hidden=true;$('report-view').hidden=true;$('consent').checked=false;for(const key of ['cloud-reports','local-reports','answers','subscriptions'])$(key).replaceChildren();}
   if(signed&&state.user?.id!==currentUser){currentUser=state.user.id;generation++;run(refresh);}
 }});
-const api=createCloudApi({getToken:()=>auth.getToken()});
+const api=createCloudApi({getToken:()=>auth.getToken(),getUserId:()=>auth.state.user?.id||null});
 async function run(task,button){if(button)button.disabled=true;try{await task();}catch(e){status(e.message,true);}finally{if(button?.isConnected)button.disabled=false;}}
 function element(tag,text,className){const node=document.createElement(tag);if(text)node.textContent=text;if(className)node.className=className;return node;}
 function button(text,action,secondary=false){const node=element('button',text,secondary?'secondary':'');node.addEventListener('click',()=>run(()=>action(node),node));return node;}
@@ -24,7 +24,7 @@ async function refresh(){
   if(version===generation)status('Signed in. Your cloud reports are private to this account.');
 }
 function renderBilling(){
-  $('billing-status').textContent=me.billing.active?`Cloud saves are active through ${date(me.billing.validUntil*1000)}.`:'You do not have an active cloud subscription.';
+  $('billing-status').textContent=config.cloudAccess==='free'?'Account report saving is free during the preview.':me.billing.active?`Cloud saves are active through ${date(me.billing.validUntil*1000)}.`:'You do not have an active cloud subscription.';
   $('plans').replaceChildren();
   if(!config.billingEnabled)$('plans').append(element('p','Subscriptions are not open yet. Your on-device reports still work.'));
   for(const plan of config.plans){
@@ -55,7 +55,6 @@ async function loadReports(){
   const version=generation,result=await api(`/reports${cursor?`?cursor=${encodeURIComponent(cursor)}`:''}`);if(version!==generation)return;
   for(const report of result.reports){const card=element('article');card.append(element('h3',date(report.assessedAt)),element('p',`36 answers · ${report.language.toUpperCase()}`));const actions=element('div',null,'actions');
     actions.append(button('View answers',async()=>{const v=generation,r=await api(`/reports/${report.id}`);if(v!==generation)return;$('answers').replaceChildren();r.answers.forEach((answer,i)=>{const li=element('li');li.append(element('p',source.questions[i].en),element('strong',source.choices[answer]));$('answers').append(li);});$('report-view').hidden=false;$('report-view').scrollIntoView({behavior:'auto'});},true));
-    actions.append(button('Export',async()=>{const v=generation,r=await api(`/reports/${report.id}/export`);if(v!==generation)return;const url=URL.createObjectURL(new Blob([JSON.stringify(r,null,2)],{type:'application/json'}));const a=element('a');a.href=url;a.download=`knowyourmind-${report.id}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);},true));
     actions.append(button('Delete',async()=>{if(!confirm('Permanently delete this cloud report? Your on-device copy will stay unchanged.'))return;await api(`/reports/${report.id}`,'DELETE');await refresh();status('Cloud report deleted.');},true));
     card.append(actions);$('cloud-reports').append(card);
   }

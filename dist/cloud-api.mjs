@@ -1,6 +1,8 @@
-export function createCloudApi({getToken,fetcher=fetch}) {
+export function createCloudApi({getToken,getUserId=()=>null,fetcher=fetch}) {
   return async (path,method='GET',data) => {
+    const owner=getUserId();
     const token = await getToken();
+    if(owner!==getUserId())throw new Error('Your account changed. Please try again.');
     if(!token)throw new Error('Please sign in to continue.');
     const response=await fetcher(`/api${path}`,{method,credentials:'same-origin',cache:'no-store',headers:{Authorization:`Bearer ${token}`,...(data!==undefined?{'Content-Type':'application/json'}:{})},...(data!==undefined?{body:JSON.stringify(data)}:{})});
     let result;try{result=await response.json();}catch{throw new Error('Cloud accounts are not available on this site yet.');}

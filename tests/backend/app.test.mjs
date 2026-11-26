@@ -114,3 +114,16 @@ test('user API rate limits are enforced in the database', async () => {
   for(let i=0;i<60;i++)assert.equal((await app.fetch(request('/api/me'),env)).status,200);
   const response=await app.fetch(request('/api/me'),env);assert.equal(response.status,429);assert.equal(response.headers.get('retry-after'),'60');
 });
+
+test('free account storage still requires consent and history is encrypted, paginated and owner-only',async()=>{
+ const env=environment();env.CLOUD_REPORTS_ACCESS='free';env.BILLING_ENABLED='false';const app=makeApp();
+ assert.equal((await app.fetch(request('/api/reports','POST',{...report(),consent:null}),env)).status,400);
+ const ids=[];
+ for(let i=0;i<27;i++){const r=await app.fetch(request('/api/reports','POST',{...report(),clientId:`history_report_${i}`,assessedAt:new Date((timestamp-i*3600)*1000).toISOString()}),env);assert.equal(r.status,201);ids.push((await r.json()).id);}
+ const firstResponse=await app.fetch(request('/api/reports/history'),env);assert.equal(firstResponse.headers.get('cache-control'),'private, no-store');
+ const first=await firstResponse.json();assert.equal(first.reports.length,25);assert.equal(first.reports[0].id,ids[0]);assert.deepEqual(first.reports[0].answers,report().answers);
+ const second=await (await app.fetch(request('/api/reports/history?cursor='+first.nextCursor),env)).json();assert.equal(second.reports.length,2);assert.equal(second.nextCursor,null);
+ assert.equal(new Set([...first.reports,...second.reports].map(r=>r.id)).size,27);
+ assert.deepEqual((await (await app.fetch(request('/api/reports/history','GET',undefined,'user_Bob'),env)).json()).reports,[]);
+ assert.equal((await app.fetch(request('/api/reports/history?cursor='+first.nextCursor,'GET',undefined,'user_Bob'),env)).status,400);
+});

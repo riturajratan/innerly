@@ -18,15 +18,17 @@ updates and questionnaire completion are ignored.
 - `CLERK_WEBHOOK_INSTANCE_ID` is a public environment variable pinned in wrangler.
 - Migration `0002_signup_notifications.sql` is applied by the deployment command.
 
-Setup is not live until both secrets and the Clerk endpoint are configured and a
-Clerk test delivery appears in the selected Slack channel. This file does not
-assert provider setup or a test delivery has happened.
+Completed 26 November 2026: both runtime secrets are encrypted in Cloudflare;
+Clerk endpoint `ep_3MeIg1wpSPhdvKkLh1kHsER6wpB` subscribes to `user.created`.
+The signed synthetic delivery returned HTTP 200, and the owner confirmed a real
+Google signup alert in the destination channel. The branded Slack icon is saved.
 
 ## Message and delivery behavior
 
 Alerts contain name, verified primary email, account ID, Google/email method and
-signup time. Names and email are rendered as plain text, so user input cannot
-mention a Slack channel or inject message formatting. No questionnaire answers,
+signup time. Block Kit cards use a heading, two-column identity fields, a separate
+account-ID row and an IST timestamp. User fields escape Slack control characters
+and disable automatic links/mentions; markdown styling within text may still render. No questionnaire answers,
 reports, scores, tokens, private metadata or IP addresses are included.
 
 Clerk's SDK verifies the signature and timestamp of the bounded raw request. The
@@ -49,7 +51,7 @@ on retry. This is at-least-once delivery, not an exactly-once guarantee.
 
 Run `npm test`, `npm run test:runtime`, and `npm run check:deploy`. Automated tests
 cover valid signatures, expiry, tampering, instance mismatch, ignored login/edit
-events, concurrency, failure/retry, deduplication, URL restrictions, plain-text
+events, concurrency, failure/retry, deduplication, URL restrictions, escaped
 identity fields and exclusion of unverified email and private metadata. Use a
 synthetic Clerk test event for the live smoke test; never send questionnaire data.
 

@@ -21,8 +21,12 @@ Production: **https://knowyourmind.ai/**, repository `riturajratan/innerly`.
 
 ## Remaining launch checks
 
-Complete a real production Google/email sign-in and email delivery test. Configure
-report encryption with a securely backed-up key before enabling cloud writes.
+A real production Google signup and its Slack notification are confirmed. Email
+login still needs an owner end-to-end check. Configure report encryption with a
+securely backed-up key before enabling cloud writes. Cloudflare dashboard access
+currently returns Page not found / Request timed out in both the owner and agent
+browsers; the live public API still responds with cloudEnabled=false. See
+[reports, Analytics and SEO status](reports-analytics-seo.md).
 Billing remains off: the owner has not created a Razorpay merchant account, and
 prices, merchant approval and provider sandbox testing are still outstanding.
 See [backend setup](cloudflare-backend.md) and [signup alerts](signup-notifications.md).

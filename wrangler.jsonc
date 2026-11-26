@@ -13,7 +13,9 @@
     "binding": "ASSETS",
     "run_worker_first": [
       "/api/*",
-      "/auth-config.mjs"
+      "/auth-config.mjs",
+      "/",
+      "/index.html"
     ]
   },
   "vars": {
@@ -23,7 +25,8 @@
     "CLERK_WEBHOOK_INSTANCE_ID": "ins_3Luh0pkr7SXTlwfBAnUN0eFh1pg",
     "BILLING_ENABLED": "false",
     "BILLING_PLANS": "[]",
-    "CLERK_JWT_KEY": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo/6nquzgvej8mCJ9/wGJ\nbxnu+ypCX0FRrAeevvPEa/uWpE2tgdYZqN9ELwEY3rFjlluKo5Jn1jmy4OglEbtz\nLcMpdzVhyMQSR8idxbD4co39dJYzN2CtpKGNGAfjYbk8q3IfYTh0Jv01SNQrnzdY\noXyFZIFnuPKe+m9QWETTB5xfS7N3QgxEzjRMg4PUIxsfIenLmmBcqJnHfaL7LL3b\nYlKic6Xo97X1NL2OIIuxQCc/BFXgU7+4Rtk09vQAlYT55B033GZYqsv5L5o/C5Lo\n6A3UHgfuNQM/MVFwJLs4QYdTQMHiRcSUYyTIDH7J7B7efDeVm+9Dx8A+07qJfjBc\nAQIDAQAB\n-----END PUBLIC KEY-----\n"
+    "CLERK_JWT_KEY": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo/6nquzgvej8mCJ9/wGJ\nbxnu+ypCX0FRrAeevvPEa/uWpE2tgdYZqN9ELwEY3rFjlluKo5Jn1jmy4OglEbtz\nLcMpdzVhyMQSR8idxbD4co39dJYzN2CtpKGNGAfjYbk8q3IfYTh0Jv01SNQrnzdY\noXyFZIFnuPKe+m9QWETTB5xfS7N3QgxEzjRMg4PUIxsfIenLmmBcqJnHfaL7LL3b\nYlKic6Xo97X1NL2OIIuxQCc/BFXgU7+4Rtk09vQAlYT55B033GZYqsv5L5o/C5Lo\n6A3UHgfuNQM/MVFwJLs4QYdTQMHiRcSUYyTIDH7J7B7efDeVm+9Dx8A+07qJfjBc\nAQIDAQAB\n-----END PUBLIC KEY-----\n",
+    "CLOUD_REPORTS_ACCESS": "free"
   },
   "d1_databases": [
     {

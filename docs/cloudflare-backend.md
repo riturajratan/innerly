@@ -1,9 +1,10 @@
 # KnowYourMind backend and Cloudflare deployment
 
 The website and `/api/*` backend run in one Cloudflare Worker. The existing
-questionnaire and local reports remain available. `cloud-account.html` provides
-Clerk sign-in, explicit per-report uploads, cloud report reading/export/deletion,
-subscription checkout, billing refresh and cancellation.
+questionnaire and local reports remain available. My reports integrates optional
+account saving, history, exact-response comparison and deletion.
+The earlier `cloud-account.html` remains an unlinked billing management interface.
+See [release status](reports-analytics-seo.md) before treating new work as live.
 
 ## Release state and product boundaries
 
@@ -13,12 +14,12 @@ subscription checkout, billing refresh and cancellation.
   was applied through the D1 console and recorded in `d1_migrations`; the six
   application tables and migration table were verified in that console.
 - Worker name: `knowyourmind`; static assets: `dist/`.
-- Production origin: `https://knowyourmind.ai`. The domain is registered; the
-  Worker custom domain and Clerk DNS cutover remain separate deployment steps.
+- Production origin: `https://knowyourmind.ai`. The Worker custom domain and Clerk DNS
+  cutover are complete; HTTPS and production Google sign-in have been verified.
 - Checkout is **disabled** in the checked-in configuration. No price has been
   chosen and no live plan or merchant credential has been configured.
-- Existing local reports stay free. This implementation gates **new cloud saves**
-  on an active, verified subscription. Previously saved cloud data remains
+- Existing local reports stay free. The current public configuration sets `CLOUD_REPORTS_ACCESS=free` for the preview.
+  Without that explicit flag, new cloud saves require an active verified subscription. Previously saved cloud data remains
   readable/exportable/deletable after expiry. This is not a paywall around the
   existing public local report generator. Final paid benefits and prices still
   need a product decision before opening checkout.
@@ -26,7 +27,7 @@ subscription checkout, billing refresh and cancellation.
   subscriptions, following the owner's latest direction; it does not create any
   live subscription automatically.
 - No AI analysis, transactional report email service, or server PDF generation
-  is enabled by this work. Report export is JSON; existing browser printing works.
+  is enabled by this work. The report UI offers Print / PDF; the internal authenticated export API remains available for data-access support, without a JSON-export button.
 
 ## Local development and verification
 
@@ -70,6 +71,7 @@ dashboard variables. Secrets are configured separately and never committed.
 | `RAZORPAY_KEY_SECRET` | Worker secret: matching merchant API secret. |
 | `RAZORPAY_WEBHOOK_SECRET` | Worker secret: separate secret used to verify raw webhook bodies. |
 | `BILLING_PLANS` | Public var: JSON catalog described below. Empty until plans are approved. |
+| `CLOUD_REPORTS_ACCESS` | Public var: `free` enables preview saves with consent; any other value requires a subscription. |
 | `BILLING_ENABLED` | Public var: keep `false` until test-mode and live configuration checks pass. |
 
 Use `npx wrangler secret put NAME` to enter each secret interactively, or use the
@@ -85,7 +87,8 @@ remain in the original application. Session JWTs are verified using the public
 signing key, exact issuer and authorized origin; this backend has no Clerk admin
 secret. Tokens expire normally; key rotation requires a config update and deploy. The Worker serves
 `/auth-config.mjs` dynamically so frontend and backend share the same public key.
-Google production login remains off until separately configured.
+Google production login is configured and a real signup has been confirmed.
+OAuth brand verification is still waiting for Google’s requested 24-hour retry window.
 
 ## GitHub and deployment
 

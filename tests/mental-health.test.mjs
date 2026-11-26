@@ -54,6 +54,9 @@ test('reports distinguish translated screens, context, fictional examples and re
 test('public entry is mental-health focused without legacy personality navigation',async()=>{
  const html=await readFile(new URL('../dist/index.html',import.meta.url),'utf8');
  assert.match(html,/mental-app\.mjs/);assert.match(html,/36 questions/);assert.doesNotMatch(html,/href="personality\.html"/);assert.doesNotMatch(html,/accuracy rate|testimonials|country-selector/);
- const app=await readFile(new URL('../dist/mental-app.mjs',import.meta.url),'utf8');assert.doesNotMatch(app,/fetch\(|XMLHttpRequest|sendBeacon/);
+ const app=await readFile(new URL('../dist/mental-app.mjs',import.meta.url),'utf8');assert.doesNotMatch(app,/XMLHttpRequest|sendBeacon/);
+ // Optional account sync now uses an authenticated, consent-gated API. The
+ // questionnaire calculations themselves must remain fully on-device.
+ for(const module of ['innerly-v1-model.mjs','mental-model.mjs','checkin-flow.mjs'])assert.doesNotMatch(await readFile(new URL('../dist/'+module,import.meta.url),'utf8'),/fetch\(|XMLHttpRequest|sendBeacon/);
  assert.match(app,/mh-save-confirm/);assert.match(app,/if\(!report&&answers\.some/);
 });

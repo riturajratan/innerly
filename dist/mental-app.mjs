@@ -1,4 +1,8 @@
 import './header-layout.mjs?v=1';
+import './analytics.mjs?v=1';
+import {createCloudApi} from './cloud-api.mjs?v=2';
+import {createAccountReportStore} from './account-report-store.mjs?v=1';
+import {accountHistoryMarkup} from './report-history-view.mjs?v=1';
 import {createReportExporter} from './report-export.mjs?v=brand-1';
 import {icon} from './report-concept-view.mjs?v=brand-1';
 import {mountThoughtWaves} from './planning.mjs?v=14';
@@ -39,6 +43,13 @@ let draftEnabled=false,draftSynced=false;
 if(!reportDemo)try{saved=[...readWorkbookReports(localStorage.getItem(INNERLY_V1_STORAGE)),...readReflectionReports(localStorage.getItem(REFLECTION60_STORAGE)),...readSavedCheckins(localStorage.getItem(MENTAL_STORAGE))];const draft=readDraft(localStorage.getItem(DRAFT_STORAGE));if(draft){answers=draft.answers;language=draft.language;draftEnabled=true;draftSynced=true;}}catch{}
 let answerLanguage=language;
 const auth=createClerkAuth({publishableKey:reportDemo?'':clerkPublishableKey,window,document,onChange:updateAuthHeader});
+let cloudConfig=null,historySource='account',comparisonSelection={},cloudStatus='',cloudSaving=false;
+const cloudApi=createCloudApi({getToken:()=>auth.getToken(),getUserId:()=>auth.state.user?.id||null});
+const accountReports=createAccountReportStore({api:cloudApi,onChange:()=>{queueMicrotask(()=>{if(view==='history')render(false);else if(view==='report')renderCloudBanner();});}});
+const cloudConfiguration=reportDemo?Promise.resolve(null):fetch('/api/config',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(value=>{cloudConfig=value;if(view==='history')render(false);else if(view==='report')renderCloudBanner();return value;}).catch(()=>null);
+function reportHistory(){return report?.cloudId?accountReports.state.reports:saved;}
+function autoSaveEnabled(){try{return !!accountReports.state.userId&&!!cloudConfig?.consentVersion&&localStorage.getItem('knowyourmind-cloud-consent:'+accountReports.state.userId)===cloudConfig.consentVersion;}catch{return false;}}
+function setAutoSave(enabled){const id=accountReports.state.userId;if(!id)return;const key='knowyourmind-cloud-consent:'+id;if(enabled)localStorage.setItem(key,cloudConfig.consentVersion);else localStorage.removeItem(key);}
 const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
 let thoughtWaves=null;
 let personalReport=null;
@@ -52,7 +63,7 @@ function localizeStartButtons(){
   button.innerHTML=`${esc(reporting?say(language,'Start a new test','नया टेस्ट शुरू करें'):qt('Start test','Start My Test','अपना टेस्ट शुरू करें'))} <span aria-hidden="true">→</span>`;button.lang=language;button.dir=languageDirection(language);
  }
 }
-function goHistory(){if(reportDemo){location.assign('./?view=history');return;}view='history';render();}
+function goHistory(){if(reportDemo){location.assign('./?view=history');return;}view='history';render();if(accountReports.state.userId&&!accountReports.state.loaded)accountReports.load();}
 function newTest(){
  if(reportDemo){location.assign('./?new=1');return;}
  const fresh=()=>{try{localStorage.removeItem(DRAFT_STORAGE);}catch{showDialog(`<h2>${say(language,'Could not start a new test','नया टेस्ट शुरू नहीं हो सका')}</h2><p>${say(language,'Your saved draft could not be cleared. Please try again.','सेव draft हट नहीं सका। कृपया फिर कोशिश करें।')}</p>`);return;}closeDialog();startFresh();};
@@ -60,11 +71,13 @@ function newTest(){
   showDialog(`<h2>${say(language,'Start a new test?','नया टेस्ट शुरू करें?')}</h2><p>${say(language,'This replaces your unfinished answers. Your completed saved reports stay in My reports.','इससे अधूरे जवाब बदल जाएँगे। पूरी की गई सेव reports मेरी रिपोर्ट में रहेंगी।')}</p><div class="mh-account-actions"><button class="mh-secondary" data-close>${say(language,'Keep my current test','मौजूदा टेस्ट रखें')}</button><button class="mh-primary" id="mh-new-test-confirm">${say(language,'Start a new test','नया टेस्ट शुरू करें')}</button></div>`);
   dialog.querySelector('#mh-new-test-confirm').onclick=fresh;return;
  }
- if(report&&!saved.some(r=>r.id===report.id)){begin();return;}
+ if(report&&!report.cloudId&&!saved.some(r=>r.id===report.id)){begin();return;}
  fresh();
 }
 
 function render(focus=true){
+ window.dispatchEvent(new CustomEvent('knowyourmind:view',{detail:view}));
+ document.querySelector('meta[name=robots]')?.setAttribute('content',view==='home'?'index,follow':'noindex,nofollow');
  thoughtWaves?.destroy();thoughtWaves=null;
  personalReport?.destroy();personalReport=null;
  const showPersonalReport=view==='report'&&!reportDemo&&usesPersonalReport(report);
@@ -80,17 +93,18 @@ function render(focus=true){
  document.body.classList.toggle('mh-personal-report',showPersonalReport);
  for(const id of ['personal-report-base-style','personal-report-style']){const stylesheet=document.getElementById(id);if(stylesheet)stylesheet.disabled=!showPersonalReport;}
  clearAuthReturn();hideGraphTooltip();updateAuthHeader(auth.state);
- cancelGuide();document.documentElement.lang=view==='quiz'?language:displayLanguage(language);document.documentElement.dir=view==='quiz'?languageDirection(language):'ltr';document.querySelector('.mh-header').lang=displayLanguage(language);document.querySelector('.mh-header').dir='ltr';document.querySelector('.mh-footer').lang=displayLanguage(language);document.querySelector('.mh-footer').dir='ltr';document.querySelector('#mh-language-note').textContent=coverageNotice(language);document.querySelector('#mh-language-note').lang=language;document.querySelector('#mh-language-note').dir=languageDirection(language);document.title=say(language,'Know Your Mind — A mental-health check-in','Know Your Mind — अपने मन का हाल जानें');document.querySelector('#mh-language').value=language;
+ cancelGuide();document.documentElement.lang=view==='quiz'?language:displayLanguage(language);document.documentElement.dir=view==='quiz'?languageDirection(language):'ltr';document.querySelector('.mh-header').lang=displayLanguage(language);document.querySelector('.mh-header').dir='ltr';document.querySelector('.mh-footer').lang=displayLanguage(language);document.querySelector('.mh-footer').dir='ltr';document.querySelector('#mh-language-note').textContent=coverageNotice(language);document.querySelector('#mh-language-note').lang=language;document.querySelector('#mh-language-note').dir=languageDirection(language);document.title=say(language,'Know Your Mind: Self-Reflection & Mental Wellbeing Check-In','Know Your Mind — अपने मन का हाल जानें');document.querySelector('#mh-language').value=language;
  document.querySelector('#mh-home').textContent=say(language,'Home','होम');document.querySelector('#mh-history').textContent=say(language,'My reports','मेरी रिपोर्ट');document.querySelector('.mh-footer>span').textContent=say(language,'A moment for your mind.','कुछ पल, अपने मन के लिए।');document.querySelector('#mh-motion').textContent=say(language,paused?'Resume motion':'Pause motion',paused?'Motion चालू करें':'Motion रोकें');
  document.body.classList.toggle('mh-in-checkin',view==='quiz');document.body.classList.toggle('mh-home-page',view==='home');
  document.querySelector('#mh-home').setAttribute('aria-current',view==='home'?'page':'false');document.querySelector('#mh-history').setAttribute('aria-current',view==='history'||view==='report'?'page':'false');
  if(view==='home'){app.innerHTML=mentalHomeMarkup({language});bindHomeInteractions(app,language,localizeStartButtons);thoughtWaves=mountThoughtWaves(app.querySelector('[data-thought-waves]'),{pagePaused:paused,strongerStrokes:true});if(answers.some(v=>v!==null)&&!report)app.insertAdjacentHTML('afterbegin',`<div class="mh-resume-banner"><span><strong>${completedCount(answers)} / ${QUESTION_TOTAL}</strong> · ${say(language,draftSynced?'Saved in this browser. Ready when you are.':'Your answers are still here in this open page.',draftSynced?'इसी browser में सेव है। जब चाहें जारी रखें।':'इस खुले पेज में आपके जवाब अभी भी हैं।')}</span><div><button class="mh-secondary" data-action="resume" lang="${language}" dir="${languageDirection(language)}">${qt('Continue test','Continue my check-in','अपना check-in जारी रखें')} →</button><button class="mh-link" data-action="discard" lang="${language}" dir="${languageDirection(language)}">${qt('removeDraft','Remove draft','Draft हटाएँ')}</button></div></div>`);}
  if(view==='quiz'){app.innerHTML=quizMarkup(answers,language,draftSynced);setActiveQuestion(resumeQuestion(answers)??0);}
  if(view==='report'){
-  app.innerHTML=showPersonalReport?personalReportMarkup(report,saved,displayLanguage(language)):reportDemo?sampleReportMarkup({report,history:saved,language,preset:samplePreset,view:reportView,selection:reportSelection}):reportMarkup(report,saved,language,reportView,{...reportSelection,unlocked:previewUnlockedReports.has(report.id),preview:previewSelection});
-  if(showPersonalReport){personalReport=mountPersonalReport(app,report,saved,displayLanguage(language));document.title=say(language,'Know Your Mind — Your personal reflection','Know Your Mind — आपकी व्यक्तिगत रिपोर्ट');}
+  app.innerHTML=showPersonalReport?personalReportMarkup(report,reportHistory(),displayLanguage(language)):reportDemo?sampleReportMarkup({report,history:saved,language,preset:samplePreset,view:reportView,selection:reportSelection}):reportMarkup(report,reportHistory(),language,reportView,{...reportSelection,unlocked:previewUnlockedReports.has(report.id),preview:previewSelection});
+  if(showPersonalReport){personalReport=mountPersonalReport(app,report,reportHistory(),displayLanguage(language));document.title=say(language,'Know Your Mind — Your personal reflection','Know Your Mind — आपकी व्यक्तिगत रिपोर्ट');}
  }
- if(view==='history')app.innerHTML=`<section class="mh-history"><p class="mh-kicker">${say(language,'SAVED ON THIS DEVICE','इस DEVICE पर सेव')}</p><h1>${say(language,'Your check-ins. Your pace.','आपके check-ins। आपकी गति।')}</h1><p>${say(language,'Reports saved in this browser appear here. They do not sync to your account. Anyone using this browser can open them.','इस browser में सेव reports यहाँ दिखती हैं। ये खाते से sync नहीं होतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है।')}</p>${saved.length?`<div class="mh-saved-list">${saved.toSorted((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).map(r=>`<article><div class="mh-saved-copy"><span>${new Date(r.createdAt).toLocaleDateString(language,{day:'numeric',month:'long',year:'numeric'})}</span><strong>${r.version===INNERLY_V1_VERSION?say(language,'Know Your Mind V1 · 36 questions','Know Your Mind V1 · 36 सवाल'):r.version===REFLECTION60_VERSION?say(language,'60-statement reflection','60 statements की reflection'):`Earlier PHQ-4 ${r.scores.total}/12`}</strong><small><bdi>${languageName(r.language)}</bdi> </small></div><div class="mh-saved-actions"><button class="mh-saved-open" data-open="${esc(r.id)}">${icon('eye')}<span>${say(language,'View report','रिपोर्ट देखें')}</span></button><button class="report-delete-button" data-delete="${esc(r.id)}" aria-label="${say(language,'Delete this saved check-in','यह सेव check-in हटाएँ')}">${icon('trash')}<span>${say(language,'Delete report','रिपोर्ट हटाएँ')}</span></button></div></article>`).join('')}</div>`:`<div class="mh-empty">${say(language,'Your first saved report will appear here.','आपकी पहली सेव report यहाँ दिखेगी।')}</div>`}<button class="mh-primary" data-action="begin">${qt('Start test','Start My Test','अपना टेस्ट शुरू करें')} →</button></section>`;
+ if(view==='history')app.innerHTML=accountHistoryMarkup({localReports:saved.toSorted((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)),cloud:accountReports.state,source:historySource,config:cloudConfig,autoSave:autoSaveEnabled(),selection:comparisonSelection,saving:cloudSaving,status:cloudStatus});
+ if(view==='report'&&!reportDemo)renderCloudBanner();
  if(reportDemo&&view==='report')document.title=say(language,'Know Your Mind — Interactive sample report','Know Your Mind — Interactive उदाहरण report');
  document.querySelector('#mh-history').hidden=false;
  localizeStartButtons();
@@ -111,7 +125,7 @@ function selectReportQuestion(index,scroll=false){
  reportSelection={dimension:`dimension-${Math.floor(index/6)+1}`,question:index};highlightGraphic(index);hideGraphTooltip();
  for(const b of app.querySelectorAll('[data-workbook-question],[data-workbook-map]'))b.setAttribute('aria-pressed',String(Number(b.dataset.workbookQuestion??b.dataset.workbookMap)===index));
  if(reportView==='timeline'){
-  app.querySelector('#wb-timeline-detail').innerHTML=workbookTimelineDetail(report,saved,index,displayLanguage(language));
+  app.querySelector('#wb-timeline-detail').innerHTML=workbookTimelineDetail(report,reportHistory(),index,displayLanguage(language));
   if(reportDemo){const notes=app.querySelectorAll('#wb-timeline-detail>.wb-help');if(notes.length)notes[notes.length-1].textContent=say(language,'These example dates and check-ins are fictional.','ये उदाहरण की तारीखें और check-ins काल्पनिक हैं।');}
  }else app.querySelector('#wb-question-detail').innerHTML=workbookQuestionReading(report.answers,index,displayLanguage(language));
  const status=app.querySelector('#wb-focus-status');
@@ -137,17 +151,19 @@ function begin(){
  if(reportDemo){const next=new URL('./',location.href);next.searchParams.set('lang',language);next.searchParams.set('start','1');location.assign(next.href);return;}
  cancelGuide();
  if(answers.some(v=>v!==null)&&!isComplete(answers)){resume();return;}
- if(report&&!saved.some(r=>r.id===report.id)){showDialog(`<h2>${say(language,'Start a new check-in?','नया check-in शुरू करें?')}</h2><p>${say(language,'This report is not saved. You can go back to save or print it first.','यह report सेव नहीं है। पहले वापस जाकर इसे सेव या print कर सकते हैं।')}</p><button class="mh-primary" id="mh-new-confirm">${qt('Start test','Start My Test','अपना टेस्ट शुरू करें')}</button>`);dialog.querySelector('#mh-new-confirm').onclick=()=>{closeDialog();startFresh();};return;}
+ if(report&&!report.cloudId&&!saved.some(r=>r.id===report.id)){showDialog(`<h2>${say(language,'Start a new check-in?','नया check-in शुरू करें?')}</h2><p>${say(language,'This report is not saved. You can go back to save or print it first.','यह report सेव नहीं है। पहले वापस जाकर इसे सेव या print कर सकते हैं।')}</p><button class="mh-primary" id="mh-new-confirm">${qt('Start test','Start My Test','अपना टेस्ट शुरू करें')}</button>`);dialog.querySelector('#mh-new-confirm').onclick=()=>{closeDialog();startFresh();};return;}
  if(answers.some(v=>v!==null)&&!report){resume();}else startFresh();
 }
 function finish(){
  cancelGuide();
+ cloudStatus='';
  if(!isComplete(answers)){const i=nextUnanswered(answers);if(view!=='quiz'){view='quiz';render();}app.querySelector('#mh-form-message').textContent=qt('A few answers are still missing.','A few answers are still missing. Let us finish those.','कुछ जवाब बाकी हैं। उन्हें पूरा करें।');goToQuestion(i);return;}
  report=makeCheckin(answers,{id:crypto.randomUUID(),createdAt:new Date().toISOString(),language});let removed=true;
  const stored=storeCurrentReport();
  if(stored&&draftEnabled){try{localStorage.removeItem(DRAFT_STORAGE);}catch{removed=false;}}
  draftEnabled=false;draftSynced=false;previewSelection={};reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};view='report';render();
  if(!stored)app.querySelector('#mh-report-status').textContent=say(language,'Your report is ready, but it could not be saved in this browser. Keep this page open and retry Save or use Print / PDF. Existing reports have not been removed.','Report तैयार है, लेकिन इस browser में सेव नहीं हो सकी। पेज खुला रखें और Save फिर आज़माएँ या Print / PDF इस्तेमाल करें। पुरानी reports हटाई नहीं गई हैं।');
+ if(autoSaveEnabled()&&cloudConfig?.cloudEnabled)saveAccountReport(report);
  else if(!removed)app.querySelector('#mh-report-status').textContent=say(language,'Your report is saved. The earlier draft also remains in this browser.','आपकी report सेव है। पिछला draft भी इस browser में मौजूद है।');
 }
 function setActiveQuestion(i){
@@ -192,6 +208,44 @@ function showReportOffer(){
  showDialog(`<h2>${say(language,'Your full report · $1','आपकी पूरी report · $1')}</h2><p>${say(language,'One-time payment for this report. No recurring subscription.','इस report के लिए एक बार भुगतान। कोई recurring subscription नहीं।')}</p><p>${say(language,'Payments are coming soon. You can explore and download your full report for free during this preview.','भुगतान जल्द शुरू होंगे। इस preview में आप पूरी report मुफ़्त देख और डाउनलोड कर सकते हैं।')}</p><div class="mh-account-actions"><button class="mh-primary" id="wb-free-preview">${say(language,'Open my free preview','मेरा मुफ़्त preview खोलें')}</button></div>`);
  dialog.querySelector('#wb-free-preview').onclick=()=>{closeDialog();unlockReportPreview();};
 }
+function renderCloudBanner(){
+ app.querySelector('.cloud-report-banner')?.remove();
+ if(reportDemo||view!=='report'||!report||report.version!==INNERLY_V1_VERSION)return;
+ const text=cloudStatus||(report.cloudId?'Saved to your account. Available when you sign in on another device.':'Save this report to your account to keep your history across devices.');
+ app.insertAdjacentHTML('afterbegin',`<aside class="cloud-report-banner"><p role="status">${esc(text)}</p>${report.cloudId?'<button data-cloud-action="history">My reports &amp; comparison</button>':`<button data-cloud-save="current" ${cloudSaving?'disabled':''}>${cloudSaving?'Saving…':'Save to my account'}</button>`}</aside>`);
+}
+async function saveAccountReport(target){
+ if(cloudSaving)throw new Error('A report is still saving. Please wait for it to finish.');const owner=accountReports.state.userId;
+ cloudSaving=true;cloudStatus='Saving your report to your account…';if(view==='history')render(false);else renderCloudBanner();
+ try{const savedReport=await accountReports.save(target,cloudConfig.consentVersion);if(!savedReport||owner!==accountReports.state.userId)return;
+  cloudStatus='Saved to your account.';if(report===target)report=savedReport;
+ }catch(error){if(owner===accountReports.state.userId)cloudStatus=error.message+' You can retry saving this report.';}
+ finally{if(owner===accountReports.state.userId){cloudSaving=false;if(view==='report')render(false);else if(view==='history')render(false);}}
+}
+async function cloudConsent(target=null){
+ await cloudConfiguration;
+ if(auth.state.status!=='signed-in'){requestAccount();return;}
+ if(!cloudConfig?.cloudEnabled)throw new Error('Account storage is being prepared. Your device report is safe. Please try again shortly.');
+ const owner=accountReports.state.userId;
+ showDialog(`<h2>${target?'Save this report to your account?':'Auto-save new reports?'}</h2><p>Your 36 answers, report language and check-in date will be stored encrypted on Know Your Mind’s Cloudflare backend, linked to this account. You can open or delete them in My reports after signing in on another device.</p><p>Only save your own reports. Your answers and report details are not sent to Slack or Google Analytics.</p><label><input type="checkbox" id="cloud-auto-consent" ${target?'':'checked'}> Also save future completed check-ins to this account from this browser. You can turn this off in My reports.</label><p id="cloud-consent-error" role="alert"></p><div class="mh-account-actions"><button class="mh-secondary" data-close>Keep on this device</button><button class="mh-primary" id="cloud-consent-confirm">${target?'Agree & save this report':'Agree & enable auto-save'}</button></div>`);
+ dialog.querySelector('#cloud-consent-confirm').onclick=async()=>{
+  if(owner!==accountReports.state.userId){closeDialog();return;}
+  try{if(dialog.querySelector('#cloud-auto-consent').checked)setAutoSave(true);closeDialog();if(target)await saveAccountReport(target);else if(view==='history')render(false);}catch(error){const message=dialog.querySelector('#cloud-consent-error');if(message)message.textContent=error.message;}
+ };
+}
+async function handleCloudAction(button){
+ const action=button.dataset.cloudAction;
+ if(action==='signin'){requestAccount();return;}
+ if(action==='history'){historySource='account';goHistory();return;}
+ if(action==='refresh'||action==='more'){await accountReports.load(action==='more');return;}
+ if(action==='autosave'){if(autoSaveEnabled()){setAutoSave(false);render(false);}else await cloudConsent();return;}
+ if(button.dataset.cloudSave){const target=button.dataset.cloudSave==='current'?report:saved.find(r=>r.id===button.dataset.cloudSave);if(target)await cloudConsent(target);return;}
+ if(button.dataset.cloudOpen){const target=accountReports.state.reports.find(r=>r.id===button.dataset.cloudOpen);if(target){report=target;language=target.language;cloudStatus='';view='report';render();}return;}
+ if(button.dataset.cloudDelete){const target=accountReports.state.reports.find(r=>r.id===button.dataset.cloudDelete),owner=accountReports.state.userId;if(!target)return;
+  showDialog(`<h2>Delete this account report?</h2><p>This permanently removes this report from your account. A separate copy saved in this browser or downloaded as a PDF stays available until you delete it.</p><p id="cloud-delete-error" role="alert"></p><button class="mh-primary" id="cloud-delete-confirm">Delete account report</button>`);
+  dialog.querySelector('#cloud-delete-confirm').onclick=async()=>{if(owner!==accountReports.state.userId){closeDialog();return;}const confirm=dialog.querySelector('#cloud-delete-confirm');confirm.disabled=true;try{await accountReports.remove(target.id);if(owner!==accountReports.state.userId)return;if(report?.cloudId===target.id)report=null;closeDialog();view='history';render(false);}catch(error){dialog.querySelector('#cloud-delete-error').textContent=error.message;confirm.disabled=false;}};
+ }
+}
 function saveReport(){
  if(reportDemo)return;
  if(saved.some(r=>r.id===report.id))return;
@@ -204,6 +258,14 @@ function storeCurrentReport(){
 }
 function clearAuthReturn(){if(reportDemo)return;try{sessionStorage.removeItem(AUTH_RETURN_STORAGE);}catch{}}
 function updateAuthHeader(state){
+ if(!reportDemo&&typeof accountReports!=='undefined'){
+  const previous=accountReports.state.userId,next=state.status==='signed-in'?state.user?.id:null;
+  if(previous!==next){
+   if(report?.cloudId){report=null;answers=Array(QUESTION_TOTAL).fill(null);view='history';closeDialog();}
+   comparisonSelection={};cloudStatus='';cloudSaving=false;accountReports.setUser(next);
+   if(next)accountReports.load();
+  }
+ }
  const button=document.querySelector('#mh-auth');if(!button)return;
  if(reportDemo){button.hidden=false;button.disabled=false;button.textContent=say(language,'Account','खाता');return;}
  button.hidden=state.status==='disabled';button.disabled=state.status==='loading';
@@ -219,7 +281,8 @@ async function openAccount(){
   await auth.ready();
   if(auth.state.status!=='signed-in'){await auth.signIn(language);return;}
   const user=auth.state.user;
-  showDialog(`<h2>${say(language,'Your Know Your Mind account','आपका Know Your Mind खाता')}</h2><p class="mh-account-email">${esc(user?.primaryEmailAddress?.emailAddress||user?.fullName||'')}</p><p class="mh-footnote">${say(language,'Signing out does not remove saved reports. Anyone using this browser can open them. Remove them from My reports on a shared device.','साइन आउट करने से सेव reports नहीं हटतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है। साझा device पर “मेरी रिपोर्ट” से इन्हें हटाएँ।')}</p><div class="mh-account-actions"><button class="mh-secondary" id="mh-account-manage">${say(language,'Manage account','खाता मैनेज करें')}</button><button class="mh-secondary" id="mh-account-out">${say(language,'Sign out','साइन आउट')}</button></div>`);
+  showDialog(`<h2>${say(language,'Your Know Your Mind account','आपका Know Your Mind खाता')}</h2><p class="mh-account-email">${esc(user?.primaryEmailAddress?.emailAddress||user?.fullName||'')}</p><p class="mh-footnote">${say(language,'Signing out hides your account reports. Reports saved separately in this browser remain accessible here. Remove browser copies from My reports on a shared device.','साइन आउट करने पर खाते की reports छिप जाती हैं। इस browser में अलग से सेव reports यहीं रहती हैं। साझा device पर “मेरी रिपोर्ट” से browser वाली प्रतियाँ हटाएँ।')}</p><div class="mh-account-actions"><button class="mh-primary" id="mh-account-reports">My reports &amp; comparisons</button><button class="mh-secondary" id="mh-account-manage">${say(language,'Manage account','खाता मैनेज करें')}</button><button class="mh-secondary" id="mh-account-out">${say(language,'Sign out','साइन आउट')}</button></div>`);
+  dialog.querySelector('#mh-account-reports').onclick=()=>{closeDialog();historySource='account';goHistory();};
   dialog.querySelector('#mh-account-manage').onclick=async()=>{closeDialog();try{await auth.profile();}catch{authError();}};
   dialog.querySelector('#mh-account-out').onclick=async()=>{closeDialog();try{await auth.signOut(language);}catch{authError();}};
  }catch{authError();}
@@ -227,10 +290,10 @@ async function openAccount(){
 function requestAccount(){
  if(reportDemo){location.assign('./?account=1');return;}
  cancelGuide();
- const unsavedReport=report&&!saved.some(r=>r.id===report.id);
+ const unsavedReport=report&&!report.cloudId&&!saved.some(r=>r.id===report.id);
  const unsavedAnswers=!report&&answers.some(v=>v!==null)&&!draftSynced;
  const proceed=()=>{
-  try{rememberAuthReturn(sessionStorage,{view,reportId:report?.id||null,language});}
+  try{rememberAuthReturn(sessionStorage,{view:report?.cloudId?'history':view,reportId:report?.id||null,language});}
   catch{ /* Existing browser saves still remain available if session storage is blocked. */ }
   openAccount();
  };
@@ -244,6 +307,8 @@ function requestAccount(){
 app.addEventListener('focusin',e=>activateQuestionFrom(e.target));
 app.addEventListener('pointerdown',e=>{activateQuestionFrom(e.target);cancelGuide();pointerInput=true;if(view==='quiz')window.scrollTo({top:window.scrollY,behavior:'instant'});});app.addEventListener('keydown',()=>{pointerInput=false;cancelGuide();});
 app.addEventListener('change',e=>{
+ if(e.target.matches('[data-compare]')){const key=e.target.dataset.compare;comparisonSelection={...comparisonSelection,[key]:key==='question'?Number(e.target.value):e.target.value};render(false);app.querySelector(`[data-compare="${key}"]`)?.focus({preventScroll:true});return;}
+
  if(e.target.matches('[data-answer]'))recordAnswer(Number(e.target.dataset.answer),Number(e.target.value));
  if(e.target.matches('[data-workbook-area]')&&report?.version===INNERLY_V1_VERSION){
   const profile=dimensionProfile(report.answers,e.target.value);reportSelection={dimension:profile.id,question:profile.items[0]};
@@ -260,6 +325,9 @@ app.addEventListener('click',e=>{
  hideGraphTooltip();
  const detailMark=e.target.closest('[data-detail-graphic] [data-graphic-question]');if(detailMark){selectReportQuestion(Number(detailMark.dataset.graphicQuestion));return;}
  const button=e.target.closest('button');if(!button)return;
+ if(button.dataset.historySource){historySource=button.dataset.historySource;comparisonSelection={};render(false);if(historySource==='account'&&!accountReports.state.loaded)accountReports.load();return;}
+ if(button.dataset.cloudAction||button.dataset.cloudOpen||button.dataset.cloudSave||button.dataset.cloudDelete){handleCloudAction(button).catch(error=>{cloudStatus=error.message;showDialog(`<h2>Account report</h2><p role="alert">${esc(error.message)}</p><button class="mh-secondary" data-close>Close</button>`);});return;}
+
  if(button.dataset.responseQuestion!==undefined){
   const index=Number(button.dataset.responseQuestion);
   if(button.hasAttribute('data-preview-response')){
@@ -298,7 +366,7 @@ app.addEventListener('click',e=>{
  if(button.dataset.reportView){reportView=button.dataset.reportView;const y=window.scrollY;render(false);app.querySelector(`[data-report-view="${reportView}"]`).focus({preventScroll:true});window.scrollTo({top:y,behavior:'instant'});return;}
  if(button.dataset.screenDetail){for(const b of app.querySelectorAll('[data-screen-detail]'))b.setAttribute('aria-pressed',String(b===button));app.querySelector('#mh-score-reading').innerHTML=screeningDetail(report,button.dataset.screenDetail,displayLanguage(language));return;}
  if(button.dataset.historyPoint){const r=button.dataset.historyPoint===report.id?report:saved.find(r=>r.id===button.dataset.historyPoint);if(r){showDialog(`<h2>${say(language,'A check-in snapshot','Check-in की झलक')}</h2><p>${new Date(r.createdAt).toLocaleDateString(language)} · PHQ-4 ${r.scores.total}/12</p>${screenBars(r.scores,displayLanguage(language))}<p>${say(language,'This describes that two-week period, not a prediction.','यह उस दो-सप्ताह की अवधि के बारे में है, आगे का अनुमान नहीं।')}</p>`);}return;}
- if(button.dataset.open){report=saved.find(r=>r.id===button.dataset.open);if(report){language=report.language;view='report';reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};render();}return;}
+ if(button.dataset.open){cloudStatus='';report=saved.find(r=>r.id===button.dataset.open);if(report){language=report.language;view='report';reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};render();}return;}
  if(button.dataset.delete){const id=button.dataset.delete;showDialog(`<h2>${say(language,'Delete this saved check-in?','यह सेव check-in हटाएँ?')}</h2><p>${say(language,'This removes its answers and report from this browser. Downloaded copies are not affected.','इसके जवाब और report इस browser से हटेंगे। Download की गई copies नहीं हटेंगी।')}</p><button class="mh-primary" id="mh-delete-confirm">${say(language,'Delete this check-in','यह check-in हटाएँ')}</button>`);dialog.querySelector('#mh-delete-confirm').onclick=()=>{try{const key=reportStorage(saved.find(r=>r.id===id));updateSavedReports(key,removeLocalReport(localStorage,key,id));if(report?.id===id){report=null;answers=Array(QUESTION_TOTAL).fill(null);draftEnabled=false;draftSynced=false;}view='history';closeDialog();render();}catch{dialog.querySelector('p').textContent=say(language,'Deletion failed. Please try again.','हटाया नहीं जा सका। फिर कोशिश करें।');}};return;}
  switch(button.dataset.action){case'dimension-overview':{const target=app.querySelector(`[data-infographic][data-workbook-dimension="${reportSelection.dimension}"]`);target?.focus({preventScroll:true});target?.scrollIntoView({behavior:motion(),block:'center'});break;}case'report-offer':showReportOffer();break;case'unlock-preview':unlockReportPreview();break;case'begin':begin();break;case'new-test':newTest();break;case'history':goHistory();break;case'home':view='home';render();break;case'resume':resume();break;case'break':takeBreak();break;case'discard':discardDraft();break;case'review':reviewAnswers();break;case'unanswered':cancelGuide();goToQuestion(resumeQuestion(answers),'instant');break;case'finish':finish();break;case'preview':{const p=app.querySelector('#mh-report-preview');p.tabIndex=-1;p.focus({preventScroll:true});p.scrollIntoView({behavior:motion(),block:'start'});break;}case'save':saveReport();break;case'print':if(!reportExporter.open(button))window.print();break;}
 });

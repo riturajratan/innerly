@@ -17,7 +17,7 @@ const config = {
   APP_ORIGIN: origin, CLERK_ISSUER: 'https://clerk.knowyourmind.ai',
   CLERK_PUBLISHABLE_KEY: `pk_test_${Buffer.from('clerk.knowyourmind.ai$').toString('base64')}`,
   CLERK_JWT_KEY: jwtKey,
-  REPORT_ENCRYPTION_KEY: Buffer.alloc(32, 9).toString('base64'), BILLING_ENABLED: 'false', BILLING_PLANS: '[]',
+  REPORT_ENCRYPTION_KEY: Buffer.alloc(32, 9).toString('base64'), CLOUD_REPORTS_ACCESS: 'free', BILLING_ENABLED: 'false', BILLING_PLANS: '[]',
 };
 await writeFile(envFile, Object.entries(config).map(([key,value]) => `${key}=${JSON.stringify(value)}`).join('\n'), { mode: 0o600 });
 const common = ['--env-file', envFile];
@@ -52,13 +52,16 @@ INSERT INTO payments VALUES ('pay_fixture','smoke_subscription','inv_fixture',10
   const body={clientId:'runtime_report_ABC',version:'innerly-workbook-v1',language:'en',answers:Array(36).fill(2),assessedAt:new Date().toISOString(),consent:'cloud-reports-v1'};
   const saved=await api('/reports','POST',body);assert.equal(saved.status,201);const {id}=await saved.json();
   const read=await api(`/reports/${id}`);assert.equal(read.status,200);assert.equal(read.headers.get('cache-control'),'private, no-store');assert.deepEqual((await read.json()).answers,body.answers);
+  const timeline=await api('/reports/history');assert.equal(timeline.status,200);assert.deepEqual((await timeline.json()).reports[0].answers,body.answers);
+  assert.deepEqual((await (await api('/reports/history','GET',undefined,'user_Bob')).json()).reports,[]);
+  const bobSave=await api('/reports','POST',{...body,clientId:'runtime_report_BOB'},'user_Bob');assert.equal(bobSave.status,201);
   assert.equal((await api(`/reports/${id}`,'GET',undefined,'user_Bob')).status,404);
   assert.equal((await api(`/reports/${id}`,'DELETE',undefined,'user_Bob')).status,404);
   assert.equal((await fetch(`${origin}/api/me`)).status,401);
   assert.equal((await api('/billing/subscriptions','POST',{plan:'fixture',requestId:'runtime_checkout'})).status,503);
   assert.equal((await api(`/reports/${id}`,'DELETE')).status,200);
   assert.equal((await api(`/reports/${id}`)).status,404);
-  console.log('PASS: actual workerd + D1 migration, Clerk JWT verification, encrypted report round-trip, owner isolation, deletion, cache headers and disabled checkout.');
+  console.log('PASS: actual workerd + D1 migration, Clerk JWT verification, encrypted report round-trip, free preview saving, account timeline, owner isolation, deletion, cache headers and disabled checkout.');
 } finally {
   if(server&&server.exitCode===null){server.kill('SIGTERM');await once(server,'exit');}
   await rm(dir,{recursive:true,force:true});
