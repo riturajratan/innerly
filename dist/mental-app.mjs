@@ -1,4 +1,5 @@
 import './header-layout.mjs?v=1';
+import {createCheckinSync} from './checkin-sync.mjs';
 import './analytics.mjs?v=1';
 import {createCloudApi} from './cloud-api.mjs?v=2';
 import {createAccountReportStore} from './account-report-store.mjs?v=1';
@@ -47,9 +48,17 @@ let cloudConfig=null,historySource='account',comparisonSelection={},cloudStatus=
 const cloudApi=createCloudApi({getToken:()=>auth.getToken(),getUserId:()=>auth.state.user?.id||null});
 const accountReports=createAccountReportStore({api:cloudApi,onChange:()=>{queueMicrotask(()=>{if(view==='history')render(false);else if(view==='report')renderCloudBanner();});}});
 const cloudConfiguration=reportDemo?Promise.resolve(null):fetch('/api/config',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(value=>{cloudConfig=value;if(view==='history')render(false);else if(view==='report')renderCloudBanner();return value;}).catch(()=>null);
+let syncStatus='';
+const checkinSync=createCheckinSync({api:cloudApi,storage:localStorage,
+ onRestore(draft){if(reportDemo)return;if(draft){answers=[...draft.answers];language=answerLanguage=draft.language;draftEnabled=true;draftSynced=true;}else{answers=Array(QUESTION_TOTAL).fill(null);draftEnabled=false;draftSynced=false;}if(view==='home'||view==='quiz')render(false);},
+ onStatus(text){syncStatus=text;draftStatus();if(view==='report'&&autoSaveEnabled()&&!report?.cloudId){cloudStatus=text;renderCloudBanner();}},
+ onSaved(savedReport){accountReports.load();if(report?.id===savedReport.clientId){report=savedReport;cloudStatus='Saved to your account';if(view==='report')render(false);}}
+});
+if(!reportDemo)queueMicrotask(()=>{if(auth.state.status!=='signed-in'){const legacy=readDraft(localStorage.getItem(DRAFT_STORAGE));checkinSync.setUser(null);if(!checkinSync.draft&&legacy)checkinSync.update(legacy.answers,legacy.language);}});
+window.addEventListener('online',()=>checkinSync.retry());
 function reportHistory(){return report?.cloudId?accountReports.state.reports:saved;}
-function autoSaveEnabled(){try{return !!accountReports.state.userId&&!!cloudConfig?.consentVersion&&localStorage.getItem('knowyourmind-cloud-consent:'+accountReports.state.userId)===cloudConfig.consentVersion;}catch{return false;}}
-function setAutoSave(enabled){const id=accountReports.state.userId;if(!id)return;const key='knowyourmind-cloud-consent:'+id;if(enabled)localStorage.setItem(key,cloudConfig.consentVersion);else localStorage.removeItem(key);}
+function autoSaveEnabled(){return auth.state.status==='signed-in';}
+
 const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
 let thoughtWaves=null;
 let personalReport=null;
@@ -98,7 +107,7 @@ function render(focus=true){
  document.body.classList.toggle('mh-in-checkin',view==='quiz');document.body.classList.toggle('mh-home-page',view==='home');
  document.querySelector('#mh-home').setAttribute('aria-current',view==='home'?'page':'false');document.querySelector('#mh-history').setAttribute('aria-current',view==='history'||view==='report'?'page':'false');
  if(view==='home'){app.innerHTML=mentalHomeMarkup({language});bindHomeInteractions(app,language,localizeStartButtons);thoughtWaves=mountThoughtWaves(app.querySelector('[data-thought-waves]'),{pagePaused:paused,strongerStrokes:true});if(answers.some(v=>v!==null)&&!report)app.insertAdjacentHTML('afterbegin',`<div class="mh-resume-banner"><span><strong>${completedCount(answers)} / ${QUESTION_TOTAL}</strong> · ${say(language,draftSynced?'Saved in this browser. Ready when you are.':'Your answers are still here in this open page.',draftSynced?'इसी browser में सेव है। जब चाहें जारी रखें।':'इस खुले पेज में आपके जवाब अभी भी हैं।')}</span><div><button class="mh-secondary" data-action="resume" lang="${language}" dir="${languageDirection(language)}">${qt('Continue test','Continue my check-in','अपना check-in जारी रखें')} →</button><button class="mh-link" data-action="discard" lang="${language}" dir="${languageDirection(language)}">${qt('removeDraft','Remove draft','Draft हटाएँ')}</button></div></div>`);}
- if(view==='quiz'){app.innerHTML=quizMarkup(answers,language,draftSynced);setActiveQuestion(resumeQuestion(answers)??0);}
+ if(view==='quiz'){app.innerHTML=quizMarkup(answers,language,draftSynced);draftStatus();setActiveQuestion(resumeQuestion(answers)??0);}
  if(view==='report'){
   app.innerHTML=showPersonalReport?personalReportMarkup(report,reportHistory(),displayLanguage(language)):reportDemo?sampleReportMarkup({report,history:saved,language,preset:samplePreset,view:reportView,selection:reportSelection}):reportMarkup(report,reportHistory(),language,reportView,{...reportSelection,unlocked:previewUnlockedReports.has(report.id),preview:previewSelection});
   if(showPersonalReport){personalReport=mountPersonalReport(app,report,reportHistory(),displayLanguage(language));document.title=say(language,'Know Your Mind — Your personal reflection','Know Your Mind — आपकी व्यक्तिगत रिपोर्ट');}
@@ -145,7 +154,7 @@ function reportStorage(r){return r.version===INNERLY_V1_VERSION?INNERLY_V1_STORA
 function updateSavedReports(key,rows){const reader=key===INNERLY_V1_STORAGE?readWorkbookReports:key===REFLECTION60_STORAGE?readReflectionReports:readSavedCheckins;saved=[...reader(JSON.stringify(rows)),...saved.filter(r=>reportStorage(r)!==key)];}
 function showDialog(markup){lastFocus=document.activeElement;dialog.innerHTML=`<button class="mh-dialog-close" aria-label="${qt('Close dialog','Close','बंद करें')}" data-close>×</button>${markup}`;dialog.showModal();}
 function closeDialog(){dialog.close();lastFocus?.focus?.();}
-function startFresh(){answerLanguage=language;answers=Array(QUESTION_TOTAL).fill(null);report=null;draftEnabled=false;draftSynced=false;view='quiz';render();}
+function startFresh(){answerLanguage=language;answers=Array(QUESTION_TOTAL).fill(null);report=null;draftEnabled=true;draftSynced=true;view='quiz';checkinSync.fresh(answers,language);render();}
 function resume(){language=answerLanguage;report=null;view='quiz';render();goToQuestion(resumeQuestion(answers),'instant');}
 function begin(){
  if(reportDemo){const next=new URL('./',location.href);next.searchParams.set('lang',language);next.searchParams.set('start','1');location.assign(next.href);return;}
@@ -158,12 +167,13 @@ function finish(){
  cancelGuide();
  cloudStatus='';
  if(!isComplete(answers)){const i=nextUnanswered(answers);if(view!=='quiz'){view='quiz';render();}app.querySelector('#mh-form-message').textContent=qt('A few answers are still missing.','A few answers are still missing. Let us finish those.','कुछ जवाब बाकी हैं। उन्हें पूरा करें।');goToQuestion(i);return;}
- report=makeCheckin(answers,{id:crypto.randomUUID(),createdAt:new Date().toISOString(),language});let removed=true;
+ report=makeCheckin(answers,{id:checkinSync.draft?.id||crypto.randomUUID(),createdAt:new Date().toISOString(),language});let removed=true;
  const stored=storeCurrentReport();
  if(stored&&draftEnabled){try{localStorage.removeItem(DRAFT_STORAGE);}catch{removed=false;}}
  draftEnabled=false;draftSynced=false;previewSelection={};reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};view='report';render();
  if(!stored)app.querySelector('#mh-report-status').textContent=say(language,'Your report is ready, but it could not be saved in this browser. Keep this page open and retry Save or use Print / PDF. Existing reports have not been removed.','Report तैयार है, लेकिन इस browser में सेव नहीं हो सकी। पेज खुला रखें और Save फिर आज़माएँ या Print / PDF इस्तेमाल करें। पुरानी reports हटाई नहीं गई हैं।');
- if(autoSaveEnabled()&&cloudConfig?.cloudEnabled)saveAccountReport(report);
+ checkinSync.complete(report,cloudConfig?.consentVersion||'cloud-reports-v1');
+ if(autoSaveEnabled()){cloudStatus='Saving your report…';renderCloudBanner();}
  else if(!removed)app.querySelector('#mh-report-status').textContent=say(language,'Your report is saved. The earlier draft also remains in this browser.','आपकी report सेव है। पिछला draft भी इस browser में मौजूद है।');
 }
 function setActiveQuestion(i){
@@ -175,18 +185,13 @@ function setActiveQuestion(i){
 function activateQuestionFrom(target){const question=target.closest?.('.mh-question');if(question)setActiveQuestion(Number(question.id.slice(5)));}
 function goToQuestion(i,scrollBehavior=motion()){const target=app.querySelector(`#mh-q-${i}`);if(target){setActiveQuestion(i);const legend=target.querySelector('legend');legend.tabIndex=-1;legend.focus({preventScroll:true});const offset=(document.querySelector('.mh-header')?.getBoundingClientRect().height||0)+(app.querySelector('.mh-progress')?.getBoundingClientRect().height||0)+16;window.scrollTo({top:Math.max(0,window.scrollY+target.getBoundingClientRect().top-offset),behavior:scrollBehavior});}}
 function persistDraft(){
- try{localStorage.setItem(DRAFT_STORAGE,JSON.stringify(makeDraft(answers,answerLanguage)));draftEnabled=true;draftSynced=true;return true;}catch{draftSynced=false;return false;}
+ checkinSync.update(answers,answerLanguage);draftEnabled=true;draftSynced=checkinSync.locallySaved;return draftSynced;
 }
-function draftStatus(){const el=app.querySelector('#mh-draft-status');if(el)el.textContent=draftEnabled?qt(draftSynced?'saved':'saveFailed',draftSynced?'Saved in this browser':'Latest changes could not be saved. Keep this page open.',draftSynced?'इसी browser में सेव है':'नए बदलाव सेव नहीं हुए। यह पेज खुला रखें।'):'';}
-function takeBreak(){
- cancelGuide();
- if(draftEnabled&&persistDraft()){view='home';render();return;}
- showDialog(`<h2>${qt('Save & take a break','Save & take a break','सेव करें और विराम लें')}</h2><p>${wellbeingLocales[language]?.privacy||say(language,'Your answers will stay in this browser so you can continue later. When you return, new answers will save here too. Anyone using this browser could read your saved answers. Use a private device. You can remove the draft from the homepage. This does not sync to another device.','बाद में जारी रखने के लिए आपके जवाब इसी browser में रहेंगे। वापस आने पर नए जवाब भी यहीं सेव होंगे। इस browser का इस्तेमाल करने वाला कोई भी व्यक्ति सेव जवाब देख सकता है। निजी device इस्तेमाल करें। होमपेज से draft हटा सकते हैं। यह दूसरे device से sync नहीं होता।')}</p><p id="mh-draft-error" role="status"></p><button class="mh-primary" id="mh-break-confirm">${qt('saveHere','Save here & take a break','यहीं सेव करें और विराम लें')}</button>`);
- dialog.querySelector('#mh-break-confirm').onclick=()=>{if(!persistDraft()){dialog.querySelector('#mh-draft-error').textContent=qt('saveFailed','Saving failed. Your answers are still in this open page. Please keep it open and try again.','सेव नहीं हुआ। जवाब अभी इस खुले पेज में हैं। पेज खुला रखें और फिर कोशिश करें।');return;}closeDialog();view='home';render();};
-}
+function draftStatus(){const el=app.querySelector('#mh-draft-status');if(el){el.textContent=syncStatus||'Your progress saves automatically.';if(syncStatus.includes('another tab')){const b=document.createElement('button');b.textContent='Keep this draft';b.onclick=()=>checkinSync.keepCurrent().catch(()=>{});el.append(' ',b);}}}
+function takeBreak(){cancelGuide();persistDraft();view='home';render();}
 function discardDraft(){
- cancelGuide();showDialog(`<h2>${say(language,'Remove this unfinished check-in?','यह अधूरा check-in हटाएँ?')}</h2><p>${say(language,'This clears the draft from this page and this browser. Your completed saved reports stay as they are.','इस पेज और browser से अधूरा draft हटेगा। पूरी की गई सेव reports रहेंगी।')}</p><button class="mh-primary" id="mh-discard-confirm">${qt('removeDraft','Remove draft','Draft हटाएँ')}</button>`);
- dialog.querySelector('#mh-discard-confirm').onclick=()=>{try{localStorage.removeItem(DRAFT_STORAGE);}catch{dialog.querySelector('p').textContent=say(language,'The draft could not be removed. Please try again.','Draft हट नहीं सका। फिर कोशिश करें।');return;}answers=Array(QUESTION_TOTAL).fill(null);report=null;draftEnabled=false;draftSynced=false;closeDialog();view='home';render();};
+ cancelGuide();showDialog(`<h2>${say(language,'Remove this unfinished check-in?','यह अधूरा check-in हटाएँ?')}</h2><p>${say(language,'This removes your unfinished check-in from this browser and, when signed in, your account. Your completed saved reports stay as they are.','इस पेज और browser से अधूरा draft हटेगा। पूरी की गई सेव reports रहेंगी।')}</p><button class="mh-primary" id="mh-discard-confirm">${qt('removeDraft','Remove draft','Draft हटाएँ')}</button>`);
+ dialog.querySelector('#mh-discard-confirm').onclick=async()=>{try{await checkinSync.discard();localStorage.removeItem(DRAFT_STORAGE);}catch{dialog.querySelector('p').textContent=say(language,'The draft could not be removed. Please try again.','Draft हट नहीं सका। फिर कोशिश करें।');return;}answers=Array(QUESTION_TOTAL).fill(null);report=null;draftEnabled=false;draftSynced=false;closeDialog();view='home';render();};
 }
 function reviewAnswers(){
  cancelGuide();showDialog(`<h2>${qt('Questions','Your answers, at a glance','आपके जवाब, एक नज़र में')}</h2><p>${['en','hi'].includes(language)?say(language,'Choose any question to review it. A tick means answered.','किसी भी सवाल पर वापस जाएँ। टिक यानी जवाब दिया गया है।'):`✓ ${responseState(language,true)}`}</p><div class="mh-question-map">${answers.map((a,i)=>`<button data-jump="${i}" class="${validResponse(a,i)?'done':''}" aria-label="${qt('Question','Question','सवाल')} ${i+1}, ${responseState(language,validResponse(a,i))}">${i+1}${validResponse(a,i)?'<small aria-hidden="true">✓</small>':''}</button>`).join('')}</div>`);
@@ -196,7 +201,7 @@ function recordAnswer(i,value){
  if(!validResponse(value,i))return;
  const wasAnswered=validResponse(answers[i],i);answers[i]=value;
  app.querySelector(`#mh-q-${i}`)?.classList.add('answered');
- const count=answers.filter((v,j)=>validResponse(v,j)).length;app.querySelector('#mh-progress').value=count;app.querySelector('#mh-progress-label').textContent=`${count} / ${QUESTION_TOTAL}`;app.querySelector('#mh-form-message').textContent='';app.querySelector('[data-action="break"]').disabled=false;updateGrowth();cancelGuide();if(draftEnabled)persistDraft();draftStatus();
+ const count=answers.filter((v,j)=>validResponse(v,j)).length;app.querySelector('#mh-progress').value=count;app.querySelector('#mh-progress-label').textContent=`${count} / ${QUESTION_TOTAL}`;app.querySelector('#mh-form-message').textContent='';app.querySelector('[data-action="break"]').disabled=false;updateGrowth();cancelGuide();persistDraft();draftStatus();
  if(wasAnswered||!pointerInput)return;
  guideTimer=setTimeout(()=>{if(view!=='quiz')return;const next=nextContinuousQuestion(answers,i);if(next!==null)goToQuestion(next);else finish();},paused||reduce.matches?120:420);
 }
@@ -212,7 +217,7 @@ function renderCloudBanner(){
  app.querySelector('.cloud-report-banner')?.remove();
  if(reportDemo||view!=='report'||!report||report.version!==INNERLY_V1_VERSION)return;
  const text=cloudStatus||(report.cloudId?'Saved to your account. Available when you sign in on another device.':'Save this report to your account to keep your history across devices.');
- app.insertAdjacentHTML('afterbegin',`<aside class="cloud-report-banner"><p role="status">${esc(text)}</p>${report.cloudId?'<button data-cloud-action="history">My reports &amp; comparison</button>':`<button data-cloud-save="current" ${cloudSaving?'disabled':''}>${cloudSaving?'Saving…':'Save to my account'}</button>`}</aside>`);
+ app.insertAdjacentHTML('afterbegin',`<aside class="cloud-report-banner"><p role="status">${esc(text)}</p>${report.cloudId?'<button data-cloud-action="history">My reports &amp; comparison</button>':autoSaveEnabled()&&checkinSync.isPending(report.id)?'<button data-cloud-action="retry-sync">Retry sync</button>':`<button data-cloud-save="current" ${cloudSaving?'disabled':''}>${cloudSaving?'Saving…':'Save to my account'}</button>`}</aside>`);
 }
 async function saveAccountReport(target){
  if(cloudSaving)throw new Error('A report is still saving. Please wait for it to finish.');const owner=accountReports.state.userId;
@@ -223,22 +228,16 @@ async function saveAccountReport(target){
  finally{if(owner===accountReports.state.userId){cloudSaving=false;if(view==='report')render(false);else if(view==='history')render(false);}}
 }
 async function cloudConsent(target=null){
- await cloudConfiguration;
- if(auth.state.status!=='signed-in'){requestAccount();return;}
- if(!cloudConfig?.cloudEnabled)throw new Error('Account storage is being prepared. Your device report is safe. Please try again shortly.');
- const owner=accountReports.state.userId;
- showDialog(`<h2>${target?'Save this report to your account?':'Auto-save new reports?'}</h2><p>Your 36 answers, report language and check-in date will be stored encrypted on Know Your Mind’s Cloudflare backend, linked to this account. You can open or delete them in My reports after signing in on another device.</p><p>Only save your own reports. Your answers and report details are not sent to Slack or Google Analytics.</p><label><input type="checkbox" id="cloud-auto-consent" ${target?'':'checked'}> Also save future completed check-ins to this account from this browser. You can turn this off in My reports.</label><p id="cloud-consent-error" role="alert"></p><div class="mh-account-actions"><button class="mh-secondary" data-close>Keep on this device</button><button class="mh-primary" id="cloud-consent-confirm">${target?'Agree & save this report':'Agree & enable auto-save'}</button></div>`);
- dialog.querySelector('#cloud-consent-confirm').onclick=async()=>{
-  if(owner!==accountReports.state.userId){closeDialog();return;}
-  try{if(dialog.querySelector('#cloud-auto-consent').checked)setAutoSave(true);closeDialog();if(target)await saveAccountReport(target);else if(view==='history')render(false);}catch(error){const message=dialog.querySelector('#cloud-consent-error');if(message)message.textContent=error.message;}
- };
+ await cloudConfiguration;if(auth.state.status!=='signed-in'){requestAccount();return;}
+ if(!cloudConfig?.cloudEnabled)throw new Error('Account saving is temporarily unavailable. Your report is safe on this device.');
+ if(target)await saveAccountReport(target);
 }
 async function handleCloudAction(button){
  const action=button.dataset.cloudAction;
  if(action==='signin'){requestAccount();return;}
  if(action==='history'){historySource='account';goHistory();return;}
  if(action==='refresh'||action==='more'){await accountReports.load(action==='more');return;}
- if(action==='autosave'){if(autoSaveEnabled()){setAutoSave(false);render(false);}else await cloudConsent();return;}
+ if(action==='autosave')return;
  if(button.dataset.cloudSave){const target=button.dataset.cloudSave==='current'?report:saved.find(r=>r.id===button.dataset.cloudSave);if(target)await cloudConsent(target);return;}
  if(button.dataset.cloudOpen){const target=accountReports.state.reports.find(r=>r.id===button.dataset.cloudOpen);if(target){report=target;language=target.language;cloudStatus='';view='report';render();}return;}
  if(button.dataset.cloudDelete){const target=accountReports.state.reports.find(r=>r.id===button.dataset.cloudDelete),owner=accountReports.state.userId;if(!target)return;
@@ -261,8 +260,9 @@ function updateAuthHeader(state){
  if(!reportDemo&&typeof accountReports!=='undefined'){
   const previous=accountReports.state.userId,next=state.status==='signed-in'?state.user?.id:null;
   if(previous!==next){
+   answers=Array(QUESTION_TOTAL).fill(null);draftEnabled=false;draftSynced=false;if(view==='quiz')view='home';
    if(report?.cloudId){report=null;answers=Array(QUESTION_TOTAL).fill(null);view='history';closeDialog();}
-   comparisonSelection={};cloudStatus='';cloudSaving=false;accountReports.setUser(next);
+   comparisonSelection={};cloudStatus='';cloudSaving=false;accountReports.setUser(next);checkinSync.setUser(next);
    if(next)accountReports.load();
   }
  }
@@ -404,3 +404,5 @@ if(!reportDemo&&!authReturn){
  if(route.searchParams.get('new')==='1'){route.searchParams.delete('new');history.replaceState(null,'',route);newTest();}
  if(route.searchParams.get('account')==='1'){route.searchParams.delete('account');history.replaceState(null,'',route);requestAccount();}
 }
+
+document.addEventListener('click',event=>{if(event.target.closest('[data-cloud-action="retry-sync"]'))checkinSync.retry();});

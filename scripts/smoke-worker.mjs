@@ -48,6 +48,12 @@ INSERT INTO payments VALUES ('pay_fixture','smoke_subscription','inv_fixture',10
     method,headers:{Origin:origin,Authorization:`Bearer ${token({sub:user,azp:origin})}`,'Content-Type':'application/json'},
     ...(body!==undefined?{body:JSON.stringify(body)}:{}),
   });
+  const partial={id:'runtime_draft_ABC',revision:0,language:'en',answers:[1,...Array(35).fill(null)]};
+  assert.equal((await api('/draft','PUT',partial)).status,200);
+  assert.deepEqual((await (await api('/draft')).json()).draft.answers,partial.answers);
+  assert.equal((await (await api('/draft','GET',undefined,'user_Bob')).json()).draft,null);
+  assert.equal((await api('/draft','DELETE',{id:partial.id,revision:1})).status,200);
+  assert.equal((await api('/draft','PUT',{...partial,revision:1})).status,409);
   const me=await api('/me');assert.equal(me.status,200);assert.equal((await me.json()).billing.active,true);
   const body={clientId:'runtime_report_ABC',version:'innerly-workbook-v1',language:'en',answers:Array(36).fill(2),assessedAt:new Date().toISOString(),consent:'cloud-reports-v1'};
   const saved=await api('/reports','POST',body);assert.equal(saved.status,201);const {id}=await saved.json();
