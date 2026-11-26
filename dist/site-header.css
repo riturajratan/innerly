@@ -2,7 +2,7 @@
 /* Shared header rules intentionally override each page's earlier header skin. */
 body .innerly-header.innerly-header{box-sizing:border-box;position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;max-width:none;min-height:88px;height:auto;margin:0;padding:18px max(24px,calc((100% - 1216px)/2));background:#fff;border:0;border-bottom:1px solid #e6edf5;box-shadow:none;color:#1b355b;font:500 15px/1.5 'DM Sans',system-ui,sans-serif}
 body .innerly-header.innerly-header *{box-sizing:border-box}
-body .innerly-header.innerly-header .innerly-brand{display:inline-flex;align-items:center;gap:7px;flex:none;margin:0;padding:0;color:#1b355b;text-decoration:none;white-space:nowrap;font:750 31px/1.2 'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-1.6px}
+body .innerly-header.innerly-header .innerly-brand{display:inline-flex;align-items:center;gap:7px;flex:none;margin:0;padding:0;color:#1b355b;text-decoration:none;white-space:nowrap;font:750 23px/1.2 'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-.8px}
 body .innerly-header.innerly-header .innerly-brand>span{font:inherit;letter-spacing:inherit;color:inherit;margin:0}
 body .innerly-header.innerly-header .innerly-brand img{width:36px;height:36px;object-fit:contain;display:block}
 body .innerly-header.innerly-header nav{display:flex;align-items:center;gap:8px;margin:0 0 0 auto;padding:0;order:0;width:auto;flex:none}
@@ -20,7 +20,7 @@ body .innerly-header.innerly-header :is(a,button,select):focus-visible{outline:3
 html{scroll-padding-top:105px}
 @media(max-width:760px){
  body .innerly-header.innerly-header{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'brand tools' 'nav nav';gap:8px 10px;min-height:120px;padding:12px 16px}
- body .innerly-header.innerly-header .innerly-brand{grid-area:brand;font-size:27px;letter-spacing:-1.4px;gap:5px}
+ body .innerly-header.innerly-header .innerly-brand{grid-area:brand;font-size:19px;letter-spacing:-.5px;gap:5px}
  body .innerly-header.innerly-header .innerly-brand img{width:32px;height:32px}
  body .innerly-header.innerly-header .innerly-header-tools{grid-area:tools;gap:6px}
  body .innerly-header.innerly-header select{max-width:116px;font-size:16px;padding:9px 8px}
@@ -28,10 +28,12 @@ html{scroll-padding-top:105px}
  body .innerly-header.innerly-header nav :is(a,button){min-height:44px;font-size:14px;padding:10px 15px}
  html{scroll-padding-top:135px}
 }
-@media(max-width:360px){body .innerly-header.innerly-header{padding-inline:12px;column-gap:6px}body .innerly-header.innerly-header .innerly-brand{font-size:24px}body .innerly-header.innerly-header select{max-width:103px}body .innerly-header.innerly-header nav{gap:4px}body .innerly-header.innerly-header nav :is(a,button){padding-inline:13px}}
+@media(max-width:360px){body .innerly-header.innerly-header{padding-inline:12px;column-gap:6px}body .innerly-header.innerly-header .innerly-brand{font-size:18px}body .innerly-header.innerly-header select{max-width:103px}body .innerly-header.innerly-header nav{gap:4px}body .innerly-header.innerly-header nav :is(a,button){padding-inline:13px}}
 @media print{body .innerly-header.innerly-header{position:static;min-height:55px;padding:0 0 12px}body .innerly-header.innerly-header nav,body .innerly-header.innerly-header .innerly-header-tools{display:none!important}}
 /* The standalone reading control enlarges body copy without moving the header. */
 body.mh-large main:not(.report-main):not(#app)>:is(p,ul,ol),body.mh-large .legal-page section :is(p,li){font-size:20px;line-height:1.8}
 body.mh-large .report-main :is(.area-caption,.insight p,.plan-copy>p,.fine-print,.qe-panel-heading>p){font-size:17px;line-height:1.8}
 body.mh-large .report-main :is(.qe-question-title,.qe-position-reading>span>b){font-size:20px}
 @media(max-width:760px){body .site-header.innerly-header{grid-template-areas:'brand brand' 'nav nav' 'tools tools'}body .site-header.innerly-header nav{justify-content:center}body .site-header.innerly-header .innerly-brand{justify-self:center}body .site-header.innerly-header .innerly-header-tools{justify-content:center}body .site-header.innerly-header .reading-tools{display:flex;gap:6px}}
+
+@media(max-width:760px){body .innerly-header.innerly-header .innerly-brand>span{max-width:6em;white-space:normal}body .innerly-header.innerly-header .innerly-brand{white-space:normal}}

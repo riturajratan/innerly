@@ -19,7 +19,7 @@ export function clerkConfig(value = '') {
 }
 
 export function authReturnUrl(href, language = 'en') {
-  // Always return to this installation, including GitHub Pages' /innerly/ path.
+  // Always return to this installation, at the custom domain root or a preview subpath.
   // Do not accept redirect URLs from query parameters or saved user data.
   const url = new URL('./', href);
   if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Invalid app origin.');

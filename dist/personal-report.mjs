@@ -1,7 +1,7 @@
 import {mountAnswerMap} from './answer-map.mjs?v=2';
 import {mountReportDetails} from './report-details.mjs?v=1';
-import {reportSnapshot} from './report-concept-view.mjs?v=25';
-import {personalQuestionMarkup} from './personal-report-view.mjs?v=26';
+import {reportSnapshot} from './report-concept-view.mjs?v=brand-1';
+import {personalQuestionMarkup} from './personal-report-view.mjs?v=brand-1';
 import {mountQuestionExplorer} from './question-explorer.mjs?v=7';
 
 export function mountPersonalReport(root,report,history=[],language='en'){

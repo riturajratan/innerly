@@ -32,15 +32,15 @@ test('legacy HTML contains the earlier homepage content and coherent share metad
   const content = html.match(/<main\b[^>]*id="app"[^>]*>([\s\S]*?)<\/main>/)[1];
   assert.equal(content, discoveryHomeMarkup({}));
   assert.equal((content.match(/<h1>/g) || []).length, 1);
-  assert.match(html, /rel="canonical" href="https:\/\/www\.riturajratan\.com\/innerly\/"/);
+  assert.match(html, /rel="canonical" href="https:\/\/knowyourmind\.ai\/personality\.html"/);
   assert.match(html, /name="twitter:card" content="summary_large_image"/);
   const schema = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)[1]);
   assert.equal(schema['@graph'].find(item => item['@type'] === 'WebApplication').isAccessibleForFree, true);
   assert.doesNotMatch(JSON.stringify(schema), /aggregateRating|reviewCount|95%|210M/);
-  const image = new URL('../dist/assets/innerly-social-cover.png', import.meta.url);
+  const image = new URL('../dist/assets/knowyourmind-social-cover.png', import.meta.url);
   assert.ok(existsSync(image));
   const png = readFileSync(image);
   assert.equal(png.readUInt32BE(16), 1200);
   assert.equal(png.readUInt32BE(20), 630);
-  assert.match(readFileSync(new URL('../dist/sitemap.xml', import.meta.url), 'utf8'), /https:\/\/www\.riturajratan\.com\/innerly\//);
+  assert.match(readFileSync(new URL('../dist/sitemap.xml', import.meta.url), 'utf8'), /https:\/\/knowyourmind\.ai\//);
 });

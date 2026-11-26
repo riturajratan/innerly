@@ -1,4 +1,4 @@
-import {countryNames,latestEvaluation,countrySeries,trendSegments} from './world-perspective.mjs';
+import {countryNames,latestEvaluation,countrySeries,trendSegments} from './world-perspective.mjs?v=brand-1';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const say=(l,en,hi)=>l==='hi'?hi:en;
 export const topLifeEvaluations=countryNames.map(name=>({name,row:latestEvaluation(name)})).filter(x=>x.row).toSorted((a,b)=>b.row[1]-a.row[1]||a.name.localeCompare(b.name)).slice(0,10);

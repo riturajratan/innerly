@@ -4,7 +4,13 @@ Innerly is a static GitHub Pages app. Clerk handles accounts and authentication;
 the questionnaire remains available to guests. This integration uses ClerkJS 6
 and Clerk UI 1, loaded from the Frontend API associated with the public key.
 
-## Current status
+## Domain migration (26 November 2026)
+
+The website is being renamed **Know Your Mind** at `https://knowyourmind.ai/`.
+The previous verified setup below is historical; the new domain is not yet verified.
+See [domain-migration.md](domain-migration.md) for the current cutover requirements.
+
+## Previous verified status
 
 Local sign-in is working. A **production instance was created with the user's
 approval on 10 November 2026** for `www.riturajratan.com/innerly/`. The email-only

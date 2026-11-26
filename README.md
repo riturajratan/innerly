@@ -1,4 +1,4 @@
-# Innerly — V1 wellbeing reflection
+# Know Your Mind — V1 wellbeing reflection
 
 **Deployment: GitHub Pages publishes `dist/` after checks on pushes to `main`.**
 
@@ -10,7 +10,7 @@ Product journey: understand your mind → notice thinking and behavioural patter
 
 ## Current experience
 
-The active check-in uses the 36 approved questions from `Innerly_V1_Questionnaire.xlsx` (Question Bank, A2:C37), preserving IDs Q01–Q36, exact English wording, order and six dimensions. The five active options are Never, Rarely, Sometimes, Often and Almost Always. Per the owner’s 10 November update, all 36 answers are required before a new report can be generated. The workbook’s original sixth option remains only in source data and earlier saved reports. Duration follows the workbook: 8–12 minutes.
+The active check-in uses the 36 approved questions from `Know Your Mind_V1_Questionnaire.xlsx` (Question Bank, A2:C37), preserving IDs Q01–Q36, exact English wording, order and six dimensions. The five active options are Never, Rarely, Sometimes, Often and Almost Always. Per the owner’s 10 November update, all 36 answers are required before a new report can be generated. The workbook’s original sixth option remains only in source data and earlier saved reports. Duration follows the workbook: 8–12 minutes.
 
 All questions, five active response choices, dimension labels and the questionnaire notice are bundled in the existing 20 languages: en, hi, zh, es, fr, ar, bn, pt, ru, ur, id, de, ja, mr, te, tr, ta, vi, ko, it. Translation assets live in `dist/innerly-v1-locales/`. The workbook extraction is `dist/innerly-v1-source.json`; `dist/innerly-v1-questions.mjs` is its browser module, with parity checked in tests. Translations are editorial drafts requiring fluent-speaker review before validation claims. Texts are nested under `texts` so Indonesian code `id` cannot overwrite a question ID.
 
@@ -67,13 +67,13 @@ python3 -m http.server 4298 --bind 127.0.0.1 --directory dist
 
 The following notes describe the retained legacy experience, not the new mental-health homepage.
 
-# Innerly
+# Know Your Mind
 
-Live site: https://www.riturajratan.com/innerly/
+Primary domain: https://knowyourmind.ai/ (DNS and hosting cutover tracked in `docs/domain-migration.md`).
 
-New visual report concept: https://www.riturajratan.com/innerly/report-preview.html. A separate, directly accessible fictional report with all six workbook areas, animated donut/stacked/response charts, editable sample answers, three example profiles, per-area strengths and next steps, and print/PDF support. It reuses the existing per-question editorial guidance; it does not calculate health scores or population rankings and never reads or writes saved responses. Generate it with `node scripts/render-report-preview.mjs`.
+New visual report concept: https://knowyourmind.ai/report-preview.html. A separate, directly accessible fictional report with all six workbook areas, animated donut/stacked/response charts, editable sample answers, three example profiles, per-area strengths and next steps, and print/PDF support. It reuses the existing per-question editorial guidance; it does not calculate health scores or population rankings and never reads or writes saved responses. Generate it with `node scripts/render-report-preview.mjs`.
 
-Direct interactive sample: https://www.riturajratan.com/innerly/report-demo.html?lang=en (use `lang=hi` for Hindi). The dedicated page uses three labelled fictional answer patterns and fictional history. It does not load real drafts/reports, does not save sample answers, and disables account actions. Its Start My Test action returns to the real questionnaire, resuming a saved draft if present. `node scripts/render-report-demo.mjs` runs after the main homepage renderer in CI.
+Direct interactive sample: https://knowyourmind.ai/report-demo.html?lang=en (use `lang=hi` for Hindi). The dedicated page uses three labelled fictional answer patterns and fictional history. It does not load real drafts/reports, does not save sample answers, and disables account actions. Its Start My Test action returns to the real questionnaire, resuming a saved draft if present. `node scripts/render-report-demo.mjs` runs after the main homepage renderer in CI.
 
 Print / PDF offers consolidated and full detailed exports. Both snapshot the current answers into an isolated preview, with the strength-count meter, answer breakdown and six-area overview on the first page. The full export adds explanations, guidance, area charts and all 36 answers. A4 print styles keep related cards together, repeat the report header and page numbers, and avoid blank opening or trailing pages. Chrome's Save as PDF preserves the gradient and selectable text; use A4 if exporting through the macOS system print dialog. The default fictional example was saved and visually checked in both formats (2 and 12 pages respectively).
 
@@ -173,7 +173,7 @@ The hero highlights the actual 36 questions, five dimensions and estimated 6–9
 
 Two SVG adult characters on the left react to a conversation-tone slider: tension, a neutral pause, then a friendly exchange. Gaze, eyebrows, head tilt, eye openness and smile move smoothly. This is independent of the two preference sliders on the right, so differences in personality preferences are never treated as conflict or a compatibility score. These are fictional illustrations, not inferred moods or traits assigned to gender. Transitions follow reduced-motion settings. Testimonial cards use supplied names and sample copy, with a section-level disclosure that they are not submitted customer reviews. The supplied Sanjay Gupta avatar is stored locally; there is no review or aggregate-rating schema.
 
-The homepage is pre-rendered with `node scripts/render-home.mjs` and refreshed by the Pages workflow before tests. Run this command whenever homepage markup changes. Search/share metadata includes a canonical URL, robots meta, title, description, keywords, Open Graph, Twitter card and a 1200×630 PNG. JSON-LD describes the website, webpage and web application without fabricated reviews. `dist/sitemap.xml` lists only the public homepage. The keywords tag is included as requested; Google does not use it for rankings. Domain-root robots.txt is managed by the parent portfolio, not this subpath project.
+The homepage is pre-rendered with `node scripts/render-home.mjs` and refreshed by the Pages workflow before tests. Run this command whenever homepage markup changes. Search/share metadata includes a canonical URL, robots meta, title, description, keywords, Open Graph, Twitter card and a 1200×630 PNG. JSON-LD describes the website, webpage and web application without fabricated reviews. `dist/sitemap.xml` lists only the public homepage. The keywords tag is included as requested; Google does not use it for rankings. `dist/robots.txt` declares the sitemap at the custom domain root.
 
 The hero keeps the four-adult editorial panorama. The bottom invitation uses its own garden-path illustration in `dist/assets/innerly-next-chapter.webp`, giving the two sections different scenes within the same restrained visual style.
 
@@ -181,7 +181,7 @@ The hero keeps the four-adult editorial panorama. The bottom invitation uses its
 
 The homepage uses a short story: recognise an everyday need → explore an example report → begin the 36-question reflection → choose a small action. `dist/story-home.mjs` owns the four life-area previews (work/business, relationships, home/family, emotional wellbeing), four report views and clickable score explanations. It preserves the existing questionnaire, scoring, saved answers and reports. `story-home.css` scopes the new visual system to the homepage, with large touch targets, A+ reading support, responsive layouts, keyboard controls, brief interaction-triggered motion, an explicit motion toggle and `prefers-reduced-motion` support. English and Hindi copy are authored; the existing question-language selector remains in the header. No demographic is assigned a personality.
 
-The country explorer is separate from the individual assessment. It visualises **published life evaluation averages**, not country personality or Innerly customer statistics. Data: World Happiness Report 2026, Figure 2.1, based on the Gallup World Poll. [Official download and methodology](https://www.worldhappiness.report/data-sharing/). Latest observations are three-year averages for 2023–2025; earlier points show rolling averages by their final survey year, 2020–2025. The 147 countries/territories match the latest source table. Both confidence limits are retained, missing periods remain missing, and duplicate country selections are collapsed. The source table is available from every chart, including exact periods and 95% confidence intervals.
+The country explorer is separate from the individual assessment. It visualises **published life evaluation averages**, not country personality or Know Your Mind customer statistics. Data: World Happiness Report 2026, Figure 2.1, based on the Gallup World Poll. [Official download and methodology](https://www.worldhappiness.report/data-sharing/). Latest observations are three-year averages for 2023–2025; earlier points show rolling averages by their final survey year, 2020–2025. The 147 countries/territories match the latest source table. Both confidence limits are retained, missing periods remain missing, and duplicate country selections are collapsed. The source table is available from every chart, including exact periods and 95% confidence intervals.
 
 To refresh the bundled dataset, download the official [WHR26 workbook](https://files.worldhappiness.report/WHR26_Data_Figure_2.1.xlsx), then run `python3 scripts/extract-wellbeing.py /path/to/WHR26_Data_Figure_2.1.xlsx`. The extractor uses Python's standard library and writes `dist/data/world-wellbeing.mjs`. Source citation: Helliwell, J. F., Layard, R., Sachs, J. D., De Neve, J.-E., Aknin, L. B., & Wang, S. (Eds.). (2026). *World Happiness Report 2026*. University of Oxford: Wellbeing Research Centre.
 

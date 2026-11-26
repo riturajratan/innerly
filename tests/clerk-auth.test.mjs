@@ -38,6 +38,7 @@ test('public config rejects secrets, malformed keys and URL/path injection',()=>
 });
 test('auth returns stay inside the installed site path and preserve supported language syntax',()=>{
   assert.equal(authReturnUrl('https://example.com/innerly/index.html?redirect_url=https://evil.test/#a','hi'),'https://example.com/innerly/?lang=hi');
+  assert.equal(authReturnUrl('https://knowyourmind.ai/index.html?redirect_url=https://evil.test/','hi'),'https://knowyourmind.ai/?lang=hi');
   assert.equal(authReturnUrl('http://localhost:4298/','zh-CN'),'http://localhost:4298/?lang=zh-CN');
   assert.equal(new URL(authReturnUrl('https://example.com/innerly/','//evil')).searchParams.get('lang'),'en');
   assert.throws(()=>authReturnUrl('file:///innerly/index.html'));

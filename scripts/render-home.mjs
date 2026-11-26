@@ -1,5 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import { discoveryHomeMarkup } from '../dist/start-experience.mjs';
+import { discoveryHomeMarkup } from '../dist/start-experience.mjs?v=brand-1';
 
 const page = new URL('../dist/personality.html', import.meta.url);
 const source = await readFile(page, 'utf8');

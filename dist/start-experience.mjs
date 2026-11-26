@@ -1,4 +1,4 @@
-import { storyHomeMarkup } from './story-home.mjs?v=story-3';
+import { storyHomeMarkup } from './story-home.mjs?v=brand-1';
 import { traits, band } from "./model.mjs";
 import { thinkingViews } from "./thinking-views.mjs";
 const esc = (v) =>

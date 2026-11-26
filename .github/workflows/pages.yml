@@ -1,4 +1,4 @@
-name: Deploy Innerly to GitHub Pages
+name: Deploy Know Your Mind to GitHub Pages
 
 on:
   push:

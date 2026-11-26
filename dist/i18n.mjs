@@ -5,7 +5,7 @@ export function setLocale(value){locale=canonicalLanguage(value)||'en'}
 const pairs=`Skip to content|मुख्य भाग पर जाएँ
 Explore|खोजें
 My reports|मेरी रिपोर्ट
-Innerly home|Innerly होम
+Know Your Mind home|Know Your Mind होम
 Main navigation|मुख्य नेविगेशन
 Text size|अक्षरों का आकार
 Comfortable text size|सामान्य अक्षर
@@ -147,7 +147,7 @@ Larger text is on.|बड़े अक्षर चालू हैं।
 Comfortable text is on.|सामान्य अक्षर चालू हैं।
 Your summary card is downloaded. Share it only if you want to.|सारांश कार्ड डाउनलोड हो गया। चाहें तो साझा करें।
 A mirror, not a label.|खुद को समझें, कोई ठप्पा नहीं।
-Innerly is a name inspired by your inner world: your thoughts, feelings, and preferences.|Innerly नाम आपके अंदर की दुनिया से प्रेरित है: आपके विचार, भावनाएँ और पसंद।
+Know Your Mind is a space to explore your thoughts, feelings, and preferences.|Know Your Mind आपके विचारों, भावनाओं और पसंद को समझने की एक जगह है।
 This is an original, unvalidated self-reflection questionnaire. It does not diagnose a condition or measure your worth, abilities, or suitability.|यह खुद को समझने की मौलिक, असत्यापित प्रश्नावली है। यह किसी स्थिति का निदान या आपकी योग्यता, मूल्य या उपयुक्तता का आकलन नहीं करती।
 Your short summary and full report are free for now. No payment details are collected.|सारांश और पूरी रिपोर्ट अभी मुफ़्त हैं। भुगतान की जानकारी नहीं ली जाती।
 Clear my saved data|मेरा सेव डेटा मिटाएँ
@@ -166,7 +166,7 @@ Your report is saved in this browser. You can also open an email draft with your
 Your email address|आपका ईमेल पता
 Open email draft →|ईमेल ड्राफ्ट खोलें →
 Skip for now →|अभी छोड़ें →
-This opens your email app. Review and send the message there. Innerly does not send or collect your email.|इससे आपका ईमेल ऐप खुलेगा। वहीं संदेश देखकर भेजें। Innerly आपका ईमेल भेजता या इकट्ठा नहीं करता।
+This opens your email app. Review and send the message there. Know Your Mind does not send or collect your email.|इससे आपका ईमेल ऐप खुलेगा। वहीं संदेश देखकर भेजें। Know Your Mind आपका ईमेल भेजता या इकट्ठा नहीं करता।
 Return here to view your report.|रिपोर्ट देखने के लिए यहाँ लौटें।
 View my report →|मेरी रिपोर्ट देखें →
 Your full report, at a glance|पूरी रिपोर्ट में क्या है

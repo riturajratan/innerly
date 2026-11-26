@@ -1,25 +1,25 @@
-import {createReportExporter} from './report-export.mjs?v=6';
-import {icon} from './report-concept-view.mjs?v=25';
+import {createReportExporter} from './report-export.mjs?v=brand-1';
+import {icon} from './report-concept-view.mjs?v=brand-1';
 import {mountThoughtWaves} from './planning.mjs?v=14';
 import {previewResponseDetail} from './response-graphs.mjs?v=report-3';
-import {sampleReportMarkup} from './sample-report-view.mjs?v=report-summary-1';
+import {sampleReportMarkup} from './sample-report-view.mjs?v=brand-1';
 import {sampleReportData} from './sample-report.mjs?v=report-3';
-import {personalReportMarkup,usesPersonalReport} from './personal-report-view.mjs?v=26';
-import {mountPersonalReport} from './personal-report.mjs?v=23';
+import {personalReportMarkup,usesPersonalReport} from './personal-report-view.mjs?v=brand-1';
+import {mountPersonalReport} from './personal-report.mjs?v=brand-1';
 import {INNERLY_V1_VERSION,INNERLY_V1_STORAGE,readWorkbookReports,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=storage-1';
 import {saveLocalReport,removeLocalReport} from './report-storage.mjs?v=1';
-import {workbookDimensionReading} from './innerly-v1-views.mjs?v=report-summary-1';
+import {workbookDimensionReading} from './innerly-v1-views.mjs?v=brand-1';
 import {workbookQuestionReading,workbookTimelineDetail,workbookFocusStatus} from './innerly-v1-charts.mjs?v=report-4';
 import {dimensionProfile} from './innerly-v1-insights.mjs?v=report-3';
 import {REFLECTION60_VERSION,REFLECTION60_STORAGE,readReflectionReports} from './reflection60-model.mjs';
-import {topicReading} from './reflection60-views.mjs?v=mh-14';
+import {topicReading} from './reflection60-views.mjs?v=brand-1';
 import {LANGUAGE_STORAGE,resolveQuestionLanguage,languageDirection,languageName,displayLanguage,questionUI,wellbeingLocales,coverageNotice,responseState,growthCaption} from './mental-language.mjs?v=mh-14';
 import {DRAFT_STORAGE,readDraft,makeDraft,resumeQuestion,nextContinuousQuestion} from './checkin-draft.mjs?v=mh-14';
 import {feelingReading} from './feeling-explorer.mjs?v=mh-14';
-import {bindHomeInteractions} from './innerly-home.mjs?v=home-preview-13';
+import {bindHomeInteractions} from './innerly-home.mjs?v=brand-1';
 import {MENTAL_STORAGE,readSavedCheckins} from './mental-model.mjs?v=mh-14';
 import {QUESTION_TOTAL,completedCount,completeFlow as isComplete,validQuestionResponse as validResponse,makeFlowReport as makeCheckin,nextFlowQuestion as nextUnanswered,growthState} from './checkin-flow.mjs?v=mh-14';
-import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=gauge-5';
+import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=brand-1';
 import {clerkPublishableKey} from './auth-config.mjs?v=auth-1';
 import {createClerkAuth} from './clerk-auth.mjs?v=auth-1';
 import {rememberAuthReturn,takeAuthReturn,AUTH_RETURN_STORAGE} from './auth-continuation.mjs?v=auth-1';
@@ -79,7 +79,7 @@ function render(focus=true){
  document.body.classList.toggle('mh-personal-report',showPersonalReport);
  for(const id of ['personal-report-base-style','personal-report-style']){const stylesheet=document.getElementById(id);if(stylesheet)stylesheet.disabled=!showPersonalReport;}
  clearAuthReturn();hideGraphTooltip();updateAuthHeader(auth.state);
- cancelGuide();document.documentElement.lang=view==='quiz'?language:displayLanguage(language);document.documentElement.dir=view==='quiz'?languageDirection(language):'ltr';document.querySelector('.mh-header').lang=displayLanguage(language);document.querySelector('.mh-header').dir='ltr';document.querySelector('.mh-footer').lang=displayLanguage(language);document.querySelector('.mh-footer').dir='ltr';document.querySelector('#mh-language-note').textContent=coverageNotice(language);document.querySelector('#mh-language-note').lang=language;document.querySelector('#mh-language-note').dir=languageDirection(language);document.title=say(language,'Innerly — A mental-health check-in','Innerly — अपने मन का हाल जानें');document.querySelector('#mh-language').value=language;
+ cancelGuide();document.documentElement.lang=view==='quiz'?language:displayLanguage(language);document.documentElement.dir=view==='quiz'?languageDirection(language):'ltr';document.querySelector('.mh-header').lang=displayLanguage(language);document.querySelector('.mh-header').dir='ltr';document.querySelector('.mh-footer').lang=displayLanguage(language);document.querySelector('.mh-footer').dir='ltr';document.querySelector('#mh-language-note').textContent=coverageNotice(language);document.querySelector('#mh-language-note').lang=language;document.querySelector('#mh-language-note').dir=languageDirection(language);document.title=say(language,'Know Your Mind — A mental-health check-in','Know Your Mind — अपने मन का हाल जानें');document.querySelector('#mh-language').value=language;
  document.querySelector('#mh-home').textContent=say(language,'Home','होम');document.querySelector('#mh-history').textContent=say(language,'My reports','मेरी रिपोर्ट');document.querySelector('.mh-footer>span').textContent=say(language,'A moment for your mind.','कुछ पल, अपने मन के लिए।');document.querySelector('#mh-motion').textContent=say(language,paused?'Resume motion':'Pause motion',paused?'Motion चालू करें':'Motion रोकें');
  document.body.classList.toggle('mh-in-checkin',view==='quiz');document.body.classList.toggle('mh-home-page',view==='home');
  document.querySelector('#mh-home').setAttribute('aria-current',view==='home'?'page':'false');document.querySelector('#mh-history').setAttribute('aria-current',view==='history'||view==='report'?'page':'false');
@@ -87,10 +87,10 @@ function render(focus=true){
  if(view==='quiz'){app.innerHTML=quizMarkup(answers,language,draftSynced);setActiveQuestion(resumeQuestion(answers)??0);}
  if(view==='report'){
   app.innerHTML=showPersonalReport?personalReportMarkup(report,saved,displayLanguage(language)):reportDemo?sampleReportMarkup({report,history:saved,language,preset:samplePreset,view:reportView,selection:reportSelection}):reportMarkup(report,saved,language,reportView,{...reportSelection,unlocked:previewUnlockedReports.has(report.id),preview:previewSelection});
-  if(showPersonalReport){personalReport=mountPersonalReport(app,report,saved,displayLanguage(language));document.title=say(language,'Innerly — Your personal reflection','Innerly — आपकी व्यक्तिगत रिपोर्ट');}
+  if(showPersonalReport){personalReport=mountPersonalReport(app,report,saved,displayLanguage(language));document.title=say(language,'Know Your Mind — Your personal reflection','Know Your Mind — आपकी व्यक्तिगत रिपोर्ट');}
  }
- if(view==='history')app.innerHTML=`<section class="mh-history"><p class="mh-kicker">${say(language,'SAVED ON THIS DEVICE','इस DEVICE पर सेव')}</p><h1>${say(language,'Your check-ins. Your pace.','आपके check-ins। आपकी गति।')}</h1><p>${say(language,'Reports saved in this browser appear here. They do not sync to your account. Anyone using this browser can open them.','इस browser में सेव reports यहाँ दिखती हैं। ये खाते से sync नहीं होतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है।')}</p>${saved.length?`<div class="mh-saved-list">${saved.toSorted((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).map(r=>`<article><div class="mh-saved-copy"><span>${new Date(r.createdAt).toLocaleDateString(language,{day:'numeric',month:'long',year:'numeric'})}</span><strong>${r.version===INNERLY_V1_VERSION?say(language,'Innerly V1 · 36 questions','Innerly V1 · 36 सवाल'):r.version===REFLECTION60_VERSION?say(language,'60-statement reflection','60 statements की reflection'):`Earlier PHQ-4 ${r.scores.total}/12`}</strong><small><bdi>${languageName(r.language)}</bdi> </small></div><div class="mh-saved-actions"><button class="mh-saved-open" data-open="${esc(r.id)}">${icon('eye')}<span>${say(language,'View report','रिपोर्ट देखें')}</span></button><button class="report-delete-button" data-delete="${esc(r.id)}" aria-label="${say(language,'Delete this saved check-in','यह सेव check-in हटाएँ')}">${icon('trash')}<span>${say(language,'Delete report','रिपोर्ट हटाएँ')}</span></button></div></article>`).join('')}</div>`:`<div class="mh-empty">${say(language,'Your first saved report will appear here.','आपकी पहली सेव report यहाँ दिखेगी।')}</div>`}<button class="mh-primary" data-action="begin">${qt('Start test','Start My Test','अपना टेस्ट शुरू करें')} →</button></section>`;
- if(reportDemo&&view==='report')document.title=say(language,'Innerly — Interactive sample report','Innerly — Interactive उदाहरण report');
+ if(view==='history')app.innerHTML=`<section class="mh-history"><p class="mh-kicker">${say(language,'SAVED ON THIS DEVICE','इस DEVICE पर सेव')}</p><h1>${say(language,'Your check-ins. Your pace.','आपके check-ins। आपकी गति।')}</h1><p>${say(language,'Reports saved in this browser appear here. They do not sync to your account. Anyone using this browser can open them.','इस browser में सेव reports यहाँ दिखती हैं। ये खाते से sync नहीं होतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है।')}</p>${saved.length?`<div class="mh-saved-list">${saved.toSorted((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).map(r=>`<article><div class="mh-saved-copy"><span>${new Date(r.createdAt).toLocaleDateString(language,{day:'numeric',month:'long',year:'numeric'})}</span><strong>${r.version===INNERLY_V1_VERSION?say(language,'Know Your Mind V1 · 36 questions','Know Your Mind V1 · 36 सवाल'):r.version===REFLECTION60_VERSION?say(language,'60-statement reflection','60 statements की reflection'):`Earlier PHQ-4 ${r.scores.total}/12`}</strong><small><bdi>${languageName(r.language)}</bdi> </small></div><div class="mh-saved-actions"><button class="mh-saved-open" data-open="${esc(r.id)}">${icon('eye')}<span>${say(language,'View report','रिपोर्ट देखें')}</span></button><button class="report-delete-button" data-delete="${esc(r.id)}" aria-label="${say(language,'Delete this saved check-in','यह सेव check-in हटाएँ')}">${icon('trash')}<span>${say(language,'Delete report','रिपोर्ट हटाएँ')}</span></button></div></article>`).join('')}</div>`:`<div class="mh-empty">${say(language,'Your first saved report will appear here.','आपकी पहली सेव report यहाँ दिखेगी।')}</div>`}<button class="mh-primary" data-action="begin">${qt('Start test','Start My Test','अपना टेस्ट शुरू करें')} →</button></section>`;
+ if(reportDemo&&view==='report')document.title=say(language,'Know Your Mind — Interactive sample report','Know Your Mind — Interactive उदाहरण report');
  document.querySelector('#mh-history').hidden=false;
  localizeStartButtons();
  if(focus)focusHeading();
@@ -218,7 +218,7 @@ async function openAccount(){
   await auth.ready();
   if(auth.state.status!=='signed-in'){await auth.signIn(language);return;}
   const user=auth.state.user;
-  showDialog(`<h2>${say(language,'Your Innerly account','आपका Innerly खाता')}</h2><p class="mh-account-email">${esc(user?.primaryEmailAddress?.emailAddress||user?.fullName||'')}</p><p class="mh-footnote">${say(language,'Signing out does not remove saved reports. Anyone using this browser can open them. Remove them from My reports on a shared device.','साइन आउट करने से सेव reports नहीं हटतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है। साझा device पर “मेरी रिपोर्ट” से इन्हें हटाएँ।')}</p><div class="mh-account-actions"><button class="mh-secondary" id="mh-account-manage">${say(language,'Manage account','खाता मैनेज करें')}</button><button class="mh-secondary" id="mh-account-out">${say(language,'Sign out','साइन आउट')}</button></div>`);
+  showDialog(`<h2>${say(language,'Your Know Your Mind account','आपका Know Your Mind खाता')}</h2><p class="mh-account-email">${esc(user?.primaryEmailAddress?.emailAddress||user?.fullName||'')}</p><p class="mh-footnote">${say(language,'Signing out does not remove saved reports. Anyone using this browser can open them. Remove them from My reports on a shared device.','साइन आउट करने से सेव reports नहीं हटतीं। इस browser का इस्तेमाल करने वाला कोई भी इन्हें खोल सकता है। साझा device पर “मेरी रिपोर्ट” से इन्हें हटाएँ।')}</p><div class="mh-account-actions"><button class="mh-secondary" id="mh-account-manage">${say(language,'Manage account','खाता मैनेज करें')}</button><button class="mh-secondary" id="mh-account-out">${say(language,'Sign out','साइन आउट')}</button></div>`);
   dialog.querySelector('#mh-account-manage').onclick=async()=>{closeDialog();try{await auth.profile();}catch{authError();}};
   dialog.querySelector('#mh-account-out').onclick=async()=>{closeDialog();try{await auth.signOut(language);}catch{authError();}};
  }catch{authError();}

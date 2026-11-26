@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://knowyourmind.ai/sitemap.xml
