@@ -1,0 +1,26 @@
+{
+  "name": "knowyourmind",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build-worker.mjs",
+    "test": "node --test tests/*.test.mjs tests/backend/*.test.mjs",
+    "test:backend": "node --test tests/backend/*.test.mjs",
+    "test:runtime": "node scripts/smoke-worker.mjs",
+    "dev": "wrangler dev",
+    "deploy": "npm run test && npm run build && wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "check:deploy": "npm run build && wrangler deploy --dry-run --outdir worker-build"
+  },
+  "dependencies": {
+    "@clerk/backend": "3.33.1"
+  },
+  "devDependencies": {
+    "wrangler": "4.168.0"
+  }
+}

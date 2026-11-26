@@ -2,6 +2,13 @@
 
 **Deployment: GitHub Pages publishes `dist/` after checks on pushes to `main`.**
 
+**Cloudflare backend migration:** `worker/`, `migrations/` and `wrangler.jsonc`
+add private account reports and Razorpay subscriptions with the existing Clerk
+login. The account UI is `cloud-account.html`. Checkout remains disabled until
+merchant plans, production secrets and live verification are configured. See
+[Cloudflare setup and API contract](docs/cloudflare-backend.md). The existing
+browser-only experience and GitHub Pages workflow remain usable during migration.
+
 ## Our core mission
 
 Help people understand their current state of mind, identify thinking and behavioural patterns that may contribute to mental stress, and discover practical ways to improve their mental well-being, resilience and overall quality of life.

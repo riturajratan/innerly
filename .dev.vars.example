@@ -1,0 +1,14 @@
+# Copy to .dev.vars for LOCAL DEVELOPMENT ONLY. Never commit populated secrets.
+APP_ORIGIN=http://localhost:8787
+CLERK_PUBLISHABLE_KEY=
+CLERK_ISSUER=
+CLERK_SECRET_KEY=
+# Optional PEM public key for networkless Clerk token verification.
+CLERK_JWT_KEY=
+# Generate once: openssl rand -base64 32. Keep it stable, back it up securely.
+REPORT_ENCRYPTION_KEY=
+BILLING_ENABLED=false
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
+RAZORPAY_WEBHOOK_SECRET=
+BILLING_PLANS=[]

@@ -68,6 +68,7 @@ export function createClerkAuth({ publishableKey, window: win, document: doc,
   return {
     get state() { return state; },
     ready,
+    async getToken() { return (await ready())?.session?.getToken() || null; },
     async signIn(language) {
       const client = await ready();
       if (!client) return;

@@ -17,19 +17,21 @@ On 26 November 2026, both `knowyourmind.ai` and `www.knowyourmind.ai` failed DNS
 
 GitHub Pages accepted the new custom domain, but Chrome blocked the next DNS action because an extension popup was open while the Mac was locked. No DNS record was saved. The previous Pages domain and HTTPS enforcement were restored, and `https://www.riturajratan.com/innerly/` returned HTTP 200 with the new branding. Resume the cutover after the browser popup is dismissed; the new domain must not be described as live yet.
 
-This repository publishes with a custom GitHub Actions workflow. A CNAME file alone does not configure its custom domain; GitHub Pages ignores that file for this workflow.
+The current hosting target is now a **Cloudflare Worker**, following the owner's
+backend deployment decision. Keep the earlier GitHub Pages deployment available
+for existing users during migration. Do not point the new apex at GitHub Pages.
 
-1. Verify domain ownership and set the repository's Pages custom domain to `knowyourmind.ai`.
-2. In Cloudflare, configure the apex for GitHub Pages, preserving unrelated records:
-   - `A @ 185.199.108.153`
-   - `A @ 185.199.109.153`
-   - `A @ 185.199.110.153`
-   - `A @ 185.199.111.153`
-   - `CNAME www riturajratan.github.io`
-3. Confirm DNS, certificate issuance, HTTPS and the preferred-host redirect.
-4. Verify the homepage, questionnaire, saved-report flow, sample report, privacy and terms, and both PDF modes.
+1. Deploy the repository's `wrangler.jsonc` as Worker `knowyourmind`, with the
+   existing D1 database binding. See [backend setup](cloudflare-backend.md).
+2. Add `knowyourmind.ai` as the Worker's Custom Domain. Cloudflare manages the
+   corresponding DNS record and certificate.
+3. Configure `www` to redirect to the apex separately, then verify DNS, HTTPS,
+   the homepage, questionnaire, saved-report flow, sample report and policy pages.
+4. Complete the existing Clerk application's domain setup below, and verify login
+   before describing cloud accounts as available. Billing remains disabled until
+   merchant configuration, prices and real provider testing are complete.
 
-Source: [GitHub custom-domain documentation](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site).
+Source: [Cloudflare Worker custom domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/).
 
 ## Clerk cutover pending
 
@@ -45,4 +47,5 @@ Source: [Clerk domain-change documentation](https://clerk.com/docs/guides/develo
 
 ## Existing local reports
 
-Browser storage is scoped to an origin. Reports/drafts saved on the old domain are not automatically accessible on the new domain, even though their storage identifiers are unchanged. Keep the prior origin accessible long enough for users to save their reports as PDFs. Do not claim an account login transfers these reports; reports are currently local, not account-synced.
+Browser storage is scoped to an origin. Reports/drafts saved on the old domain are not automatically accessible on the new domain, even though their storage identifiers are unchanged. Keep the prior origin accessible long enough for users to save their reports as PDFs. Do not claim an account login transfers these reports; existing reports stay local unless the user explicitly uploads a selected report
+through the configured cloud account.
