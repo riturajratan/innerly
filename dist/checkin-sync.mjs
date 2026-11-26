@@ -8,7 +8,7 @@ export function createCheckinSync({api,storage,onRestore=()=>{},onStatus=()=>{},
  const persist=()=>{try{storage.setItem(key(),JSON.stringify(state));locallySaved=true;return true;}catch{locallySaved=false;onStatus('Could not save on this device. Keep this page open.');return false;}};
  const current=g=>g===generation;
  const validDraft=d=>d&&typeof d.id==='string'&&/^[a-zA-Z0-9_-]{8,128}$/.test(d.id)&&d.version==='innerly-workbook-v1'&&supportedLanguage(d.language)&&Array.isArray(d.answers)&&d.answers.length===36&&d.answers.every(v=>v===null||(Number.isInteger(v)&&v>=0&&v<=4));
- const recovery=()=>locallySaved?'Saved on this device. Account sync will retry when you reconnect.':'Could not save yet. Keep this page open and retry sync.';
+ const recovery=()=>locallySaved?'Waiting for connection. Your report has not synced to your account yet; we’ll retry automatically.':'Could not save yet. Keep this page open and retry sync.';
  async function drain(){
   if(!owner||!ready||running||(blocked&&!state.pending.length))return;
   const g=generation;running=true;
@@ -44,14 +44,14 @@ export function createCheckinSync({api,storage,onRestore=()=>{},onStatus=()=>{},
   async setUser(id){
    clearTimeout(timer);owner=id;const g=++generation;running=false;ready=false;blocked=false;state=blank();
    try{const cached=JSON.parse(storage.getItem(key()));if(cached&&Array.isArray(cached.pending)&&Number.isSafeInteger(cached.revision)&&cached.revision>=0&&typeof cached.dirty==='boolean'&&(!cached.draft||validDraft(cached.draft))&&cached.pending.every(r=>validDraft(r)&&r.answers.every(Number.isInteger)&&Number.isFinite(Date.parse(r.createdAt))&&r.consent==='cloud-reports-v1'))state=cached;}catch{}
-   onRestore(state.draft);if(!owner){ready=true;onStatus(state.draft?'Saved on this device':'');return;}
+   onRestore(state.draft);if(!owner){ready=true;onStatus(state.draft?'Progress kept here. Sign in to sync across devices.':'');return;}
    try{const remote=await api('/draft');if(!current(g))return;
     if(state.dirty&&state.revision!==remote.revision){blocked=true;onStatus('A newer check-in exists in another tab or device. Your answers are safe here; choose Keep this draft to continue with these answers.');}
     else if(!state.dirty){state.draft=state.pending.some(r=>r.id===remote.draft?.id)?null:remote.draft;state.revision=remote.revision;persist();onRestore(state.draft);}
     ready=true;await drain();
    }catch{if(current(g)){onStatus(recovery());timer=setTimeout(()=>this.setUser(owner),15000);}}
   },
-  update(answers,language){if(!state)state=blank();state.draft={id:state.draft?.id||crypto.randomUUID(),version:'innerly-workbook-v1',language,answers:[...answers],savedAt:new Date().toISOString()};state.dirty=!!owner;const stored=persist();if(stored)onStatus(owner?'Saving…':'Saved on this device');clearTimeout(timer);timer=setTimeout(drain,800);return state.draft;},
+  update(answers,language){if(!state)state=blank();state.draft={id:state.draft?.id||crypto.randomUUID(),version:'innerly-workbook-v1',language,answers:[...answers],savedAt:new Date().toISOString()};state.dirty=!!owner;const stored=persist();if(stored)onStatus(owner?'Saving…':'Progress kept here. Sign in to sync across devices.');clearTimeout(timer);timer=setTimeout(drain,800);return state.draft;},
   fresh(answers,language){if(!state)state=blank();state.draft=null;return this.update(answers,language);},
   complete(report,consent){if(!owner){state.draft=null;state.dirty=false;persist();return;}if(!state.pending.some(r=>r.id===report.id))state.pending.push({...report,consent});state.draft=null;state.dirty=false;persist();clearTimeout(timer);drain();},
   async discard(){

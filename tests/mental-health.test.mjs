@@ -58,5 +58,5 @@ test('public entry is mental-health focused without legacy personality navigatio
  // Optional account sync now uses an authenticated, consent-gated API. The
  // questionnaire calculations themselves must remain fully on-device.
  for(const module of ['innerly-v1-model.mjs','mental-model.mjs','checkin-flow.mjs'])assert.doesNotMatch(await readFile(new URL('../dist/'+module,import.meta.url),'utf8'),/fetch\(|XMLHttpRequest|sendBeacon/);
- assert.match(app,/mh-save-confirm/);assert.match(app,/if\(!report&&answers\.some/);
+ assert.doesNotMatch(app,/mh-save-confirm/);assert.match(app,/if\(!report&&answers\.some/);
 });

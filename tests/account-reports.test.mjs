@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createAccountReportStore} from '../dist/account-report-store.mjs';
 import {createCloudApi} from '../dist/cloud-api.mjs';
-import {comparisonData,comparisonMarkup} from '../dist/report-history-view.mjs';
+import {comparisonData,comparisonMarkup,accountHistoryMarkup} from '../dist/report-history-view.mjs';
 import {personalReportMarkup} from '../dist/personal-report-view.mjs';
 import {consolidatedComparisonData,consolidatedComparisonMarkup} from '../dist/report-comparison-summary.mjs';
 import {reportSnapshot} from '../dist/report-concept-view.mjs';
@@ -63,4 +63,12 @@ test('one report invites a return check-in; charts require two distinct compatib
  const hi=report('hi','2026-11-26T10:00:00.000Z','hi');assert.doesNotMatch(comparisonMarkup([first,hi]),/<svg/);
  const second=report('second');assert.match(comparisonMarkup([hi,first,second]),/Notice what has changed/);
  assert.equal(comparisonMarkup([]),'');
+});
+
+test('account-first history hides storage choices and keeps unsynced legacy reports recoverable',()=>{
+ const old=report('old_report'),synced=report('local_saved'),cloud={userId:'alice',reports:[{...synced,id:'cloud_saved',clientId:synced.id,cloudId:'cloud_saved'}],loading:false};
+ const html=accountHistoryMarkup({localReports:[old,synced],cloud,config:{cloudEnabled:true}});
+ assert.doesNotMatch(html,/This browser|Report location|Saved on this device|data-history-source/);
+ assert.match(html,/Your check-ins save automatically to your account/);assert.match(html,/Earlier reports \(1\)/);assert.match(html,/data-cloud-open="cloud_saved"/);assert.match(html,/data-cloud-save="old_report"/);
+ const guest=personalReportMarkup(old,[old]);assert.doesNotMatch(guest,/Saved on this device|Save on this device|Saved automatically in this browser|data-action="save"/);
 });
