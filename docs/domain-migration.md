@@ -13,7 +13,9 @@ Repository: `riturajratan/innerly`; the repository and existing storage/version 
 
 ## Hosting cutover pending
 
-On 26 November 2026, both `knowyourmind.ai` and `www.knowyourmind.ai` failed DNS resolution. The owner confirmed Cloudflare as the domain provider. Cloudflare and GitHub settings must be verified before marking this domain live.
+On 26 November 2026, both `knowyourmind.ai` and `www.knowyourmind.ai` failed DNS resolution. Cloudflare confirms the registration is Active through 26 November 2028, with zero DNS records. The website rebrand was deployed successfully in commit `67556a4`.
+
+GitHub Pages accepted the new custom domain, but Chrome blocked the next DNS action because an extension popup was open while the Mac was locked. No DNS record was saved. The previous Pages domain and HTTPS enforcement were restored, and `https://www.riturajratan.com/innerly/` returned HTTP 200 with the new branding. Resume the cutover after the browser popup is dismissed; the new domain must not be described as live yet.
 
 This repository publishes with a custom GitHub Actions workflow. A CNAME file alone does not configure its custom domain; GitHub Pages ignores that file for this workflow.
 
