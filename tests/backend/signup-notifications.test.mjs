@@ -28,7 +28,7 @@ test('verified signup sends only selected identity details and deduplicates by u
   assert.match(JSON.stringify(payload), /Google/);
   assert.doesNotMatch(JSON.stringify(payload), /private_metadata|answers/);
   assert.equal(payload.blocks[1].text.type, 'plain_text');
-  assert.equal(calls[0].options.redirect, 'error');
+  assert.equal(calls[0].options.redirect, 'manual');
   assert.deepEqual(await (await app.fetch(delivery({ eventId: 'msg_Redelivery' }), env)).json(), { duplicate: true });
   assert.equal(calls.length, 1);
   const stored = JSON.stringify(env.DB.sqlite.prepare('SELECT * FROM signup_notifications').all());
@@ -63,7 +63,7 @@ test('Slack destination cannot be redirected to an arbitrary server', async () =
   }
 });
 test('delivery failures return retryable errors and release the claim for a later attempt', async () => {
-  for (const failure of [async () => new Response('rate_limited', { status: 429 }), async () => new Response('not_ok'), async () => { throw new Error('secret-url'); }]) {
+  for (const failure of [async () => new Response(null, { status: 302, headers: { Location: 'https://example.com/' } }), async () => new Response('rate_limited', { status: 429 }), async () => new Response('not_ok'), async () => { throw new Error('secret-url'); }]) {
     let attempt = 0;
     const { app, env } = setup(async () => { attempt++; return attempt === 1 ? failure() : new Response('ok'); });
     const response = await app.fetch(delivery(), env);

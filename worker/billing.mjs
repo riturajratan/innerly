@@ -29,7 +29,7 @@ export function razorpay(env, fetcher = fetch) {
     try {
       response = await fetcher(`https://api.razorpay.com/v1/${path}`, {
         method, headers: { Authorization: `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`, 'Content-Type': 'application/json' },
-        ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(12000), redirect: 'error',
+        ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(12000), redirect: 'manual',
       });
     } catch { fail(502, 'payment_provider_unavailable'); }
     if (!response.ok) fail(502, 'payment_provider_unavailable');

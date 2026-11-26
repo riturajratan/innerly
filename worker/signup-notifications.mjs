@@ -64,7 +64,8 @@ export async function signupWebhook(request, env, fetcher, now) {
   }
   try {
     const response = await fetcher(destination, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(signupMessage(user)), redirect: 'error', signal: AbortSignal.timeout(8000) });
+      // workerd supports manual/follow only; reject 3xx via response.ok below.
+      body: JSON.stringify(signupMessage(user)), redirect: 'manual', signal: AbortSignal.timeout(8000) });
     if (!response.ok || (await bodyText(response, 1024)).trim() !== 'ok') throw new Error('delivery_failed');
     await env.DB.prepare('UPDATE signup_notifications SET sent_at = ?, lease_until = 0 WHERE user_id = ? AND claim_token = ?')
       .bind(now, user.id, claim).run();
