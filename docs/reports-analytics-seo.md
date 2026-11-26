@@ -1,3 +1,11 @@
+## Automatic saving update — 26 November 2026
+
+Replaces the earlier opt-in autosave flow: signed-in check-ins now sync encrypted partial drafts (`0004_checkin_drafts.sql`) and save completed, dated reports automatically. Guest drafts stay local. New tests have independent IDs; completed reports stay in history. Browser recovery queues retry network failures; account switches and revision conflicts prevent accidental cross-account uploads or stale overwrites. Privacy and FAQ copy reflect the automatic behavior.
+
+Validated with 212 tests, actual workerd/D1 migrations and encryption round-trips, and synthetic browser checks for refresh/resume, automatic completion, dated history and starting a blank new test. Production real-user save remains an owner check; no real questionnaire answers were entered for QA.
+
+Earlier release notes below are historical where they describe manual or opt-in saving.
+
 # Reports, Analytics and SEO release status
 
 Updated 26 November 2026, after production release `54068a4`. Cloudflare build

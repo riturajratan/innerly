@@ -54,7 +54,7 @@ const checkinSync=createCheckinSync({api:cloudApi,storage:localStorage,
  onStatus(text){syncStatus=text;draftStatus();if(view==='report'&&autoSaveEnabled()&&!report?.cloudId){cloudStatus=text;renderCloudBanner();}},
  onSaved(savedReport){accountReports.load();if(report?.id===savedReport.clientId){report=savedReport;cloudStatus='Saved to your account';if(view==='report')render(false);}}
 });
-if(!reportDemo)queueMicrotask(()=>{if(auth.state.status!=='signed-in'){const legacy=readDraft(localStorage.getItem(DRAFT_STORAGE));checkinSync.setUser(null);if(!checkinSync.draft&&legacy)checkinSync.update(legacy.answers,legacy.language);}});
+if(!reportDemo)queueMicrotask(()=>{if(auth.state.status!=='signed-in'){const legacy=readDraft(localStorage.getItem(DRAFT_STORAGE));checkinSync.setUser(null);if(!checkinSync.draft&&legacy){checkinSync.update(legacy.answers,legacy.language);checkinSync.setUser(null);}}});
 window.addEventListener('online',()=>checkinSync.retry());
 function reportHistory(){return report?.cloudId?accountReports.state.reports:saved;}
 function autoSaveEnabled(){return auth.state.status==='signed-in';}
@@ -172,7 +172,7 @@ function finish(){
  if(stored&&draftEnabled){try{localStorage.removeItem(DRAFT_STORAGE);}catch{removed=false;}}
  draftEnabled=false;draftSynced=false;previewSelection={};reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};view='report';render();
  if(!stored)app.querySelector('#mh-report-status').textContent=say(language,'Your report is ready, but it could not be saved in this browser. Keep this page open and retry Save or use Print / PDF. Existing reports have not been removed.','Report तैयार है, लेकिन इस browser में सेव नहीं हो सकी। पेज खुला रखें और Save फिर आज़माएँ या Print / PDF इस्तेमाल करें। पुरानी reports हटाई नहीं गई हैं।');
- checkinSync.complete(report,cloudConfig?.consentVersion||'cloud-reports-v1');
+ if(autoSaveEnabled()||stored)checkinSync.complete(report,cloudConfig?.consentVersion||'cloud-reports-v1');
  if(autoSaveEnabled()){cloudStatus='Saving your report…';renderCloudBanner();}
  else if(!removed)app.querySelector('#mh-report-status').textContent=say(language,'Your report is saved. The earlier draft also remains in this browser.','आपकी report सेव है। पिछला draft भी इस browser में मौजूद है।');
 }
