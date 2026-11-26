@@ -1,10 +1,11 @@
-import {icon} from './report-concept-view.mjs?v=18';
+import {createReportExporter} from './report-export.mjs?v=6';
+import {icon} from './report-concept-view.mjs?v=24';
 import {mountThoughtWaves} from './planning.mjs?v=14';
 import {previewResponseDetail} from './response-graphs.mjs?v=report-3';
 import {sampleReportMarkup} from './sample-report-view.mjs?v=report-summary-1';
 import {sampleReportData} from './sample-report.mjs?v=report-3';
-import {personalReportMarkup,usesPersonalReport} from './personal-report-view.mjs?v=19';
-import {mountPersonalReport} from './personal-report.mjs?v=20';
+import {personalReportMarkup,usesPersonalReport} from './personal-report-view.mjs?v=25';
+import {mountPersonalReport} from './personal-report.mjs?v=22';
 import {INNERLY_V1_VERSION,INNERLY_V1_STORAGE,readWorkbookReports,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=storage-1';
 import {saveLocalReport,removeLocalReport} from './report-storage.mjs?v=1';
 import {workbookDimensionReading} from './innerly-v1-views.mjs?v=report-summary-1';
@@ -15,10 +16,10 @@ import {topicReading} from './reflection60-views.mjs?v=mh-14';
 import {LANGUAGE_STORAGE,resolveQuestionLanguage,languageDirection,languageName,displayLanguage,questionUI,wellbeingLocales,coverageNotice,responseState,growthCaption} from './mental-language.mjs?v=mh-14';
 import {DRAFT_STORAGE,readDraft,makeDraft,resumeQuestion,nextContinuousQuestion} from './checkin-draft.mjs?v=mh-14';
 import {feelingReading} from './feeling-explorer.mjs?v=mh-14';
-import {bindHomeInteractions} from './innerly-home.mjs?v=home-preview-8';
+import {bindHomeInteractions} from './innerly-home.mjs?v=home-preview-12';
 import {MENTAL_STORAGE,readSavedCheckins} from './mental-model.mjs?v=mh-14';
 import {QUESTION_TOTAL,completedCount,completeFlow as isComplete,validQuestionResponse as validResponse,makeFlowReport as makeCheckin,nextFlowQuestion as nextUnanswered,growthState} from './checkin-flow.mjs?v=mh-14';
-import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=home-preview-8';
+import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=gauge-4';
 import {clerkPublishableKey} from './auth-config.mjs?v=auth-1';
 import {createClerkAuth} from './clerk-auth.mjs?v=auth-1';
 import {rememberAuthReturn,takeAuthReturn,AUTH_RETURN_STORAGE} from './auth-continuation.mjs?v=auth-1';
@@ -29,6 +30,7 @@ let preferredLanguage='';try{preferredLanguage=localStorage.getItem(LANGUAGE_STO
 let language=resolveQuestionLanguage({url:new URL(location.href).searchParams.get('lang'),saved:preferredLanguage,browserLanguages:navigator.languages||[],deviceLanguage:navigator.language});
 const qt=(key,en,hi)=>questionUI(language,key,en,hi);
 let saved=[],answers=Array(QUESTION_TOTAL).fill(null),view='home',report=null,reportView='snapshot',guideTimer=null,pointerInput=false,lastFocus=null;
+const reportExporter=createReportExporter({getRoot:()=>view==='report'&&!reportDemo?app:null,getLanguage:()=>displayLanguage(language)});
 let reportSelection={dimension:'dimension-1',question:0};
 let previewSelection={};
 const previewUnlockedReports=new Set(); // Preview access only. Never use this as a paid entitlement.
@@ -297,7 +299,7 @@ app.addEventListener('click',e=>{
  if(button.dataset.historyPoint){const r=button.dataset.historyPoint===report.id?report:saved.find(r=>r.id===button.dataset.historyPoint);if(r){showDialog(`<h2>${say(language,'A check-in snapshot','Check-in की झलक')}</h2><p>${new Date(r.createdAt).toLocaleDateString(language)} · PHQ-4 ${r.scores.total}/12</p>${screenBars(r.scores,displayLanguage(language))}<p>${say(language,'This describes that two-week period, not a prediction.','यह उस दो-सप्ताह की अवधि के बारे में है, आगे का अनुमान नहीं।')}</p>`);}return;}
  if(button.dataset.open){report=saved.find(r=>r.id===button.dataset.open);if(report){language=report.language;view='report';reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};render();}return;}
  if(button.dataset.delete){const id=button.dataset.delete;showDialog(`<h2>${say(language,'Delete this saved check-in?','यह सेव check-in हटाएँ?')}</h2><p>${say(language,'This removes its answers and report from this browser. Downloaded copies are not affected.','इसके जवाब और report इस browser से हटेंगे। Download की गई copies नहीं हटेंगी।')}</p><button class="mh-primary" id="mh-delete-confirm">${say(language,'Delete this check-in','यह check-in हटाएँ')}</button>`);dialog.querySelector('#mh-delete-confirm').onclick=()=>{try{const key=reportStorage(saved.find(r=>r.id===id));updateSavedReports(key,removeLocalReport(localStorage,key,id));if(report?.id===id){report=null;answers=Array(QUESTION_TOTAL).fill(null);draftEnabled=false;draftSynced=false;}view='history';closeDialog();render();}catch{dialog.querySelector('p').textContent=say(language,'Deletion failed. Please try again.','हटाया नहीं जा सका। फिर कोशिश करें।');}};return;}
- switch(button.dataset.action){case'dimension-overview':{const target=app.querySelector(`[data-infographic][data-workbook-dimension="${reportSelection.dimension}"]`);target?.focus({preventScroll:true});target?.scrollIntoView({behavior:motion(),block:'center'});break;}case'report-offer':showReportOffer();break;case'unlock-preview':unlockReportPreview();break;case'begin':begin();break;case'new-test':newTest();break;case'history':goHistory();break;case'home':view='home';render();break;case'resume':resume();break;case'break':takeBreak();break;case'discard':discardDraft();break;case'review':reviewAnswers();break;case'unanswered':cancelGuide();goToQuestion(resumeQuestion(answers),'instant');break;case'finish':finish();break;case'preview':{const p=app.querySelector('#mh-report-preview');p.tabIndex=-1;p.focus({preventScroll:true});p.scrollIntoView({behavior:motion(),block:'start'});break;}case'save':saveReport();break;case'print':window.print();break;}
+ switch(button.dataset.action){case'dimension-overview':{const target=app.querySelector(`[data-infographic][data-workbook-dimension="${reportSelection.dimension}"]`);target?.focus({preventScroll:true});target?.scrollIntoView({behavior:motion(),block:'center'});break;}case'report-offer':showReportOffer();break;case'unlock-preview':unlockReportPreview();break;case'begin':begin();break;case'new-test':newTest();break;case'history':goHistory();break;case'home':view='home';render();break;case'resume':resume();break;case'break':takeBreak();break;case'discard':discardDraft();break;case'review':reviewAnswers();break;case'unanswered':cancelGuide();goToQuestion(resumeQuestion(answers),'instant');break;case'finish':finish();break;case'preview':{const p=app.querySelector('#mh-report-preview');p.tabIndex=-1;p.focus({preventScroll:true});p.scrollIntoView({behavior:motion(),block:'start'});break;}case'save':saveReport();break;case'print':if(!reportExporter.open(button))window.print();break;}
 });
 dialog.addEventListener('click',e=>{const jump=e.target.closest('[data-jump]');if(jump){closeDialog();goToQuestion(Number(jump.dataset.jump),'instant');return;}if(e.target.closest('[data-close]'))closeDialog();});dialog.addEventListener('cancel',()=>lastFocus?.focus?.());
 function goHome(){if(reportDemo){const next=new URL('./',location.href);next.searchParams.set('lang',language);location.assign(next.href);return;}view='home';render();}

@@ -1,11 +1,16 @@
+import {createReportExporter} from './report-export.mjs?v=6';
+import {consolidatedGuidanceMarkup} from './consolidated-insights.mjs?v=7';
 import {mountAnswerMap} from './answer-map.mjs?v=2';
+import {mountReportDetails} from './report-details.mjs?v=1';
 import {mountQuestionExplorer,benchmarkReading} from './question-explorer.mjs?v=7';
-import {consolidatedSummaryMarkup,sampleProfiles,conceptSampleReport,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable} from './report-concept-view.mjs?v=18';
+import {icon,escapeHTML,consolidatedSummaryMarkup,sampleProfiles,conceptSampleReport,areaDesign,categories,reportSnapshot,graphPath,areaGraph,insightMarkup,questionReading,planMarkup,responseTable} from './report-concept-view.mjs?v=24';
 import {workbookQuestions} from './innerly-v1-model.mjs?v=mh-14';
 
 let answers=[...sampleProfiles.everyday.answers],snapshot=reportSnapshot(answers),selected=0,filter='support',lastTrigger=null;
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],dialog=$('#question-dialog');
+const reportExporter=createReportExporter({getRoot:()=>document.querySelector('.report-main')});
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+mountReportDetails(document);
 let tried=new Set(),dialogArea=-1;
 const refreshQuestionExplorer=mountQuestionExplorer(document,{getSnapshot:()=>snapshot,getReport:()=>conceptSampleReport(answers),language:'en',signal:new AbortController().signal});
 const answerMap=mountAnswerMap(document,{getSnapshot:()=>snapshot,language:'en',onOpenQuestion:showQuestion});
@@ -14,6 +19,7 @@ function updateReport(changedQuestion=null){
  const mapFocus=lastTrigger?.dataset.mapAnswer;
  snapshot=reportSnapshot(answers);
  $('[data-consolidated-summary]').innerHTML=consolidatedSummaryMarkup(snapshot,'en',{sample:true});
+ $('[data-consolidated-guidance]').innerHTML=consolidatedGuidanceMarkup(snapshot,{areas:areaDesign,categories,icon,escapeHTML});
  if(mapFocus!==undefined)lastTrigger=$(`[data-map-answer="${mapFocus}"]`);
  for(const [i,area] of snapshot.areas.entries()){
   for(const [key,category] of Object.entries(categories)){
@@ -85,7 +91,7 @@ document.addEventListener('click',e=>{
  if(trigger.hasAttribute('data-question-prev')){showQuestion(selected-1);return;}
  if(trigger.hasAttribute('data-question-next')){showQuestion(selected+1);return;}
  if(trigger.matches('.close-dialog')){dialog.close();return;}
- if(trigger.hasAttribute('data-print'))window.print();
+ if(trigger.hasAttribute('data-print'))reportExporter.open(trigger);
 });
 document.addEventListener('keydown',e=>{
  const mark=e.target.closest('.chart-mark');if(!mark)return;
@@ -102,9 +108,9 @@ $('#sample-profile').addEventListener('change',e=>{
  $('#report-status').textContent=`${profile.name} loaded. All 36 sample answers and six report areas updated.`;
 });
 $('#plan-list').addEventListener('change',e=>{const input=e.target.closest('[data-tried]');if(!input)return;if(input.checked)tried.add(input.dataset.tried);else tried.delete(input.dataset.tried);updateTried();$('#report-status').textContent=`${$('#tried-count').textContent} of 6 sample activities marked as tried.`;});
-const method=$('.report-method details');let methodWasOpen=false;
-window.addEventListener('beforeprint',()=>{methodWasOpen=method.open;method.open=true;});
-window.addEventListener('afterprint',()=>{method.open=methodWasOpen;});
+let printDetails=[];
+window.addEventListener('beforeprint',()=>{printDetails=$$('details').map(detail=>[detail,detail.open]);printDetails.forEach(([detail])=>detail.open=true);});
+window.addEventListener('afterprint',()=>{printDetails.forEach(([detail,open])=>detail.open=open);printDetails=[];});
 if(!reduced.matches&&'IntersectionObserver' in window){
  const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('entering');observer.unobserve(entry.target);setTimeout(()=>entry.target.classList.remove('entering'),1400);}},{threshold:.2});
  $$('.response-chart,.donut-wrap').forEach(el=>observer.observe(el));

@@ -1,3 +1,4 @@
+import {responseGaugeMarkup} from './response-gauge.mjs?v=4';
 import {thoughtWavesMarkup} from './thought-waves-view.mjs?v=5';
 import {sampleReportData} from './sample-report.mjs';
 import {questionGuidance} from './innerly-v1-guidance.mjs';
@@ -6,7 +7,7 @@ const say=(l,en,hi)=>l==='hi'?hi:en;
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const arrow='<span aria-hidden="true">→</span>';
 const start=l=>`<button class="mh-primary" data-action="begin">${say(l,'Start My Test','अपना टेस्ट शुरू करें')} ${arrow}</button>`;
-export function homeIcon(kind){const paths={arrow:'M4 12h16m-6-6 6 6-6 6',loop:'M7 10c-4 0-5 6-1 8 3 2 6-2 9-6 2-3 5-4 7-1 3 5-3 9-6 5M9 5v5H4',sun:'M12 4V2m0 20v-2M4 12H2m20 0h-2M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0',connection:'M11 7C7 1 0 7 4 12l8 8 8-8c4-5-3-11-7-5M8 12h8',leaf:'M5 20C4 12 7 5 20 3c1 12-5 18-15 17ZM5 20l10-10',shield:'M12 2 3 6v6c0 5 9 10 9 10s9-5 9-10V6ZM8 12l3 3 5-6',clock:'M12 6v6l4 2M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',chart:'M4 21V11m8 10V4m8 17v-7',book:'M3 3h7l2 2 2-2h7v17h-7l-2 2-2-2H3ZM12 5v17',check:'m5 12 4 4L20 5',spark:'m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${paths[kind]||paths.leaf}"/></svg>`;}
+export function homeIcon(kind){const paths={arrow:'M4 12h16m-6-6 6 6-6 6',compass:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM16 8l-2.5 5.5L8 16l2.5-5.5Z',loop:'M7 10c-4 0-5 6-1 8 3 2 6-2 9-6 2-3 5-4 7-1 3 5-3 9-6 5M9 5v5H4',sun:'M12 4V2m0 20v-2M4 12H2m20 0h-2M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0',connection:'M11 7C7 1 0 7 4 12l8 8 8-8c4-5-3-11-7-5M8 12h8',leaf:'M5 20C4 12 7 5 20 3c1 12-5 18-15 17ZM5 20l10-10',shield:'M12 2 3 6v6c0 5 9 10 9 10s9-5 9-10V6ZM8 12l3 3 5-6',clock:'M12 6v6l4 2M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',chart:'M4 21V11m8 10V4m8 17v-7',book:'M3 3h7l2 2 2-2h7v17h-7l-2 2-2-2H3ZM12 5v17',check:'m5 12 4 4L20 5',spark:'m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${paths[kind]||paths.leaf}"/></svg>`;}
 export const homeTopics={
  thoughts:{label:['Thoughts','आपके विचार'],title:['When your mind keeps going.','जब विचार चलते ही रहें।'],description:['Notice the thoughts you return to.','उन विचारों पर ध्यान दें जो बार-बार आते हैं।'],question:6,icon:'loop'},
  emotions:{label:['Emotions','भावनाएँ'],title:['A feeling. A pause. A response.','एक भावना। एक विराम। एक प्रतिक्रिया।'],description:['Explore what happens between feeling and reacting.','भावना आने और प्रतिक्रिया देने के बीच क्या होता है, समझें।'],question:12,icon:'sun'},
@@ -50,9 +51,17 @@ function previewReading(question,answers,l,previous){
   <div class="in-preview-benefit">${homeIcon('leaf')}<p><strong>${say(l,'What it could help with','इससे क्या मदद मिल सकती है')}</strong>${esc(item.benefit)}</p></div>
  </div>`;
 }
+function homeGauge(answers,l){
+ const counts={support:0,focus:0,varies:0};
+ answers.forEach((value,index)=>counts[questionGuidance({index,id:workbookQuestions[index].id,value},l).category]++);
+ return responseGaugeMarkup(counts,l,{sample:true});
+}
 export function homeReportPreview(l='en',{question=defaultQuestion,answers=previewAnswers}={}){
  const locale=questionnaireLocale(l);
- return `<div class="in-preview-unfold">
+ return `<div class="in-gauge-teaser">
+  <div class="in-gauge-copy"><p class="in-gauge-label">${homeIcon('spark')}${say(l,'YOUR BIGGER PICTURE','आपकी पूरी तस्वीर')}</p><h3>${say(l,'What’s already<br>working for you?','आपकी कौन-सी आदतें<br>आपका साथ देती हैं?')}</h3><p>${say(l,'36 answers. A clearer picture of you.','36 जवाब। खुद की थोड़ी और समझ।')}</p><div class="in-gauge-tags"><span>${homeIcon('leaf')}${say(l,'Strengths','मजबूतियाँ')}</span><span>${homeIcon('loop')}${say(l,'Patterns','पैटर्न')}</span><span>${homeIcon('compass')}${say(l,'Next steps','अगले कदम')}</span></div></div>
+  <div class="in-gauge-example"><div id="in-home-gauge">${homeGauge(answers,l)}</div><p class="in-gauge-note">${say(l,'Fictional sample · answer counts, not a health score','काल्पनिक उदाहरण · जवाबों की गिनती, health score नहीं')}</p></div>
+ </div><div class="in-preview-unfold">
   <div class="in-preview-prompt">
    <p class="in-preview-kicker"><span>01</span> ${say(l,'A SMALL ANSWER','एक छोटा जवाब')}</p>
    <h3>${say(l,'Try an answer.<br>See what unfolds.','एक जवाब चुनें।<br>खुद को थोड़ा समझें।')}</h3>
@@ -115,8 +124,9 @@ export function bindHomeInteractions(root,language,onUpdate=()=>{}){
   if(!panel.isConnected)return;
   const previous=answers[question];answers[question]=value;
   page.innerHTML=previewReading(question,answers,l,previous===value?undefined:previous);
+  panel.querySelector('#in-home-gauge').innerHTML=homeGauge(answers,l);
   panel.querySelectorAll('[data-preview-answer]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.previewAnswer)===value)));
-  announcement.textContent=`${questionnaireLocale(l).choices[value]}. ${panel.querySelector('.in-preview-result').textContent}`;
+  announcement.textContent=`${questionnaireLocale(l).choices[value]}. ${panel.querySelector('.in-preview-result').textContent}. ${panel.querySelector('.response-gauge').getAttribute('aria-label')}`;
   if(previous===value||!animationAllowed())return;
   page.querySelector('.in-answer-fill').animate([{width:`${previous*25}%`},{width:`${value*25}%`}],{duration:950,easing:'cubic-bezier(.2,.7,.2,1)'});
   page.querySelector('.in-answer-marker').animate([{left:`${previous*25}%`},{left:`${value*25}%`}],{duration:950,easing:'cubic-bezier(.2,.7,.2,1)'});
@@ -139,6 +149,7 @@ export function bindHomeInteractions(root,language,onUpdate=()=>{}){
   if(button.hasAttribute('data-preview-answer'))changeAnswer(Number(button.dataset.previewAnswer));
   else if(button.hasAttribute('data-preview-replay')){
    answers[question]=2;page.innerHTML=previewReading(question,answers,l);
+   panel.querySelector('#in-home-gauge').innerHTML=homeGauge(answers,l);
    panel.querySelectorAll('[data-preview-answer]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.previewAnswer==='2')));
    if(!animationAllowed())return;
    demoTimer=setTimeout(()=>{if(animationAllowed())changeAnswer(3);},1100);

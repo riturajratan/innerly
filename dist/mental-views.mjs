@@ -1,12 +1,12 @@
 import {workbookReportPreview} from './innerly-v1-preview.mjs?v=report-4';
-import {innerlyHome} from './innerly-home.mjs?v=home-preview-8';
+import {innerlyHome} from './innerly-home.mjs?v=home-preview-12';
 import {INNERLY_V1_VERSION,questionnaireLocale} from './innerly-v1-model.mjs?v=mh-14';
 import {workbookReportMarkup,workbookSample} from './innerly-v1-views.mjs?v=report-summary-1';
 import {REFLECTION60_VERSION} from './reflection60-model.mjs';
 import {reflectionReportMarkup,reflectionSample} from './reflection60-views.mjs?v=mh-14';
 import {questionUI,batchCopy,coverageNotice,translationNotice,timeframe,contextNote,displayLanguage,languageName} from './mental-language.mjs?v=mh-14';
 import {feelingVisual,relationshipSource} from './feeling-explorer.mjs?v=mh-14';
-import {questionBank,questionChoices,QUESTION_TOTAL,REFLECTION_COUNT,completedCount,growthMarkup,growthState} from './checkin-flow.mjs?v=mh-14';
+import {questionBank,questionChoices,QUESTION_TOTAL,REFLECTION_COUNT,validQuestionResponse,completedCount,growthMarkup,growthState} from './checkin-flow.mjs?v=mh-14';
 import {traits as reflectionTraits,scoreAnswers as reflectionScores} from './model.mjs';
 import {hindiTraits} from './hi-report.mjs';
 import {checkinQuestions,answerOptions,frequency,PHQ_SOURCE,screenScores,compatibleHistory,supportLevel,suggestedSteps,stepContent} from './mental-model.mjs?v=mh-14';
@@ -44,7 +44,7 @@ export function quizMarkup(answers,l='en',savedDraft=false){
  <div class="mh-progress"><div class="mh-progress-layout">${growthMarkup(answers,l)}<div class="mh-progress-summary"><strong id="mh-progress-percent">${percent}<span>%</span></strong><span>${t('complete','complete','पूरा')}</span><small id="mh-progress-label">${done} / ${QUESTION_TOTAL}</small></div></div><progress id="mh-progress" value="${done}" max="${QUESTION_TOTAL}" aria-label="${t('completed','Questions completed','पूरे हुए सवाल')}" aria-valuetext="${percent}% · ${done} / ${QUESTION_TOTAL}"></progress><div class="mh-progress-tools"><button data-action="review" class="mh-link">${t('Questions','Review answers','जवाब देखें')}</button><button data-action="break" class="mh-pause-button" ${done?'':'disabled'}>${t('Save & take a break','Save & take a break','सेव करें और विराम लें')} <span aria-hidden="true">Ⅱ</span></button></div><span class="mh-draft-status" id="mh-draft-status" role="status">${savedDraft?t('saved','Saved in this browser','इसी browser में सेव है'):''}</span></div>
  <p class="mh-flow-help">${batchCopy(l).help}</p><p class="mh-reflection-notice">${esc(g.notice)}</p>
  <p class="mh-footnote">${say(l,'Completed reports save automatically in this browser. Find them in My reports. Use a private device: anyone using this browser could read them.','पूरी report इसी browser में अपने आप सेव होगी। My reports में खोलें। निजी device इस्तेमाल करें: इस browser का इस्तेमाल करने वाला कोई भी व्यक्ति इसे पढ़ सकता है।')}</p>
- <div class="mh-question-list">${questionBank.map((q,i)=>{const reflection=true;return `<fieldset id="mh-q-${i}" class="mh-question${answers[i]!==null?' answered':''}"><legend><span class="mh-q-number">${i+1}.</span> ${esc(q.texts[l])}</legend>
+ <div class="mh-question-list">${questionBank.map((q,i)=>{const reflection=true;return `<fieldset id="mh-q-${i}" class="mh-question${validQuestionResponse(answers[i],i)?' answered':''}"><legend><span class="mh-q-number">${i+1}.</span> ${esc(q.texts[l])}</legend>
  ${reflection?`<div class="mh-scale-ends" aria-hidden="true"><span>${esc(questionChoices(i,l)[0])}</span><span>${esc(questionChoices(i,l)[4])}</span></div>`:''}
  <div class="mh-options${reflection?' mh-reflection-options':q.options?' mh-context-options':''}">${questionChoices(i,l).map((text,v)=>`<label><input type="radio" name="mental-${i}" value="${v}" data-answer="${i}" ${answers[i]===v?'checked':''}><span class="mh-choice-dot" aria-hidden="true"></span><span class="mh-frequency-caption">${esc(text)}</span></label>`).join('')}</div></fieldset>`;}).join('')}</div>
  <p class="mh-form-message" id="mh-form-message" role="status"></p><div class="mh-quiz-actions"><button class="mh-secondary" data-action="unanswered">${t('Answer remaining questions →','Go to an unanswered question','बाकी सवाल पर जाएँ')} ↑</button><button class="mh-primary" data-action="finish">${t('See results','See my report','मेरी report देखें')} →</button></div>

@@ -37,6 +37,6 @@
  .mh-personal-report .personal-report-actions{padding:10px 12px;gap:8px}
  .mh-personal-report .personal-report-actions>div:first-child{display:none}
  .mh-personal-report .personal-action-buttons{display:flex;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;gap:8px;padding:4px;width:100%;scrollbar-width:thin}
- .mh-personal-report .personal-action-buttons>button{flex:0 0 auto;white-space:nowrap;min-height:44px}
+ .mh-personal-report .personal-action-buttons>:is(button,a){flex:0 0 auto;white-space:nowrap;min-height:44px}
 }
 @media print{.mh-personal-report .personal-report-actions{display:none!important}}

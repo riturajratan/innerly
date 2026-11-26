@@ -1,0 +1,23 @@
+/* Print must fragment a long report as normal document flow. Screen flex/grid
+   containers and keep-together rules can push the opening onto an empty page. */
+@media print {
+ html,body{height:auto;min-height:0;overflow:visible;scroll-padding:0}
+ body.mh-personal-report #app{display:block;min-height:0;height:auto;overflow:visible;padding:0;margin:0}
+ .report-layout,.report-main,[data-personal-report],.consolidated-summary,.cs-overall,.cs-overall>.cp-combined,.personal-detail-content{display:block;min-height:0;height:auto;max-height:none;overflow:visible;break-before:auto;break-inside:auto;page-break-before:auto;page-break-inside:auto}
+ .report-main{width:100%;max-width:none;margin:0;padding:0}
+ .consolidated-summary{margin:12px 0 20px;border:0;border-radius:0}
+ .cs-overall{padding:12px 0;break-after:auto}
+ .report-intro{padding:0;margin:0;break-inside:avoid;break-after:avoid-page}
+ .report-intro.report-intro-compact h1{font-size:25px;margin:10px 0}
+ .cp-intro,.cs-response-mix,.cs-overall-heading{break-inside:avoid}
+ .cp-visual-profile .cp-intro{margin-top:12px;padding:14px 18px}
+ .cp-reading,.cp-reading-content,.cp-method{display:block;break-inside:auto;overflow:visible}
+ .cp-reading-content{padding-top:0}
+ .cp-reading .cp-synthesis,.cp-reading .cp-next p{font-size:13px;line-height:1.5}
+ .cp-method{font-size:11px;line-height:1.5}
+ .cp-method summary{min-height:0}
+ .cp-reading>summary:after{display:none}
+ .personal-report-details{break-inside:auto;overflow:visible}
+ .cs-analytics{break-inside:auto}
+ .report-detail-link,.report-back-summary{display:none!important}
+}

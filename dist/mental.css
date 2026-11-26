@@ -66,13 +66,13 @@
 @media(max-width:600px){.mh-reflection-summary{padding:20px;gap:18px}.mh-reflection-summary>strong{font-size:48px}.mh-reflection-summary h2{font-size:21px}.mh-topic-row>span:first-child{font-size:15px}.mh-topic-reading{padding:18px}.mh-topic-reading p{font-size:16px}.mh-sensitive-note{padding:12px 14px}.mh-reflection-support h2{font-size:23px}.mh-answer-distribution>div{font-size:14px;grid-template-columns:minmax(85px,1fr) 1fr 24px;gap:8px}}
 @media print{.mh-reflection-support a[href^="tel"]:after{content:none}.mh-topic-row{break-inside:avoid}.mh-response-details li{break-inside:avoid}.mh-reflection-report .mh-demo-tabs{display:none}}
 
-/* Keep the current question clear without hiding or disabling the others. */
-.mh-question-list.has-question-focus>.mh-question{transition:filter 160ms ease,opacity 160ms ease}
-.mh-question-list.has-question-focus>.mh-question:not(.is-current){filter:blur(2px);opacity:.48}
-.mh-question-list.has-question-focus>.mh-question.is-current{filter:none;opacity:1;transition:none}
+/* Completion belongs to the answer, never to focus or the resume position. */
+.mh-question-list>.mh-question{filter:none;opacity:1;background:#fff;padding:28px 20px;margin:12px 0;border:1px solid #e0e8e6;border-radius:12px}
+.mh-question-list>.mh-question.answered{background:#eef8f0;border-color:#c4dfcb;box-shadow:inset 4px 0 0 #78aa86}
+.mh-question-list>.mh-question.answered legend{color:var(--ink)}
 .mh-question-list>.mh-question.is-current legend{color:var(--ink)}
-@media(prefers-reduced-motion:reduce){.mh-question-list.has-question-focus>.mh-question{transition:none}}
-@media print{.mh-question-list.has-question-focus>.mh-question{filter:none!important;opacity:1!important;transition:none}}
+@media(max-width:600px){.mh-question-list>.mh-question{padding:22px 12px}}
+@media print{.mh-question-list>.mh-question{break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
 
 /* A human welcome first; the interactive report remains in the next section. */
 .mh-hero.mh-hero-welcome{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:52px;padding:38px 0 32px;align-items:center}

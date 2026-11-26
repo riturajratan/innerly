@@ -1,3 +1,4 @@
+import {visualInsight} from '../dist/report-visuals.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {consolidatedAnalytics} from '../dist/consolidated-analytics.mjs';
@@ -34,7 +35,9 @@ test('full consolidated guidance has question evidence and remains before every 
  for(const l of ['en','hi']){
   const snapshot=reportSnapshot(report.answers,l),data=consolidatedDetails(snapshot),summary=consolidatedSummaryMarkup(snapshot,l),html=personalReportMarkup(report,[],l);
   for(const id of ['cs-patterns','cs-comparison','cs-priorities','cs-journey','cs-benefits'])assert.ok(summary.includes(`id="${id}"`));
-  for(const item of data.priorities){assert.ok(summary.includes(item.id));assert.ok(summary.includes(answerInterpretation(item,l).practice));assert.ok(!summary.includes(item.step));assert.ok(summary.includes(item.benefit));}
+  for(const item of data.priorities){assert.ok(html.includes(item.id));assert.ok(html.includes(answerInterpretation(item,l).practice));assert.ok(summary.includes(visualInsight(item,l).action));assert.ok(html.includes(item.benefit));}
+  assert.ok(html.indexOf('id="detail-priorities"')>html.indexOf('id="report-details"'));
+  assert.ok(html.indexOf('id="detail-benefits"')<html.indexOf('id="six-areas"'));
   assert.ok(html.indexOf('id="cs-benefits"')<html.indexOf('id="six-areas"'));
   assert.ok(html.indexOf('id="question-insights"')<html.indexOf('id="next-steps"'));
   assert.equal((html.match(/class="area-card"/g)||[]).length,6);
@@ -79,7 +82,7 @@ test('consolidated cards explain answers, preserve question links, and do not re
    for(const question of workbookQuestions)assert.ok(!html.includes(question.texts[l]));
    for(const item of [...consolidatedDetails(snapshot).strengths.slice(0,2),...consolidatedDetails(snapshot).attention.slice(0,2)]){
     assert.ok(html.includes(`data-question="${item.index}"`));
-    assert.ok(html.includes(answerInterpretation(item,l).title));
+    assert.ok(html.includes(visualInsight(item,l).title));
    }
    assert.match(html,/cs-icon-tile/);
   }
@@ -123,7 +126,8 @@ test('brief summary and exact answer metrics precede compact strength and growth
  const snapshot=reportSnapshot(sampleProfiles.everyday.answers);
  for(const sample of [false,true]){
   const html=consolidatedSummaryMarkup(snapshot,'en',{sample});
-  assert.ok(html.indexOf('cs-overall-copy')<html.indexOf('cs-metrics'));
+  assert.ok(html.indexOf('cs-metrics')<html.indexOf('cp-reading'));
+  assert.match(html,/<details class="cp-reading"><summary>/);
   assert.ok(html.indexOf('cs-metrics')<html.indexOf('id="cs-patterns"'));
   assert.ok(html.indexOf('id="cs-patterns"')<html.indexOf('id="cs-analytics"'));
   assert.ok(html.indexOf('id="cs-analytics"')<html.indexOf('cs-guidance-details'));
@@ -134,8 +138,8 @@ test('brief summary and exact answer metrics precede compact strength and growth
    assert.ok(html.includes(`${count} / 36 · ${percent}%`));
   }
   const cards=[...html.matchAll(/<button class="cs-insight-card[\s\S]*?<\/button>/g)];
-  assert.equal(cards.length,4);
-  for(const [card] of cards){assert.doesNotMatch(card,/<p>/);assert.match(card,/aria-description=/);}
+  assert.equal(cards.length,consolidatedDetails(snapshot).strengths.length+consolidatedDetails(snapshot).attention.length);
+  for(const [card] of cards){assert.doesNotMatch(card,/cs-insight-meaning/);assert.match(card,/cs-insight-evidence/);}
  }
 });
 
@@ -162,19 +166,47 @@ test('editing one reverse-worded answer updates its map colour and the raw frequ
  assert.equal(after.frequencies[4],before.frequencies[4]-1);assert.equal(after.frequencies[0],before.frequencies[0]+1);
  for(const i of [1,2,3])assert.equal(after.frequencies[i],before.frequencies[i]);
 });
-test('the default consolidated view prioritises real data and keeps detailed guidance behind disclosures',()=>{
+test('the complete consolidated report is visible before question-level detail',()=>{
  for(const l of ['en','hi']){
   const html=consolidatedSummaryMarkup(reportSnapshot(sampleProfiles.everyday.answers,l),l);
   assert.equal((html.match(/class="cs-answer-cell /g)||[]).length,36);
   assert.equal((html.match(/class="cs-frequency-row"/g)||[]).length,5);
-  assert.match(html,/<details class="cs-deeper cs-guidance-details"><summary>/);
+  assert.equal((html.match(/class="landscape-row"/g)||[]).length,6);
+  assert.match(html,/<div class="cs-guidance-details cs-visual-guidance">/);
   assert.match(html,/<details class="cs-deeper cs-mock-details"><summary>/);
-  assert.doesNotMatch(html,/<details[^>]+open/);
-  const visible=html.replace(/<details class="cs-deeper[\s\S]*?<\/details>/g,'');
-  assert.doesNotMatch(visible,/cs-journey-card|cs-benefit-card|cs-priority-list/);
-  if(l==='en'){
-   const words=visible.replace(/<[^>]+>/g,' ').match(/[A-Za-z]+/g)||[];
-   assert.ok(words.length<350,`${words.length} default-view words`);
+  const visible=html.replace(/<details[\s\S]*?<\/details>/g,'');
+  for(const id of ['cs-areas','cs-patterns','cs-priorities','cs-journey','cs-benefits'])assert.ok(visible.includes(`id="${id}"`));
+  assert.equal((visible.match(/class="cs-timeline-stop/g)||[]).length,4);
+
+  assert.doesNotMatch(visible,/100 fictional responses/);
+ }
+});
+
+test('personal and sample reports put every graph and the full answer record behind View detail',()=>{
+ const report=makeWorkbookReport(sampleProfiles.everyday.answers,{id:'qa',createdAt:'2026-11-14T09:00:00Z',language:'en'});
+ for(const html of [personalReportMarkup(report),personalReportMarkup(report,[],'hi'),reportConceptPage()]){
+  assert.match(html,/<details class="personal-report-details" id="report-details"><summary>/);
+  const start=html.indexOf('id="report-details"'),end=html.indexOf('class="report-back-summary"');
+  assert.ok(html.indexOf('id="cs-benefits"')<start);
+  for(const target of ['id="six-areas"','id="question-insights"','id="next-steps"','class="report-method"']){
+   assert.ok(html.indexOf(target)>start&&html.indexOf(target)<end,target);
+  }
+  assert.equal((html.match(/class="landscape-row"/g)||[]).length,6);
+ }
+});
+
+test('visual captions stay concise and every short action keeps its question link',()=>{
+ for(const l of ['en','hi']){
+  const snapshot=reportSnapshot(sampleProfiles.everyday.answers,l);
+  for(const item of snapshot.items){
+   const copy=visualInsight(item,l);
+   for(const key of ['title','action','benefit'])assert.ok(copy[key].split(/\s+/).length<=9,`${item.id} ${key}`);
+   assert.ok(copy.icon);
+  }
+  const html=consolidatedSummaryMarkup(snapshot,l);
+  for(const item of consolidatedDetails(snapshot).priorities){
+   assert.ok(html.includes(`data-question="${item.index}"`));
+   assert.ok(html.includes(visualInsight(item,l).action));
   }
  }
 });

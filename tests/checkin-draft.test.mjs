@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {makeDraft,readDraft,resumeQuestion,nextContinuousQuestion} from '../dist/checkin-draft.mjs';
 import {FLOW_VERSION} from '../dist/checkin-flow.mjs';
 import {feelingExamples,feelingVisual,feelingReading} from '../dist/feeling-explorer.mjs';
-import {mentalHomeMarkup} from '../dist/mental-views.mjs';
+import {mentalHomeMarkup,quizMarkup} from '../dist/mental-views.mjs';
 
 test('an explicit draft round-trip keeps partial answers, scales and language',()=>{
  const a=Array(36).fill(null);a[0]=4;a[5]=0;a[35]=3;a[1]=2;
@@ -35,4 +35,17 @@ test('old same-version draft skips become unanswered without losing numeric resp
  const raw={version:FLOW_VERSION,language:'hi',savedAt:'2026-11-09T12:00:00Z',answers};
  const restored=readDraft(JSON.stringify(raw));assert.equal(restored.answers[2],null);assert.equal(restored.answers[30],null);assert.equal(restored.answers[0],3);assert.equal(resumeQuestion(restored.answers),2);
  assert.throws(()=>makeDraft(answers,'hi'));assert.deepEqual(raw.answers,answers);
+});
+
+// A restored unanswered slot must never receive the completed appearance.
+test('resuming a partial draft marks only valid answers as completed, including Never',()=>{
+ const answers=Array(36).fill(null);answers[0]=4;answers[2]=0;answers[35]=2;
+ const restored=readDraft(JSON.stringify(makeDraft(answers,'en')));
+ for(const language of ['en','hi']){
+  const html=quizMarkup(restored.answers,language,true);
+  const states=[...html.matchAll(/<fieldset id="mh-q-(\d+)" class="mh-question([^"]*)"/g)];
+  assert.equal(states.length,36);
+  assert.deepEqual(states.filter(([,index,classes])=>classes.includes('answered')).map(([,index])=>Number(index)),[0,2,35]);
+  assert.equal(resumeQuestion(restored.answers),1);
+ }
 });
