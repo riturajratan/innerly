@@ -1,7 +1,7 @@
 import {fail,jsonBody,objectFields} from './security.mjs';
 export function isFeedbackAdmin(env,userId){return (env.FEEDBACK_ADMIN_USER_IDS||'').split(',').map(s=>s.trim()).filter(Boolean).includes(userId);}
 export async function publicTestimonials(env){
- const rows=await env.DB.prepare("SELECT name,message FROM feedback WHERE kind='love' AND testimonial_consent=1 AND consent_version='testimonial-name-message-v1' AND review_status='approved' ORDER BY reviewed_at DESC,id DESC LIMIT 6").all();
+ const rows=await env.DB.prepare("SELECT name,message FROM feedback WHERE kind='love' AND testimonial_consent=1 AND consent_version='testimonial-name-message-v1' AND review_status='approved' ORDER BY reviewed_at DESC,id DESC LIMIT 3").all();
  return {testimonials:rows.results.map(({name,message})=>({name,message}))};
 }
 export async function feedbackAdmin(request,env,userId,now){
