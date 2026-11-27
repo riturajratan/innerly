@@ -20,3 +20,17 @@ test('feedback rejects invalid consent, origin and excessive requests',async()=>
  const row=env.DB.sqlite.prepare('SELECT * FROM feedback LIMIT 1').get();assert.equal(row.testimonial_consent,0);assert.equal(row.consent_version,null);
  assert.throws(()=>env.DB.sqlite.prepare("UPDATE feedback SET review_status='approved'").run());
 });
+
+test('Slack failure preserves feedback, scheduled retry delivers once without mentions or email',async()=>{
+ const env=environment();env.SLACK_SIGNUP_WEBHOOK_URL='https://hooks.slack.com/services/TEST/TEST/TEST';
+ let time=timestamp,available=false,calls=0,payload;
+ const app=createApp({now:()=>time,fetcher:async(url,options)=>{calls++;payload=JSON.parse(options.body);return new Response(available?'ok':'unavailable',{status:available?200:503});}});
+ const input={...body,name:'<!channel>',message:'<@U123> This is synthetic feedback with *formatting*.'};
+ assert.equal((await app.fetch(request('/api/feedback','POST',input),env)).status,201);
+ let row=env.DB.sqlite.prepare('SELECT * FROM feedback').get();assert.equal(row.slack_sent_at,null);assert.equal(row.slack_attempts,1);assert.equal(calls,1);
+ assert.ok(!JSON.stringify(payload).includes(body.email));assert.equal(payload.blocks[2].text.type,'plain_text');assert.equal(payload.blocks[1].fields[1].type,'plain_text');
+ await app.scheduled({},env);assert.equal(calls,1);
+ available=true;time+=301;await app.scheduled({},env);
+ row=env.DB.sqlite.prepare('SELECT * FROM feedback').get();assert.equal(row.slack_sent_at,time);assert.equal(calls,2);
+ await app.fetch(request('/api/feedback','POST',input),env);await app.scheduled({},env);assert.equal(calls,2);
+});

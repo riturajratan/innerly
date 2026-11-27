@@ -39,5 +39,10 @@
   "observability": {
     "enabled": false
   },
-  "preview_urls": false
+  "preview_urls": false,
+  "triggers": {
+    "crons": [
+      "*/5 * * * *"
+    ]
+  }
 }

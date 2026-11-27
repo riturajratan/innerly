@@ -10,7 +10,7 @@ export async function submitFeedback(request,env,now){
  const fingerprint=await digest(`feedback:${request.headers.get('cf-connecting-ip')||'local'}`);
  await rateLimit(env.DB,`feedback:${fingerprint}`,now,5);
  const hash=await digest(JSON.stringify([name,email,message,value.kind,value.testimonialConsent]));
- await env.DB.prepare(`INSERT OR IGNORE INTO feedback(id,name,email,message,kind,content_hash,testimonial_consent,consent_version,consented_at,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)`).bind(value.id,name,email,message,value.kind,hash,value.testimonialConsent?1:0,value.testimonialConsent?TESTIMONIAL_CONSENT:null,value.testimonialConsent?now:null,now).run();
+ await env.DB.prepare(`INSERT OR IGNORE INTO feedback(id,name,email,message,kind,content_hash,testimonial_consent,consent_version,consented_at,created_at,slack_next_attempt) VALUES (?,?,?,?,?,?,?,?,?,?,?)`).bind(value.id,name,email,message,value.kind,hash,value.testimonialConsent?1:0,value.testimonialConsent?TESTIMONIAL_CONSENT:null,value.testimonialConsent?now:null,now,now).run();
  const saved=await env.DB.prepare('SELECT content_hash FROM feedback WHERE id=?').bind(value.id).first();
  if(saved?.content_hash!==hash)fail(409,'feedback_id_reused');
  return {saved:true,id:value.id};

@@ -1,7 +1,7 @@
 import { verifyWebhook } from '@clerk/backend/webhooks';
 import { bodyText, fail } from './security.mjs';
 
-function slackDestination(value) {
+export function slackDestination(value) {
   try {
     const url = new URL(value);
     if (url.protocol !== 'https:' || url.hostname !== 'hooks.slack.com' || url.port || url.username || url.password || url.search || url.hash || !/^\/services\/[A-Za-z0-9]+\/[A-Za-z0-9]+\/[A-Za-z0-9]+$/.test(url.pathname)) throw new Error();

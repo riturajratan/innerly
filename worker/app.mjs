@@ -1,3 +1,4 @@
+import {deliverFeedback} from './feedback-notifications.mjs';
 import {submitFeedback} from './feedback.mjs';
 import {draftRequest} from './drafts.mjs';
 import { source } from '../dist/innerly-v1-questions.mjs';
@@ -31,7 +32,8 @@ async function ownedReport(db, userId, reportId) {
 
 export function createApp({ authenticateUser = authenticate, fetcher = fetch, now = seconds } = {}) {
   return {
-    async fetch(request, env) {
+    async scheduled(event,env,ctx){await deliverFeedback(env,fetcher,now());},
+    async fetch(request, env, ctx) {
       const path = new URL(request.url).pathname;
       try {
         if (path === '/auth-config.mjs' && ['GET', 'HEAD'].includes(request.method)) {
@@ -61,7 +63,12 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
         });
         if (!env.DB) fail(503, 'database_not_configured');
         if (path === '/api/webhooks/clerk' && request.method === 'POST') return json(await signupWebhook(request, env, fetcher, now()));
-        if(path==='/api/feedback'&&request.method==='POST')return json(await submitFeedback(request,env,now()),201);
+        if(path==='/api/feedback'&&request.method==='POST'){
+          const saved=await submitFeedback(request,env,now());
+          const delivery=deliverFeedback(env,fetcher,now(),saved.id).catch(()=>{console.error('feedback_notification_deferred');});
+          if(ctx?.waitUntil)ctx.waitUntil(delivery);else await delivery;
+          return json(saved,201);
+        }
         const provider = razorpay(env, fetcher);
         if (path === '/api/webhooks/razorpay' && request.method === 'POST') return json(await webhook(request, env, provider, now()));
         const userId = await authenticateUser(request, env);
