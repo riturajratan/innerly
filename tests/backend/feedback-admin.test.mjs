@@ -19,3 +19,10 @@ test('admin access fails closed, feedback without permission cannot be published
  assert.equal((await call('/api/admin/feedback','POST',{id:sample.id,action:'approve',revision:0})).status,400);
  env.FEEDBACK_ADMIN_USER_IDS='';assert.equal((await call('/api/admin/feedback')).status,403);
 });
+
+test('account metadata exposes admin menu capability only for allowlisted owner',async()=>{
+ const {env,call}=setup();
+ assert.equal((await (await call('/api/me')).json()).feedbackAdmin,true);
+ assert.equal((await (await call('/api/me','GET',undefined,'user_Other')).json()).feedbackAdmin,false);
+ env.FEEDBACK_ADMIN_USER_IDS='';assert.equal((await (await call('/api/me')).json()).feedbackAdmin,false);
+});

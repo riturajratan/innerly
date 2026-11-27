@@ -256,6 +256,7 @@ function updateAuthHeader(state){
  if(!reportDemo&&typeof accountReports!=='undefined'){
   const previous=accountReports.state.userId,next=state.status==='signed-in'?state.user?.id:null;
   if(previous!==next){
+   dialog.querySelector('#mh-account-admin')?.remove();
    answers=Array(QUESTION_TOTAL).fill(null);draftEnabled=false;draftSynced=false;if(view==='quiz')view='home';
    if(report?.cloudId){report=null;answers=Array(QUESTION_TOTAL).fill(null);view='history';closeDialog();}
    comparisonSelection={};cloudStatus='';cloudSaving=false;accountReports.setUser(next);checkinSync.setUser(next);
@@ -281,6 +282,13 @@ async function openAccount(){
   dialog.querySelector('#mh-account-reports').onclick=()=>{closeDialog();historySource='account';goHistory();};
   dialog.querySelector('#mh-account-manage').onclick=async()=>{closeDialog();try{await auth.profile();}catch{authError();}};
   dialog.querySelector('#mh-account-out').onclick=async()=>{closeDialog();try{await auth.signOut(language);}catch{authError();}};
+  const accountActions=dialog.querySelector('.mh-account-actions');
+  cloudApi('/me').then(me=>{
+   if(me.feedbackAdmin!==true||me.userId!==user.id||auth.state.user?.id!==user.id||!accountActions.isConnected||!dialog.open)return;
+   const link=document.createElement('a');link.id='mh-account-admin';link.className='mh-secondary';link.href='/admin';link.textContent=say(language,'Feedback admin','Feedback एडमिन');
+   accountActions.insertBefore(link,accountActions.querySelector('#mh-account-out'));
+  }).catch(()=>{});
+
  }catch{authError();}
 }
 function requestAccount(){

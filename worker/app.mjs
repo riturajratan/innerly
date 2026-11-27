@@ -1,4 +1,4 @@
-import {feedbackAdmin,publicTestimonials} from './feedback-admin.mjs';
+import {feedbackAdmin,publicTestimonials,isFeedbackAdmin} from './feedback-admin.mjs';
 import {deliverFeedback} from './feedback-notifications.mjs';
 import {submitFeedback} from './feedback.mjs';
 import {draftRequest} from './drafts.mjs';
@@ -80,7 +80,7 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
         if (path.startsWith('/api/billing/')) await rateLimit(env.DB, `billing:${userId}`, timestamp, 6);
         await env.DB.prepare('INSERT OR IGNORE INTO users(id,created_at) VALUES (?,?)').bind(userId, timestamp).run();
         if(path==='/api/draft'&&['GET','PUT','DELETE'].includes(request.method))return json(await draftRequest(request,env,userId,timestamp));
-        if (path === '/api/me' && request.method === 'GET') return json({ userId, billing: await billingStatus(env.DB, userId, timestamp) });
+        if (path === '/api/me' && request.method === 'GET') return json({ userId, feedbackAdmin:isFeedbackAdmin(env,userId), billing: await billingStatus(env.DB, userId, timestamp) });
         if (path === '/api/billing/subscriptions' && request.method === 'POST') return json(await createSubscription(env.DB, userId, await jsonBody(request), env, timestamp, provider), 201);
         const subscription = path.match(/^\/api\/billing\/subscriptions\/([A-Za-z0-9_-]{8,100})\/(refresh|cancel)$/);
         if (subscription && request.method === 'POST') {
