@@ -1,8 +1,7 @@
 export async function mountTestimonials(root,language='en'){
- const anchor=root.firstChild;
  try{
   const response=await fetch('/api/testimonials',{cache:'no-store'});if(!response.ok)return;
-  const {testimonials}=await response.json();if(!root.isConnected||root.firstChild!==anchor||!Array.isArray(testimonials)||!testimonials.length)return;
+  const {testimonials}=await response.json();if(!root.isConnected||root.querySelector('.kym-testimonials')||!Array.isArray(testimonials)||!testimonials.length)return;
   const section=document.createElement('section');section.className='kym-testimonials';section.setAttribute('aria-label',language==='hi'?'आपकी बातें':'Your words');
   const heading=document.createElement('h2');heading.textContent=language==='hi'?'इस जगह के बारे में आपकी बातें।':'A little reflection. In your words.';
   const intro=document.createElement('p');intro.textContent=language==='hi'?'अनुमति के साथ साझा किए गए अनुभव।':'Experiences shared with permission.';
