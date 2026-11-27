@@ -26,3 +26,11 @@ POST /api/feedback accepts visitors without login, validates length/type/origin,
 ## Slack alerts
 
 New submissions notify the existing signup Slack destination using its existing Worker secret. Alerts include name, kind, message, received time (IST), feedback ID and testimonial permission; email stays in D1. All visitor text uses Slack plain_text blocks, preventing user-supplied mentions/markup. Feedback is saved before notification. Delivery runs in the background, and a five-minute Cron Trigger retries pending rows with backoff. Existing feedback is not backfilled. `slack_sent_at`, `slack_next_attempt`, `slack_attempts` track delivery. A 60-second atomic lease prevents concurrent sends; as with most webhooks a crash after Slack accepts but before D1 records success can still cause a duplicate on retry.
+
+## Admin review and homepage
+
+Open https://knowyourmind.ai/admin and sign in with the designated account. `FEEDBACK_ADMIN_USER_IDS` is a server-only comma-separated allowlist of Clerk user IDs; missing configuration denies access. The owner ID was matched to riturajratan@gmail.com in the production Clerk users page. No browser-provided role or email grants access.
+
+The inbox filters New, Reviewed, Published, Rejected/withdrawn and All, with 25-item pagination. Approve & publish requires explicit testimonial consent and publishes the original name and message. Reject/Unpublish or Mark reviewed removes an approved entry from the homepage. Withdraw permission also clears consent and prevents reapproval until new explicit consent is collected. Review changes use revisions to reject stale edits and append an audit row recording the admin, action and time.
+
+The public endpoint returns only the names and messages of up to six latest approved, opted-in love submissions. No email, account identifier or private feedback is exposed. Responses are no-store; changes appear on the next homepage load. The section remains hidden when no qualifying testimonials exist. No synthetic example is seeded or approved in production.

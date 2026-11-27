@@ -23,7 +23,7 @@ test('local feedback submission preserves reports and earlier notes and is idemp
  assert.throws(()=>saveFeedback({getItem:()=>null,setItem:()=>{throw new Error('Quota');}},entry));
 });
 test('every public html entry includes the shared feedback widget exactly once',()=>{
- for(const file of readdirSync(new URL('../dist/',import.meta.url)).filter(f=>f.endsWith('.html'))){
+ for(const file of readdirSync(new URL('../dist/',import.meta.url)).filter(f=>f.endsWith('.html')&&f!=='admin.html')){
   const html=readFileSync(new URL(`../dist/${file}`,import.meta.url),'utf8');
   assert.equal((html.match(/src="feedback.mjs\?v=[^\"]+"/g)||[]).length,1,file);
  }

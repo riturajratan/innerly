@@ -14,7 +14,7 @@ const envFile = join(dir, 'test.env'), state = join(dir, 'state');
 const cli = join(process.cwd(), 'node_modules/wrangler/bin/wrangler.js');
 const childEnv = { ...process.env, XDG_CONFIG_HOME: join(dir, 'config'), WRANGLER_SEND_METRICS: 'false', WRANGLER_LOG_PATH: join(dir, 'wrangler.log') };
 const config = {
-  APP_ORIGIN: origin, CLERK_ISSUER: 'https://clerk.knowyourmind.ai',
+  FEEDBACK_ADMIN_USER_IDS:'user_Alice', APP_ORIGIN: origin, CLERK_ISSUER: 'https://clerk.knowyourmind.ai',
   CLERK_PUBLISHABLE_KEY: `pk_test_${Buffer.from('clerk.knowyourmind.ai$').toString('base64')}`,
   CLERK_JWT_KEY: jwtKey,
   REPORT_ENCRYPTION_KEY: Buffer.alloc(32, 9).toString('base64'), CLOUD_REPORTS_ACCESS: 'free', BILLING_ENABLED: 'false', BILLING_PLANS: '[]',
@@ -48,6 +48,13 @@ INSERT INTO payments VALUES ('pay_fixture','smoke_subscription','inv_fixture',10
     method,headers:{Origin:origin,Authorization:`Bearer ${token({sub:user,azp:origin})}`,'Content-Type':'application/json'},
     ...(body!==undefined?{body:JSON.stringify(body)}:{}),
   });
+  const feedback={id:'runtime_feedback_123',name:'Fictional runtime test',email:'test@example.com',message:'Synthetic local test, never published on production.',kind:'love',testimonialConsent:true};
+  assert.equal((await api('/feedback','POST',feedback)).status,201);
+  assert.equal((await api('/admin/feedback','GET',undefined,'user_Bob')).status,403);
+  assert.equal((await api('/admin/feedback','POST',{id:feedback.id,revision:0,action:'approve'})).status,200);
+  assert.deepEqual((await (await api('/testimonials')).json()).testimonials,[{name:feedback.name,message:feedback.message}]);
+  assert.equal((await api('/admin/feedback','POST',{id:feedback.id,revision:1,action:'withdraw'})).status,200);
+  assert.deepEqual((await (await api('/testimonials')).json()).testimonials,[]);
   const partial={id:'runtime_draft_ABC',revision:0,language:'en',answers:[1,...Array(35).fill(null)]};
   assert.equal((await api('/draft','PUT',partial)).status,200);
   assert.deepEqual((await (await api('/draft')).json()).draft.answers,partial.answers);

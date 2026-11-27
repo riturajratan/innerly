@@ -21,7 +21,8 @@ export function clerkConfig(value = '') {
 export function authReturnUrl(href, language = 'en') {
   // Always return to this installation, at the custom domain root or a preview subpath.
   // Do not accept redirect URLs from query parameters or saved user data.
-  const url = new URL('./', href);
+  const source=new URL(href);
+  const url = new URL(/^\/admin(?:\.html)?$/.test(source.pathname)?'/admin':'./', href);
   if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Invalid app origin.');
   url.searchParams.set('lang', /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/i.test(language) ? language : 'en');
   return url.href;

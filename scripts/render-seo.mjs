@@ -55,7 +55,7 @@ for(const [file,page] of Object.entries(pages)){
 }
 // Keep legacy experiments, private account controls and secondary demos out of search.
 for(const file of await readdir('dist')){
- if(!file.endsWith('.html')||pages[file])continue;
+ if(!file.endsWith('.html')||pages[file]||file==='admin.html')continue;
  let html=await readFile('dist/'+file,'utf8');html=html.replace(/<meta\b[^>]*name=["']robots["'][^>]*>/gi,'').replace('</head>','<meta name="robots" content="noindex,follow"></head>');await writeFile('dist/'+file,html.replace(/[ \t]+$/gm,''));
 }
 await writeFile('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${Object.values(pages).map(page=>`  <url><loc>${base+page.path}</loc><lastmod>2026-11-26</lastmod></url>`).join('\n')}\n</urlset>\n`);
