@@ -1,4 +1,4 @@
-import {mountTestimonials} from './testimonials.mjs?v=photo-1';
+import {mountTestimonials} from './testimonials.mjs?v=photo-2';
 import './header-layout.mjs?v=1';
 import {createCheckinSync} from './checkin-sync.mjs';
 import './analytics.mjs?v=1';
