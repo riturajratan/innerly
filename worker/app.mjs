@@ -1,3 +1,4 @@
+import {submitFeedback} from './feedback.mjs';
 import {draftRequest} from './drafts.mjs';
 import { source } from '../dist/innerly-v1-questions.mjs';
 import { clerkConfig } from '../dist/clerk-config.mjs';
@@ -60,6 +61,7 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
         });
         if (!env.DB) fail(503, 'database_not_configured');
         if (path === '/api/webhooks/clerk' && request.method === 'POST') return json(await signupWebhook(request, env, fetcher, now()));
+        if(path==='/api/feedback'&&request.method==='POST')return json(await submitFeedback(request,env,now()),201);
         const provider = razorpay(env, fetcher);
         if (path === '/api/webhooks/razorpay' && request.method === 'POST') return json(await webhook(request, env, provider, now()));
         const userId = await authenticateUser(request, env);

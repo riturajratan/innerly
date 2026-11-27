@@ -29,19 +29,19 @@ export function feedbackMarkup(l='en'){
     <label class="ifb-field" for="ifb-email"><span id="ifb-email-label">Email</span><input aria-labelledby="ifb-email-label" id="ifb-email" name="email" type="email" required maxlength="254" autocomplete="email" placeholder="name@example.com" aria-describedby="ifb-email-error"><span class="ifb-error" id="ifb-email-error"></span></label></div>
     <label class="ifb-field" for="ifb-message"><span id="ifb-message-label">${say(l,'Message','संदेश')}</span><textarea aria-labelledby="ifb-message-label" id="ifb-message" name="message" required minlength="10" maxlength="1500" rows="3" placeholder="${say(l,'What would make Know Your Mind better for you?','Know Your Mind आपके लिए कैसे बेहतर हो सकता है?')}" aria-describedby="ifb-message-error ifb-privacy"></textarea><span class="ifb-message-meta"><span class="ifb-error" id="ifb-message-error"></span><small class="ifb-character-count">0 / 1500</small></span></label>
     <p id="ifb-privacy" class="ifb-privacy">${say(l,'Please leave personal health details and report answers out of your message.','कृपया संदेश में निजी स्वास्थ्य जानकारी या रिपोर्ट के जवाब न लिखें।')}</p>
-    <button class="ifb-submit" type="submit">${say(l,'Submit feedback','Feedback जमा करें')}<span aria-hidden="true">↗</span></button>
-    <p class="ifb-delivery">${say(l,'Saved on this device for now. Online delivery is coming later.','अभी इसी device पर सेव होगा। Online भेजने की सुविधा बाद में जुड़ेगी।')}</p>
+    <label class="ifb-testimonial" hidden><input type="checkbox" name="testimonialConsent"> <span>${say(l,"You may feature my message and name as a testimonial on Know Your Mind. My email stays private. (Optional)","आप मेरे संदेश और नाम को Know Your Mind पर testimonial के रूप में दिखा सकते हैं। Email निजी रहेगा। (वैकल्पिक)")}</span></label><button class="ifb-submit" type="submit">${say(l,'Submit feedback','Feedback जमा करें')}<span aria-hidden="true">↗</span></button>
+    <p class="ifb-delivery">${say(l,'Sent privately to the Know Your Mind team.','Know Your Mind टीम को निजी रूप से भेजा जाएगा।')}</p>
     <p class="ifb-status" role="status"></p></form>
-    <div class="ifb-success" hidden tabindex="-1"><span class="ifb-success-icon" aria-hidden="true">✓</span><h3>${say(l,'A little note.<br>A little better.','आपकी राय।<br>बेहतरी की शुरुआत।')}</h3><p>${say(l,'Thank you for helping Know Your Mind grow.','Know Your Mind को बेहतर बनाने में मदद के लिए धन्यवाद।')}</p><p class="ifb-saved-note">${say(l,'Your feedback is saved on this device. It has not been sent to the team yet.','आपका feedback इसी device पर सेव है। अभी टीम को भेजा नहीं गया है।')}</p><button class="ifb-submit" type="button" data-feedback-done>${say(l,'Done','ठीक है')}<span aria-hidden="true">✓</span></button><button type="button" class="ifb-another" data-feedback-another>${say(l,'Write another note','एक और राय लिखें')}</button></div>
+    <div class="ifb-success" hidden tabindex="-1"><span class="ifb-success-icon" aria-hidden="true">✓</span><h3>${say(l,'A little note.<br>A little better.','आपकी राय।<br>बेहतरी की शुरुआत।')}</h3><p>${say(l,'Thank you for helping Know Your Mind grow.','Know Your Mind को बेहतर बनाने में मदद के लिए धन्यवाद।')}</p><p class="ifb-saved-note">${say(l,'Your feedback has reached our team. Thank you for sharing.','आपका feedback हमारी टीम तक पहुँच गया है। धन्यवाद।')}</p><button class="ifb-submit" type="button" data-feedback-done>${say(l,'Done','ठीक है')}<span aria-hidden="true">✓</span></button><button type="button" class="ifb-another" data-feedback-another>${say(l,'Write another note','एक और राय लिखें')}</button></div>
    </div>
   </div></div>
  </dialog>`;
 }
 export function mountFeedback(){
  if(document.querySelector('#innerly-feedback'))return;
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./feedback.css?v=5',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./feedback.css?v=6',import.meta.url).href;document.head.append(css);
  const root=document.createElement('div');root.id='innerly-feedback-widget';document.body.append(root);
- let locale,launcher,dialog,form,motion,hasOpened=false,submitted=false;
+ let locale,launcher,dialog,form,motion,hasOpened=false,submitted=false,pendingSubmission=null,sending=false;
  try{hasOpened=sessionStorage.getItem('innerly.feedback.waves-opened.v1')==='1';}catch{}
  function render(){
   const l=document.documentElement.lang==='hi'?'hi':'en';if(locale===l)return;
@@ -61,19 +61,24 @@ export function mountFeedback(){
    form.elements[key].addEventListener('blur',()=>{if(form.elements[key].value||form.elements[key].getAttribute('aria-invalid')==='true')fieldError(key,validateFeedback(values(),locale)[key]);});
    form.elements[key].addEventListener('input',()=>{if(form.elements[key].getAttribute('aria-invalid')==='true')fieldError(key,validateFeedback(values(),locale)[key]);counter();});
   }
-  form.addEventListener('submit',event=>{
-   event.preventDefault();if(submitted)return;
+  form.addEventListener('change',()=>{const love=form.elements['feedback-kind'].value==='love';root.querySelector('.ifb-testimonial').hidden=!love;if(!love)form.elements.testimonialConsent.checked=false;});
+  form.addEventListener('submit',async event=>{
+   event.preventDefault();if(submitted||sending)return;
    const data=values(),errors=validateFeedback(data,locale);
    for(const key of ['name','email','message'])fieldError(key,errors[key]);
    const first=Object.keys(errors)[0];
    if(first){root.querySelector('.ifb-status').textContent=say(locale,'Please check the highlighted fields.','कृपया हाइलाइट किए गए fields ठीक करें।');form.elements[first].focus();return;}
    const button=form.querySelector('[type="submit"]');button.disabled=true;
-   try{saveFeedback(localStorage,{id:crypto.randomUUID(),createdAt:new Date().toISOString(),kind:form.elements['feedback-kind'].value,...data,status:'pending'});}
-   catch{button.disabled=false;root.querySelector('.ifb-status').textContent=say(locale,'Your feedback could not be saved. Your message is still here; please try again.','Feedback सेव नहीं हो सका। आपका संदेश यहीं है; कृपया फिर कोशिश करें।');return;}
-   submitted=true;form.hidden=true;root.querySelector('.ifb-success').hidden=false;root.querySelector('.ifb-success').focus({preventScroll:true});
+   sending=true;
+   const payload={kind:form.elements['feedback-kind'].value,...data,testimonialConsent:form.elements['feedback-kind'].value==='love'&&form.elements.testimonialConsent.checked};
+   const signature=JSON.stringify(payload);if(pendingSubmission?.signature!==signature)pendingSubmission={signature,id:crypto.randomUUID()};
+   try{const response=await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:pendingSubmission.id,...payload}),signal:AbortSignal.timeout(15000)});if(!response.ok||!(await response.json()).saved)throw new Error('not_saved');}
+
+   catch{sending=false;button.disabled=false;root.querySelector('.ifb-status').textContent=say(locale,'Your feedback could not be saved. Your message is still here; please try again.','Feedback सेव नहीं हो सका। आपका संदेश यहीं है; कृपया फिर कोशिश करें।');return;}
+   sending=false;pendingSubmission=null;submitted=true;form.hidden=true;root.querySelector('.ifb-success').hidden=false;root.querySelector('.ifb-success').focus({preventScroll:true});
   });
   root.querySelector('[data-feedback-another]').onclick=()=>{
-   submitted=false;form.reset();form.hidden=false;form.querySelector('[type="submit"]').disabled=false;root.querySelector('.ifb-success').hidden=true;
+   submitted=false;pendingSubmission=null;form.reset();root.querySelector('.ifb-testimonial').hidden=true;form.hidden=false;form.querySelector('[type="submit"]').disabled=false;root.querySelector('.ifb-success').hidden=true;
    for(const key of ['name','email','message'])fieldError(key,'');root.querySelector('.ifb-status').textContent='';counter();form.elements.name.focus();
   };
  }

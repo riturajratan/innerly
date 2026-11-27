@@ -15,7 +15,7 @@ export function createFeedbackMotion({dialog,launcher,surface,energy}){
   return {origin,box};
  }
  function waves({origin:o,box:b},duration,closing=false){
-  const sidebar=getComputedStyle(surface.querySelector('.ifb-note')).display==='none'?0:225;
+  const sidebar=getComputedStyle(surface.querySelector('.ifb-note')).display==='none'?0:surface.querySelector('.ifb-note').getBoundingClientRect().width;
   const target={x:b.left+sidebar+(b.width-sidebar)*.5,y:b.top+b.height*.5};
   const colors=['#729ac6','#82b3a0','#c9b362'];
   const control1={x:o.x-65,y:o.y-70},control2={x:target.x+75,y:target.y+110};
@@ -52,7 +52,7 @@ export function createFeedbackMotion({dialog,launcher,surface,energy}){
   if(!motionAllowed()){settle();return;}
   const duration=first?1600:1450,geometry=frames();
   const note=surface.querySelector('.ifb-note'),paper=surface.querySelector('.ifb-paper');
-  const mobile=getComputedStyle(note).display==='none',spine=mobile?0:225;
+  const mobile=getComputedStyle(note).display==='none',spine=mobile?0:surface.querySelector('.ifb-note').getBoundingClientRect().width;
   const width=geometry.box.width-spine,height=geometry.box.height;
   waves(geometry,duration);surface.style.pointerEvents='none';surface.inert=true;
   thought=document.createElement('div');thought.className='ifb-thought-cover';thought.setAttribute('aria-hidden','true');

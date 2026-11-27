@@ -28,13 +28,13 @@ test('every public html entry includes the shared feedback widget exactly once',
   assert.equal((html.match(/src="feedback.mjs\?v=[^\"]+"/g)||[]).length,1,file);
  }
 });
-test('feedback has a mind trigger, labelled fields and an honest local submission state',()=>{
+test('feedback has a mind trigger, labelled fields and an honest server submission state',()=>{
  for(const l of ['en','hi']){
   const html=feedbackMarkup(l);
   assert.match(html,/aria-haspopup="dialog"/);assert.match(html,/aria-labelledby="ifb-title"/);
   assert.match(html,/class="ifb-mind"/);assert.match(html,/class="ifb-energy"/);
   for(const name of ['name','email','message'])assert.match(html,new RegExp(`name="${name}"[^>]*required`));
-  assert.match(html,/Submit feedback|Feedback जमा करें/);assert.match(html,/has not been sent|टीम को भेजा नहीं/);
+  assert.match(html,/Submit feedback|Feedback जमा करें/);assert.match(html,/has reached our team|टीम तक पहुँच गया/);
   assert.doesNotMatch(html,/mailto:|Open email draft|ifb-fold/);
  }
 });

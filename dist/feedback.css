@@ -124,3 +124,22 @@ body:has(#innerly-feedback-widget){padding-bottom:76px}
 .ifb-dialog[data-motion=opening]>.ifb-close,.ifb-dialog[data-motion=closing]>.ifb-close{opacity:0;pointer-events:none}
 #innerly-feedback-widget .ifb-dialog:focus{outline:none}
 @media(max-width:600px){.ifb-cover-front{border-radius:16px}.ifb-cover-front .ifb-note{padding:26px}.ifb-cover-front .ifb-note-title{font-size:26px}.ifb-cover-front .ifb-orbits{max-height:260px}}
+
+/* Compact form, keeping comfortable touch targets and readable text. */
+#innerly-feedback-widget .ifb-dialog{width:620px}
+.ifb-book{grid-template-columns:180px minmax(0,1fr)}
+.ifb-note{padding:24px 18px}.ifb-brand{font-size:18px;letter-spacing:-.5px}
+.ifb-note .ifb-note-title{font-size:21px;margin-top:24px;line-height:1.4}
+.ifb-orbits{height:110px;margin-top:15px}.ifb-note>p:not(.ifb-note-title){font-size:13px}
+.ifb-paper{padding:22px 22px 18px}.ifb-eyebrow{margin-bottom:8px;font-size:9px}
+.ifb-paper h2{font-size:24px;margin-bottom:6px}.ifb-paper>p{font-size:13px;margin-bottom:13px}
+.ifb-form fieldset{margin-bottom:12px}.ifb-field{font-size:13px;margin-bottom:10px}
+#innerly-feedback-widget .ifb-field input,#innerly-feedback-widget .ifb-field textarea{margin-top:5px;padding:8px 10px;min-height:42px;font-size:14px}
+#innerly-feedback-widget .ifb-field textarea{min-height:86px}
+.ifb-form .ifb-privacy{margin-bottom:10px}.ifb-form .ifb-delivery{margin-top:8px}
+.ifb-testimonial{display:flex;align-items:flex-start;gap:8px;font-size:11px;line-height:1.5;margin:0 0 12px;color:#526c89}.ifb-testimonial[hidden]{display:none}
+.ifb-testimonial input{flex-shrink:0;width:17px;height:17px;margin:2px 0;accent-color:#254875}
+@media(max-width:600px){.ifb-book{grid-template-columns:1fr}.ifb-paper{padding:22px 18px 18px}#innerly-feedback-widget .ifb-field input,#innerly-feedback-widget .ifb-field textarea{font-size:16px}.ifb-testimonial{font-size:12px}}
+
+.ifb-cover-back .ifb-note{width:180px}
+@media(max-width:600px){#innerly-feedback-widget .ifb-dialog{width:auto;max-width:calc(100vw - 24px)}}
