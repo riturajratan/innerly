@@ -28,8 +28,10 @@ export function feedbackMarkup(l='en'){
     <div class="ifb-contact-fields"><label class="ifb-field" for="ifb-name"><span id="ifb-name-label">${say(l,'Name','नाम')}</span><input aria-labelledby="ifb-name-label" id="ifb-name" name="name" required maxlength="80" autocomplete="name" placeholder="${say(l,'Your name','आपका नाम')}" aria-describedby="ifb-name-error"><span class="ifb-error" id="ifb-name-error"></span></label>
     <label class="ifb-field" for="ifb-email"><span id="ifb-email-label">Email</span><input aria-labelledby="ifb-email-label" id="ifb-email" name="email" type="email" required maxlength="254" autocomplete="email" placeholder="name@example.com" aria-describedby="ifb-email-error"><span class="ifb-error" id="ifb-email-error"></span></label></div>
     <label class="ifb-field" for="ifb-message"><span id="ifb-message-label">${say(l,'Message','संदेश')}</span><textarea aria-labelledby="ifb-message-label" id="ifb-message" name="message" required minlength="10" maxlength="1500" rows="3" placeholder="${say(l,'What would make Know Your Mind better for you?','Know Your Mind आपके लिए कैसे बेहतर हो सकता है?')}" aria-describedby="ifb-message-error ifb-privacy"></textarea><span class="ifb-message-meta"><span class="ifb-error" id="ifb-message-error"></span><small class="ifb-character-count">0 / 1500</small></span></label>
+    <label class="ifb-photo-field" for="ifb-photo"><span>${say(l,'Add a photo (optional)','फ़ोटो जोड़ें (वैकल्पिक)')}</span><small>${say(l,'JPG, PNG or WebP · up to 3 MB','JPG, PNG या WebP · 3 MB तक')}</small><input id="ifb-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp"><span class="ifb-photo-preview" hidden><img alt=""><span></span><button type="button" data-remove-photo>${say(l,'Remove photo','फ़ोटो हटाएँ')}</button></span></label>
     <p id="ifb-privacy" class="ifb-privacy">${say(l,'Please leave personal health details and report answers out of your message.','कृपया संदेश में निजी स्वास्थ्य जानकारी या रिपोर्ट के जवाब न लिखें।')}</p>
-    <label class="ifb-testimonial" hidden><input type="checkbox" name="testimonialConsent"> <span>${say(l,"You may feature my message and name as a testimonial on Know Your Mind. My email stays private. (Optional)","आप मेरे संदेश और नाम को Know Your Mind पर testimonial के रूप में दिखा सकते हैं। Email निजी रहेगा। (वैकल्पिक)")}</span></label><button class="ifb-submit" type="submit">${say(l,'Submit feedback','Feedback जमा करें')}<span aria-hidden="true">↗</span></button>
+    <label class="ifb-testimonial" hidden><input type="checkbox" name="testimonialConsent"> <span>${say(l,"You may feature my message and name as a testimonial on Know Your Mind. My email stays private. (Optional)","आप मेरे संदेश और नाम को Know Your Mind पर testimonial के रूप में दिखा सकते हैं। Email निजी रहेगा। (वैकल्पिक)")}</span></label>
+    <label class="ifb-testimonial ifb-photo-consent" hidden><input type="checkbox" name="testimonialPhotoConsent"> <span>${say(l,'You may also display my uploaded photo with the testimonial. (Optional)','आप testimonial के साथ मेरी upload की हुई फ़ोटो भी दिखा सकते हैं। (वैकल्पिक)')}</span></label><button class="ifb-submit" type="submit">${say(l,'Submit feedback','Feedback जमा करें')}<span aria-hidden="true">↗</span></button>
     <p class="ifb-delivery">${say(l,'Sent to our team and private Slack inbox.','हमारी टीम और निजी Slack inbox में भेजा जाएगा।')}</p>
     <p class="ifb-status" role="status"></p></form>
     <div class="ifb-success" hidden tabindex="-1"><span class="ifb-success-icon" aria-hidden="true">✓</span><h3>${say(l,'A little note.<br>A little better.','आपकी राय।<br>बेहतरी की शुरुआत।')}</h3><p>${say(l,'Thank you for helping Know Your Mind grow.','Know Your Mind को बेहतर बनाने में मदद के लिए धन्यवाद।')}</p><p class="ifb-saved-note">${say(l,'Your feedback has reached our team. Thank you for sharing.','आपका feedback हमारी टीम तक पहुँच गया है। धन्यवाद।')}</p><button class="ifb-submit" type="button" data-feedback-done>${say(l,'Done','ठीक है')}<span aria-hidden="true">✓</span></button><button type="button" class="ifb-another" data-feedback-another>${say(l,'Write another note','एक और राय लिखें')}</button></div>
@@ -39,14 +41,14 @@ export function feedbackMarkup(l='en'){
 }
 export function mountFeedback(){
  if(document.querySelector('#innerly-feedback'))return;
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./feedback.css?v=6',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./feedback.css?v=7',import.meta.url).href;document.head.append(css);
  const root=document.createElement('div');root.id='innerly-feedback-widget';document.body.append(root);
  let locale,launcher,dialog,form,motion,hasOpened=false,submitted=false,pendingSubmission=null,sending=false;
  try{hasOpened=sessionStorage.getItem('innerly.feedback.waves-opened.v1')==='1';}catch{}
  function render(){
   const l=document.documentElement.lang==='hi'?'hi':'en';if(locale===l)return;
   const previous=form&&!submitted?{kind:form.elements['feedback-kind'].value,name:form.elements.name.value,email:form.elements.email.value,message:form.elements.message.value}:null;
-  motion?.destroy();locale=l;submitted=false;root.innerHTML=feedbackMarkup(l);launcher=root.querySelector('.ifb-launcher');dialog=root.querySelector('dialog');form=root.querySelector('form');
+  motion?.destroy();if(root.dataset.photoPreview){URL.revokeObjectURL(root.dataset.photoPreview);delete root.dataset.photoPreview;}locale=l;submitted=false;root.innerHTML=feedbackMarkup(l);launcher=root.querySelector('.ifb-launcher');dialog=root.querySelector('dialog');form=root.querySelector('form');
   motion=createFeedbackMotion({dialog,launcher,surface:root.querySelector('.ifb-surface'),energy:root.querySelector('.ifb-energy')});
   if(previous){form.elements['feedback-kind'].value=previous.kind;for(const key of ['name','email','message'])form.elements[key].value=previous[key];}
   launcher.onclick=()=>{render();motion.open(!hasOpened);hasOpened=true;try{sessionStorage.setItem('innerly.feedback.waves-opened.v1','1');}catch{}};
@@ -61,7 +63,11 @@ export function mountFeedback(){
    form.elements[key].addEventListener('blur',()=>{if(form.elements[key].value||form.elements[key].getAttribute('aria-invalid')==='true')fieldError(key,validateFeedback(values(),locale)[key]);});
    form.elements[key].addEventListener('input',()=>{if(form.elements[key].getAttribute('aria-invalid')==='true')fieldError(key,validateFeedback(values(),locale)[key]);counter();});
   }
-  form.addEventListener('change',()=>{const love=form.elements['feedback-kind'].value==='love';root.querySelector('.ifb-testimonial').hidden=!love;if(!love)form.elements.testimonialConsent.checked=false;});
+  form.addEventListener('change',event=>{
+   const love=form.elements['feedback-kind'].value==='love',file=form.elements.photo.files[0];root.querySelector('.ifb-testimonial').hidden=!love;root.querySelector('.ifb-photo-consent').hidden=!(love&&file);if(!love)form.elements.testimonialConsent.checked=false;if(!love||!file)form.elements.testimonialPhotoConsent.checked=false;
+   if(event.target===form.elements.photo){const preview=root.querySelector('.ifb-photo-preview'),status=root.querySelector('.ifb-status');if(root.dataset.photoPreview){URL.revokeObjectURL(root.dataset.photoPreview);delete root.dataset.photoPreview;}if(file){if(file.size>3*1024*1024||!['image/jpeg','image/png','image/webp'].includes(file.type)){form.elements.photo.value='';preview.hidden=true;status.textContent=say(locale,'Choose a JPG, PNG or WebP photo up to 3 MB.','3 MB तक की JPG, PNG या WebP फ़ोटो चुनें।');return;}root.dataset.photoPreview=URL.createObjectURL(file);preview.querySelector('img').src=root.dataset.photoPreview;preview.querySelector('span').textContent=file.name;preview.hidden=false;}else{preview.hidden=true;preview.querySelector('img').removeAttribute('src');}}
+  });
+  root.querySelector('[data-remove-photo]').onclick=()=>{form.elements.photo.value='';form.elements.photo.dispatchEvent(new Event('change',{bubbles:true}));};
   form.addEventListener('submit',async event=>{
    event.preventDefault();if(submitted||sending)return;
    const data=values(),errors=validateFeedback(data,locale);
@@ -70,15 +76,16 @@ export function mountFeedback(){
    if(first){root.querySelector('.ifb-status').textContent=say(locale,'Please check the highlighted fields.','कृपया हाइलाइट किए गए fields ठीक करें।');form.elements[first].focus();return;}
    const button=form.querySelector('[type="submit"]');button.disabled=true;
    sending=true;
-   const payload={kind:form.elements['feedback-kind'].value,...data,testimonialConsent:form.elements['feedback-kind'].value==='love'&&form.elements.testimonialConsent.checked};
-   const signature=JSON.stringify(payload);if(pendingSubmission?.signature!==signature)pendingSubmission={signature,id:crypto.randomUUID()};
-   try{const response=await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:pendingSubmission.id,...payload}),signal:AbortSignal.timeout(15000)});if(!response.ok||!(await response.json()).saved)throw new Error('not_saved');}
+   const photo=form.elements.photo.files[0],love=form.elements['feedback-kind'].value==='love',payload={kind:form.elements['feedback-kind'].value,...data,testimonialConsent:love&&form.elements.testimonialConsent.checked,testimonialPhotoConsent:love&&!!photo&&form.elements.testimonialPhotoConsent.checked};
+   const signature=JSON.stringify([payload,photo&&[photo.name,photo.size,photo.lastModified]]);if(pendingSubmission?.signature!==signature)pendingSubmission={signature,id:crypto.randomUUID()};
+   const body=new FormData();for(const [key,value] of Object.entries({id:pendingSubmission.id,...payload}))body.set(key,String(value));if(photo)body.set('photo',photo);
+   try{const response=await fetch('/api/feedback',{method:'POST',body,signal:AbortSignal.timeout(30000)});if(!response.ok||!(await response.json()).saved)throw new Error('not_saved');}
 
    catch{sending=false;button.disabled=false;root.querySelector('.ifb-status').textContent=say(locale,'Your feedback could not be saved. Your message is still here; please try again.','Feedback सेव नहीं हो सका। आपका संदेश यहीं है; कृपया फिर कोशिश करें।');return;}
    sending=false;pendingSubmission=null;submitted=true;form.hidden=true;root.querySelector('.ifb-success').hidden=false;root.querySelector('.ifb-success').focus({preventScroll:true});
   });
   root.querySelector('[data-feedback-another]').onclick=()=>{
-   submitted=false;pendingSubmission=null;form.reset();root.querySelector('.ifb-testimonial').hidden=true;form.hidden=false;form.querySelector('[type="submit"]').disabled=false;root.querySelector('.ifb-success').hidden=true;
+   submitted=false;pendingSubmission=null;form.reset();root.querySelector('.ifb-testimonial').hidden=true;root.querySelector('.ifb-photo-preview').hidden=true;root.querySelector('.ifb-photo-consent').hidden=true;if(root.dataset.photoPreview){URL.revokeObjectURL(root.dataset.photoPreview);delete root.dataset.photoPreview;}form.hidden=false;form.querySelector('[type="submit"]').disabled=false;root.querySelector('.ifb-success').hidden=true;
    for(const key of ['name','email','message'])fieldError(key,'');root.querySelector('.ifb-status').textContent='';counter();form.elements.name.focus();
   };
  }

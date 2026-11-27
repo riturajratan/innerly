@@ -60,7 +60,7 @@ export function objectFields(value, fields) {
 }
 export function id(value) { return typeof value === 'string' && /^[A-Za-z0-9_-]{8,100}$/.test(value); }
 export async function digest(text) {
-  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  const bytes = await crypto.subtle.digest('SHA-256', typeof text === 'string' ? new TextEncoder().encode(text) : text);
   return [...new Uint8Array(bytes)].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 const encode = bytes => btoa(String.fromCharCode(...bytes));

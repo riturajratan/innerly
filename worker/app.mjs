@@ -1,4 +1,4 @@
-import {feedbackAdmin,publicTestimonials,isFeedbackAdmin} from './feedback-admin.mjs';
+import {adminFeedbackPhoto,feedbackAdmin,publicTestimonials,publicTestimonialPhoto,isFeedbackAdmin} from './feedback-admin.mjs';
 import {deliverFeedback} from './feedback-notifications.mjs';
 import {submitFeedback} from './feedback.mjs';
 import {draftRequest} from './drafts.mjs';
@@ -63,6 +63,8 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
           consentVersion: CONSENT_VERSION, plans: publicPlans(env),
         });
         if (!env.DB) fail(503, 'database_not_configured');
+        const testimonialPhoto=path.match(/^\/api\/testimonial-photo\/([A-Za-z0-9_-]{8,100})$/);
+        if(testimonialPhoto&&request.method==='GET')return await publicTestimonialPhoto(env,testimonialPhoto[1]);
         if(path==='/api/testimonials'&&request.method==='GET')return json(await publicTestimonials(env));
         if (path === '/api/webhooks/clerk' && request.method === 'POST') return json(await signupWebhook(request, env, fetcher, now()));
         if(path==='/api/feedback'&&request.method==='POST'){
@@ -76,6 +78,8 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
         const userId = await authenticateUser(request, env);
         const timestamp = now();
         await rateLimit(env.DB, userId, timestamp);
+        const adminPhoto=path.match(/^\/api\/admin\/feedback-photo\/([A-Za-z0-9_-]{8,100})$/);
+        if(adminPhoto&&request.method==='GET')return await adminFeedbackPhoto(env,userId,adminPhoto[1]);
         if(path==='/api/admin/feedback')return json(await feedbackAdmin(request,env,userId,timestamp));
         if (path.startsWith('/api/billing/')) await rateLimit(env.DB, `billing:${userId}`, timestamp, 6);
         await env.DB.prepare('INSERT OR IGNORE INTO users(id,created_at) VALUES (?,?)').bind(userId, timestamp).run();

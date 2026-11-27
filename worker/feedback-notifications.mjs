@@ -5,7 +5,7 @@ export function feedbackMessage(row){
  const date=new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',dateStyle:'medium',timeStyle:'short'}).format(new Date(row.created_at*1000));
  return {text:'New Know Your Mind feedback',unfurl_links:false,unfurl_media:false,blocks:[
   {type:'header',text:{type:'plain_text',text:'💬 New Know Your Mind feedback',emoji:true}},
-  {type:'section',fields:[field('Type',({idea:'An idea',problem:'An issue',love:'Some love'})[row.kind]),field('Name',row.name),field('Received · IST',date),field('Testimonial permission',row.testimonial_consent?'Yes · review before publishing':'No · private feedback')]},
+  {type:'section',fields:[field('Type',({idea:'An idea',problem:'An issue',love:'Some love'})[row.kind]),field('Name',row.name),field('Received · IST',date),field('Testimonial permission',row.testimonial_consent?'Yes · review before publishing':'No · private feedback'),field('Photo attached',row.photo_key?'Yes · private R2 upload':'No'),field('Photo display permission',row.testimonial_photo_consent?'Yes · review before publishing':'No')]},
   {type:'section',text:field('Message',row.message)},
   {type:'context',elements:[field('Feedback ID',row.id),{type:'plain_text',text:'Saved in D1 · Email available privately in the feedback table',emoji:false}]}
  ]};
