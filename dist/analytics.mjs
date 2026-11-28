@@ -1,7 +1,7 @@
 // GA4 measures consented public-page visits only. No answers, account identifiers,
 // report events, query strings or hash fragments enter the analytics payload.
 export const MEASUREMENT_ID='G-RCRXJ28CSM';
-export const ANALYTICS_CHOICE='knowyourmind-analytics-v2';
+export const ANALYTICS_CHOICE='knowyourmind-analytics-v3';
 
 export function countCheckin(kind){
  if(kind!=='start'&&kind!=='complete')return;
@@ -13,7 +13,7 @@ export function countCheckin(kind){
 const publicPages=new Map([['/','Know Your Mind'],['/how-it-works','How it works'],['/faq','Frequently asked questions'],['/report-preview','Sample report'],['/privacy','Privacy policy'],['/terms','Terms of use'],['/self-reflection-check-in','How to do a self-reflection check-in'],['/journaling-prompts-for-overthinking','Five journaling prompts for overthinking']]);
 export function publicPage(url){const parsed=new URL(url),path=parsed.pathname.replace(/\.html$/,'').replace(/\/$/,'')||'/';return parsed.hostname==='knowyourmind.ai'&&!['view','account','start','new'].some(key=>parsed.searchParams.has(key))&&publicPages.has(path)?{page_location:parsed.origin+path,page_title:publicPages.get(path)}:null;}
 export function installAnalytics({window:win,document:doc,storage}={}){
- let choice;try{storage=storage||win.localStorage;choice=storage.getItem(ANALYTICS_CHOICE)||(storage.getItem('knowyourmind-analytics-v1')==='no'?'no':null);}catch{}
+ let choice;try{storage=storage||win.localStorage;choice=storage.getItem(ANALYTICS_CHOICE)||(storage.getItem('knowyourmind-analytics-v2')==='no'||storage.getItem('knowyourmind-analytics-v1')==='no'?'no':null);}catch{}
  let active=!doc.body.classList.contains('mh-home-page'),loaded=false,lastPage=null,banner;
  const disabled='ga-disable-'+MEASUREMENT_ID;
  win[disabled]=true;
@@ -37,7 +37,7 @@ export function installAnalytics({window:win,document:doc,storage}={}){
  }
  function preferences(){
   banner?.remove();banner=doc.createElement('section');banner.className='analytics-choice';banner.setAttribute('aria-label','Analytics preferences');
-  banner.innerHTML='<div><strong>Help us understand site visits?</strong><p>Optional analytics counts public visits and total check-in starts and completions. Your answers, reports and identity stay private.</p></div><div class="analytics-choice-actions"><button data-analytics="no">No thanks</button><button data-analytics="yes">Allow analytics</button></div>';
+  banner.innerHTML='<div><strong>Help us understand site visits?</strong><p>Optional analytics counts public visits, check-ins and recent anonymous activity. Your answers, reports and identity stay private.</p></div><div class="analytics-choice-actions"><button data-analytics="no">No thanks</button><button data-analytics="yes">Allow analytics</button></div>';
   banner.addEventListener('click',event=>{const value=event.target.closest('[data-analytics]')?.dataset.analytics;if(value)choose(value);});doc.body.append(banner);
  }
  doc.addEventListener('click',event=>{if(event.target.closest('[data-analytics-preferences]'))preferences();});

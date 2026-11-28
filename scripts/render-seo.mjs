@@ -33,7 +33,7 @@ const faq=[
  ['Do I need to take the check-in every day?','No. Choose a pace that is useful to you. The chart adds a point when you save a check-in; it does not invent scores for the days in between.'],
  ['Can I delete a report?','Yes. My reports lets you delete an account report or a report on this browser. These are separate copies. PDFs or other downloads remain until you remove them from your device.'],
  ['Which languages are supported?','The questionnaire offers 20 languages. Report explanations are available in English and Hindi. Where a full report translation is unavailable, the site explains the fallback before you continue.'],
- ['What data goes to Slack or Google Analytics?','Signup alerts contain selected account details such as name, verified email, sign-in method and signup time. Questionnaire answers and report content are excluded. After you allow analytics, Google Analytics measures public-page visits and Know Your Mind counts daily check-in starts and completions separately. It does not receive your answers, reports, name, email or account ID.'],
+ ['What data goes to Slack or Google Analytics?','Signup alerts contain selected account details such as name, verified email, sign-in method and signup time. Questionnaire answers and report content are excluded. After you allow analytics, Google Analytics measures public-page visits and Know Your Mind counts starts, completions and recent anonymous activity separately. It does not receive your answers, reports, name, email or account ID.'],
  ['How do I change my analytics choice?','Use Analytics preferences in the footer. Declining analytics does not stop you from using the check-in or saving reports.'],
 ];
 await writeFile('dist/faq.html',shell('Your questions, answered.','A guide to your check-in, saved reports and privacy.',`<section class="public-faq">${faq.map(([q,a])=>`<details><summary>${q}</summary><p>${a}</p></details>`).join('')}</section><p>Read more in <a href="./how-it-works.html">How it works</a>, our <a href="./privacy.html">Privacy Policy</a> and <a href="./terms.html">Terms of Use</a>.</p>`));
@@ -54,8 +54,8 @@ for(const [file,page] of Object.entries(pages)){
  html=html.replace('</head>',metadata+'</head>');
  html=html.replace(/<footer\b[^>]*>[\s\S]*?<\/footer>/,siteFooterMarkup({app:file==='index.html'}));
  html=html.replace(/<link rel="stylesheet" href="site-footer.css[^"]*">/g,'').replace('</head>','<link rel="stylesheet" href="site-footer.css?v=1"></head>');
- html=html.replace(/<script type="module" src="\/?analytics\.mjs\?v=\d+"><\/script>/g,'');
- if(file!=='index.html')html=html.replace('</body>','<script type="module" src="analytics.mjs?v=2"></script></body>');
+ html=html.replace(/<script type="module" src="\/?analytics\.mjs\?v=[\w-]+"><\/script>/g,'');
+ if(file!=='index.html')html=html.replace('</body>','<script type="module" src="analytics.mjs?v=community-1"></script></body>');
  await writeFile('dist/'+file,html.replace(/[ \t]+$/gm,''));
 }
 // Keep legacy experiments, private account controls and secondary demos out of search.

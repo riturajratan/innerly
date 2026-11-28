@@ -7,7 +7,7 @@ import { clerkConfig } from '../dist/clerk-config.mjs';
 import { authenticate, HttpError, fail, jsonBody, objectFields, id, seconds, encryptReport, decryptReport, digest, rateLimit } from './security.mjs';
 import { publicPlans, billingReady, billingStatus, requireSubscription, razorpay, createSubscription, refreshSubscription, cancelSubscription, webhook } from './billing.mjs';
 import { signupWebhook } from './signup-notifications.mjs';
-import { incrementCheckinTotal, readCheckinTotals } from './checkin-metrics.mjs';
+import { incrementCheckinTotal, readCheckinTotals, recordCheckinPresence, readPublicCheckinStats, clearInactiveCheckins } from './checkin-metrics.mjs';
 
 const languages = new Set(['en','hi','zh','es','fr','ar','bn','pt','ru','ur','id','de','ja','mr','te','tr','ta','vi','ko','it']);
 export const CONSENT_VERSION = 'cloud-reports-v1';
@@ -34,7 +34,10 @@ async function ownedReport(db, userId, reportId) {
 
 export function createApp({ authenticateUser = authenticate, fetcher = fetch, now = seconds } = {}) {
   return {
-    async scheduled(event,env,ctx){await deliverFeedback(env,fetcher,now());},
+    async scheduled(event,env,ctx){
+      const timestamp=now();
+      await Promise.all([deliverFeedback(env,fetcher,timestamp),clearInactiveCheckins(env.DB,timestamp)]);
+    },
     async fetch(request, env, ctx) {
       const path = new URL(request.url).pathname;
       try {
@@ -66,6 +69,17 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
         if (!env.DB) fail(503, 'database_not_configured');
         if (request.method === 'POST' && /^\/api\/metrics\/checkin\/(start|complete)$/.test(path)) {
           return await incrementCheckinTotal(request, env, now());
+        }
+        if (request.method === 'POST' && path === '/api/metrics/checkin/presence') {
+          return await recordCheckinPresence(request, env, now());
+        }
+        if (request.method === 'GET' && path === '/api/checkin-stats') {
+          const stats = await readPublicCheckinStats(env.DB, now());
+          return new Response(JSON.stringify(stats), {headers:{
+            'Content-Type':'application/json; charset=utf-8',
+            'Cache-Control':'public, max-age=30',
+            'X-Content-Type-Options':'nosniff'
+          }});
         }
         const testimonialPhoto=path.match(/^\/api\/testimonial-photo\/([A-Za-z0-9_-]{8,100})$/);
         if(testimonialPhoto&&request.method==='GET')return await publicTestimonialPhoto(env,testimonialPhoto[1]);

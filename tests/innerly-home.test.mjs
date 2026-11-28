@@ -40,8 +40,11 @@ test('mental wellbeing homepage has a clear start path, honest scope and indepen
   assert.equal((html.match(/data-home-topic=/g)||[]).length,4);
   assert.equal((html.match(/data-preview-answer=/g)||[]).length,5);
   assert.match(html,/href="report-preview.html"/);
+  assert.ok(html.indexOf('mh-report-preview') < html.indexOf('data-home-testimonials'));
+  assert.ok(html.indexOf('data-home-testimonials') < html.indexOf('id="thought-waves"'));
+  assert.match(html,/data-community-stats hidden/);
   assert.match(html,/mh-report-preview/);assert.match(html,/SAMPLE REPORT|उदाहरण रिपोर्ट/);
   assert.match(html,/20/);assert.match(html,/English and Hindi|English और हिन्दी/);
-  assert.doesNotMatch(html,/country-select|data-country|accuracy rate|million|testimonials|data-skip=/);
+  assert.doesNotMatch(html,/country-select|data-country|accuracy rate|million|data-skip=/);
  }
 });

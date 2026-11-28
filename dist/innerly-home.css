@@ -256,3 +256,13 @@ body.mh-home-page{background:#fff;color:#172c50}
 .in-topic-tabs button:focus-visible{outline:3px solid var(--topic-ink);outline-offset:4px}
 
 .in-hero-actions a.in-secondary{display:inline-flex;align-items:center;justify-content:center;gap:9px;text-decoration:underline;text-underline-offset:4px}
+
+.in-community-stats{max-width:1160px;margin:20px auto 0;padding:16px 20px;border:1px solid #e2e8f0;border-radius:16px;background:#f7f9fc;text-align:center}
+.in-community-stats [hidden]{display:none}
+.in-community-stats ul{display:flex;justify-content:center;flex-wrap:wrap;gap:10px 36px;margin:0;padding:0;list-style:none}
+.in-community-stats li{display:flex;align-items:baseline;justify-content:center;gap:7px;color:#405675;font-size:14px}
+.in-community-stats strong{color:#263f62;font-size:21px;font-variant-numeric:tabular-nums}
+.in-community-stats p{margin:4px 0 0;font-size:12px}
+.in-community-stats+.in-report-section{margin-top:clamp(48px,7vw,82px)}
+[data-home-testimonials]+.in-thought-section{margin-top:clamp(54px,7vw,90px)}
+.in-home .in-charity-label{margin:14px 0 0;text-align:center;color:#566a79;font-size:13px}

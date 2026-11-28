@@ -1,17 +1,19 @@
-import {mountTestimonials} from './testimonials.mjs?v=photo-2';
+import {mountTestimonials} from './testimonials.mjs?v=community-1';
 import './header-layout.mjs?v=1';
 import {createCheckinSync} from './checkin-sync.mjs';
-import {countCheckin} from './analytics.mjs?v=2';
+import {countCheckin} from './analytics.mjs?v=community-1';
+import {mountCommunityStats,pulseCheckinActivity} from './community-stats.mjs?v=1';
 import {createCloudApi} from './cloud-api.mjs?v=2';
 import {createAccountReportStore} from './account-report-store.mjs?v=1';
 import {accountHistoryMarkup} from './report-history-view.mjs?v=2';
 import {createReportExporter} from './report-export.mjs?v=brand-1';
+import {openReportShare,shareReportMarkup} from './report-share.mjs?v=1';
 import {icon} from './report-concept-view.mjs?v=highlights-1';
 import {mountThoughtWaves} from './planning.mjs?v=14';
 import {previewResponseDetail} from './response-graphs.mjs?v=report-3';
 import {sampleReportMarkup} from './sample-report-view.mjs?v=brand-1';
 import {sampleReportData} from './sample-report.mjs?v=report-3';
-import {personalReportMarkup,usesPersonalReport} from './personal-report-view.mjs?v=highlights-1';
+import {personalReportMarkup,usesPersonalReport} from './personal-report-view.mjs?v=share-1';
 import {mountPersonalReport} from './personal-report.mjs?v=brand-1';
 import {INNERLY_V1_VERSION,INNERLY_V1_STORAGE,readWorkbookReports,workbookQuestions,workbookChoices} from './innerly-v1-model.mjs?v=storage-1';
 import {saveLocalReport,removeLocalReport} from './report-storage.mjs?v=1';
@@ -23,10 +25,10 @@ import {topicReading} from './reflection60-views.mjs?v=brand-1';
 import {LANGUAGE_STORAGE,resolveQuestionLanguage,languageDirection,languageName,displayLanguage,questionUI,wellbeingLocales,coverageNotice,responseState,growthCaption} from './mental-language.mjs?v=mh-14';
 import {DRAFT_STORAGE,readDraft,makeDraft,resumeQuestion,nextContinuousQuestion} from './checkin-draft.mjs?v=mh-14';
 import {feelingReading} from './feeling-explorer.mjs?v=mh-14';
-import {bindHomeInteractions} from './innerly-home.mjs?v=flow-1';
+import {bindHomeInteractions} from './innerly-home.mjs?v=community-1';
 import {MENTAL_STORAGE,readSavedCheckins} from './mental-model.mjs?v=mh-14';
 import {QUESTION_TOTAL,completedCount,completeFlow as isComplete,validQuestionResponse as validResponse,makeFlowReport as makeCheckin,nextFlowQuestion as nextUnanswered,growthState} from './checkin-flow.mjs?v=mh-14';
-import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=flow-1';
+import {esc,say,mentalHomeMarkup,themeMarkup,sampleReport,quizMarkup,reportMarkup,screeningDetail,screenBars,responseBars,historyChart} from './mental-views.mjs?v=community-1';
 import {clerkPublishableKey} from './auth-config.mjs?v=auth-1';
 import {createClerkAuth} from './clerk-auth.mjs?v=auth-1';
 import {rememberAuthReturn,takeAuthReturn,AUTH_RETURN_STORAGE} from './auth-continuation.mjs?v=auth-1';
@@ -62,6 +64,7 @@ function autoSaveEnabled(){return auth.state.status==='signed-in';}
 
 const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
 let thoughtWaves=null;
+let stopCommunityStats=null;
 let personalReport=null;
 let paused=false;const motion=()=>paused||reduce.matches?'instant':'smooth';
 function cancelGuide(){clearTimeout(guideTimer);guideTimer=null;}
@@ -89,6 +92,7 @@ function render(focus=true){
  window.dispatchEvent(new CustomEvent('knowyourmind:view',{detail:view}));
  document.querySelector('meta[name=robots]')?.setAttribute('content',view==='home'?'index,follow':'noindex,nofollow');
  thoughtWaves?.destroy();thoughtWaves=null;
+ stopCommunityStats?.();stopCommunityStats=null;
  personalReport?.destroy();personalReport=null;
  const showPersonalReport=view==='report'&&!reportDemo&&usesPersonalReport(report);
  if(showPersonalReport){
@@ -108,7 +112,10 @@ function render(focus=true){
  document.body.classList.toggle('mh-in-checkin',view==='quiz');document.body.classList.toggle('mh-home-page',view==='home');
  document.querySelector('#mh-home').setAttribute('aria-current',view==='home'?'page':'false');document.querySelector('#mh-history').setAttribute('aria-current',view==='history'||view==='report'?'page':'false');
  if(view==='home'){app.innerHTML=mentalHomeMarkup({language});bindHomeInteractions(app,language,localizeStartButtons);thoughtWaves=mountThoughtWaves(app.querySelector('[data-thought-waves]'),{pagePaused:paused,strongerStrokes:true});if(answers.some(v=>v!==null)&&!report)app.insertAdjacentHTML('afterbegin',`<div class="mh-resume-banner"><span><strong>${completedCount(answers)} / ${QUESTION_TOTAL}</strong> · ${say(language,'Ready when you are. Continue where you left off.','जब चाहें वहीं से जारी रखें जहाँ छोड़ा था।')}</span><div><button class="mh-secondary" data-action="resume" lang="${language}" dir="${languageDirection(language)}">${qt('Continue test','Continue my check-in','अपना check-in जारी रखें')} →</button><button class="mh-link" data-action="discard" lang="${language}" dir="${languageDirection(language)}">${qt('removeDraft','Remove draft','Draft हटाएँ')}</button></div></div>`);}
- if(view==='home')mountTestimonials(app,language);
+ if(view==='home'){
+  mountTestimonials(app,language);
+  stopCommunityStats=mountCommunityStats(app,language);
+ }
  if(view==='quiz'){app.innerHTML=quizMarkup(answers,language,draftSynced);draftStatus();setActiveQuestion(resumeQuestion(answers)??0);}
  if(view==='report'){
   app.innerHTML=showPersonalReport?personalReportMarkup(report,reportHistory(),displayLanguage(language)):reportDemo?sampleReportMarkup({report,history:saved,language,preset:samplePreset,view:reportView,selection:reportSelection}):reportMarkup(report,reportHistory(),language,reportView,{...reportSelection,unlocked:previewUnlockedReports.has(report.id),preview:previewSelection});
@@ -204,6 +211,7 @@ function updateGrowth(){const s=growthState(answers),tree=app.querySelector('#mh
 function recordAnswer(i,value){
  if(!validResponse(value,i))return;
  const wasAnswered=validResponse(answers[i],i);answers[i]=value;
+ pulseCheckinActivity();
  app.querySelector(`#mh-q-${i}`)?.classList.add('answered');
  const count=answers.filter((v,j)=>validResponse(v,j)).length;app.querySelector('#mh-progress').value=count;app.querySelector('#mh-progress-label').textContent=`${count} / ${QUESTION_TOTAL}`;app.querySelector('#mh-form-message').textContent='';app.querySelector('[data-action="break"]').disabled=false;updateGrowth();cancelGuide();persistDraft();draftStatus();
  if(wasAnswered||!pointerInput)return;
@@ -375,7 +383,12 @@ app.addEventListener('click',e=>{
  if(button.dataset.historyPoint){const r=button.dataset.historyPoint===report.id?report:saved.find(r=>r.id===button.dataset.historyPoint);if(r){showDialog(`<h2>${say(language,'A check-in snapshot','Check-in की झलक')}</h2><p>${new Date(r.createdAt).toLocaleDateString(language)} · PHQ-4 ${r.scores.total}/12</p>${screenBars(r.scores,displayLanguage(language))}<p>${say(language,'This describes that two-week period, not a prediction.','यह उस दो-सप्ताह की अवधि के बारे में है, आगे का अनुमान नहीं।')}</p>`);}return;}
  if(button.dataset.open){cloudStatus='';report=saved.find(r=>r.id===button.dataset.open);if(report){language=report.language;view='report';reportView='snapshot';reportSelection={dimension:'dimension-1',question:0};render();}return;}
  if(button.dataset.delete){const id=button.dataset.delete;showDialog(`<h2>${say(language,'Delete this saved check-in?','यह सेव check-in हटाएँ?')}</h2><p>${say(language,'This removes its answers and report from this browser. Downloaded copies are not affected.','इसके जवाब और report इस browser से हटेंगे। Download की गई copies नहीं हटेंगी।')}</p><button class="mh-primary" id="mh-delete-confirm">${say(language,'Delete this check-in','यह check-in हटाएँ')}</button>`);dialog.querySelector('#mh-delete-confirm').onclick=()=>{try{const key=reportStorage(saved.find(r=>r.id===id));updateSavedReports(key,removeLocalReport(localStorage,key,id));if(report?.id===id){report=null;answers=Array(QUESTION_TOTAL).fill(null);draftEnabled=false;draftSynced=false;}view='history';closeDialog();render();}catch{dialog.querySelector('p').textContent=say(language,'Deletion failed. Please try again.','हटाया नहीं जा सका। फिर कोशिश करें।');}};return;}
- switch(button.dataset.action){case'dimension-overview':{const target=app.querySelector(`[data-infographic][data-workbook-dimension="${reportSelection.dimension}"]`);target?.focus({preventScroll:true});target?.scrollIntoView({behavior:motion(),block:'center'});break;}case'report-offer':showReportOffer();break;case'unlock-preview':unlockReportPreview();break;case'begin':begin();break;case'new-test':newTest();break;case'history':goHistory();break;case'home':view='home';render();break;case'resume':resume();break;case'break':takeBreak();break;case'discard':discardDraft();break;case'review':reviewAnswers();break;case'unanswered':cancelGuide();goToQuestion(resumeQuestion(answers),'instant');break;case'finish':finish();break;case'preview':{const p=app.querySelector('#mh-report-preview');p.tabIndex=-1;p.focus({preventScroll:true});p.scrollIntoView({behavior:motion(),block:'start'});break;}case'save':saveReport();break;case'print':if(!reportExporter.open(button))window.print();break;}
+ switch(button.dataset.action){case'dimension-overview':{const target=app.querySelector(`[data-infographic][data-workbook-dimension="${reportSelection.dimension}"]`);target?.focus({preventScroll:true});target?.scrollIntoView({behavior:motion(),block:'center'});break;}case'report-offer':showReportOffer();break;case'unlock-preview':unlockReportPreview();break;case'begin':begin();break;case'new-test':newTest();break;case'history':goHistory();break;case'home':view='home';render();break;case'resume':resume();break;case'break':takeBreak();break;case'discard':discardDraft();break;case'review':reviewAnswers();break;case'unanswered':cancelGuide();goToQuestion(resumeQuestion(answers),'instant');break;case'finish':finish();break;case'preview':{const p=app.querySelector('#mh-report-preview');p.tabIndex=-1;p.focus({preventScroll:true});p.scrollIntoView({behavior:motion(),block:'start'});break;}case'save':saveReport();break;case'share-report':{
+  const l=displayLanguage(language);
+  showDialog(shareReportMarkup(l));
+  openReportShare(dialog,app,{language:l,onPDF:()=>{closeDialog();if(!reportExporter.open(button))window.print();}});
+  break;
+ }case'print':if(!reportExporter.open(button))window.print();break;}
 });
 dialog.addEventListener('click',e=>{const jump=e.target.closest('[data-jump]');if(jump){closeDialog();goToQuestion(Number(jump.dataset.jump),'instant');return;}if(e.target.closest('[data-close]'))closeDialog();});dialog.addEventListener('cancel',()=>lastFocus?.focus?.());
 function goHome(){if(reportDemo){const next=new URL('./',location.href);next.searchParams.set('lang',language);location.assign(next.href);return;}view='home';render();}

@@ -40,3 +40,12 @@
  .mh-personal-report .personal-action-buttons>:is(button,a){flex:0 0 auto;white-space:nowrap;min-height:44px}
 }
 @media print{.mh-personal-report .personal-report-actions{display:none!important}}
+
+.report-share-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.report-share-actions [hidden]{display:none}
+.report-share-actions :is(a,button){min-height:44px;font-size:14px;padding:8px 12px}
+.report-share-private{border-block:1px solid #e2e9ed;padding:10px 0}
+.report-share-private summary{font-weight:700;cursor:pointer;padding:7px 0}
+.report-share-private label{display:block;margin:8px 0;font-size:14px}
+#report-share-text{box-sizing:border-box;width:100%;padding:10px;border:1px solid #c8d7e2;border-radius:8px;font:inherit;font-size:16px;resize:vertical}
+.report-share-status:empty{display:none}

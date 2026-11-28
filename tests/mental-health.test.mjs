@@ -53,7 +53,7 @@ test('reports distinguish translated screens, context, fictional examples and re
 });
 test('public entry is mental-health focused without legacy personality navigation',async()=>{
  const html=await readFile(new URL('../dist/index.html',import.meta.url),'utf8');
- assert.match(html,/mental-app\.mjs/);assert.match(html,/36 questions/);assert.doesNotMatch(html,/href="personality\.html"/);assert.doesNotMatch(html,/accuracy rate|testimonials|country-selector/);
+ assert.match(html,/mental-app\.mjs/);assert.match(html,/36 questions/);assert.doesNotMatch(html,/href="personality\.html"/);assert.doesNotMatch(html,/accuracy rate|country-selector/);
  const app=await readFile(new URL('../dist/mental-app.mjs',import.meta.url),'utf8');assert.doesNotMatch(app,/XMLHttpRequest|sendBeacon/);
  // Optional account sync now uses an authenticated, consent-gated API. The
  // questionnaire calculations themselves must remain fully on-device.
