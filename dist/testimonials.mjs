@@ -2,7 +2,6 @@ const owner={
  name:'Rituraj',
  message:'I really liked how Know Your Mind helps you understand what you’re feeling. It feels good to see your thoughts reflected clearly and understand why you feel the way you do.',
  photoUrl:'/assets/rituraj-profile.png',
- owner:true,
 };
 
 function portrait(item){
@@ -59,11 +58,6 @@ export async function mountTestimonials(root,language='en'){
   }else fallback();
   const byline=document.createElement('span');
   byline.textContent=item.name;
-  if(item.owner){
-   const role=document.createElement('small');
-   role.textContent=language==='hi'?'साइट के निर्माता':'Site creator';
-   byline.append(role);
-  }
   caption.append(avatar,byline);
   card.append(caption,quote);
   grid.append(card);

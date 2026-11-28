@@ -180,7 +180,6 @@
 .kym-testimonials .kym-testimonial-grid:not(.is-single):has(> :nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}
 .kym-testimonials .kym-testimonial-card{display:flex;flex-direction:column;gap:16px;padding:24px}
 .kym-testimonials .kym-testimonial-card figcaption{line-height:1.35}
-.kym-testimonial-card figcaption small{display:block;font-weight:500;color:#526987}
 .kym-testimonials .kym-testimonial-avatar{width:64px;height:64px;flex:none}
 .kym-testimonials .kym-testimonial-card blockquote{margin:0;font-size:clamp(17px,1.65vw,21px);line-height:1.6}
 @media(max-width:760px){

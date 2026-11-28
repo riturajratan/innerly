@@ -1,4 +1,4 @@
-import {mountTestimonials} from './testimonials.mjs?v=community-1';
+import {mountTestimonials} from './testimonials.mjs?v=community-2';
 import './header-layout.mjs?v=1';
 import {createCheckinSync} from './checkin-sync.mjs';
 import {countCheckin} from './analytics.mjs?v=community-1';
