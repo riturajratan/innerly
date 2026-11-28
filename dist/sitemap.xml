@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://knowyourmind.ai/</loc><lastmod>2026-11-26</lastmod></url>
+  <url><loc>https://knowyourmind.ai/</loc><lastmod>2026-11-28</lastmod></url>
   <url><loc>https://knowyourmind.ai/how-it-works</loc><lastmod>2026-11-26</lastmod></url>
-  <url><loc>https://knowyourmind.ai/faq</loc><lastmod>2026-11-26</lastmod></url>
-  <url><loc>https://knowyourmind.ai/report-preview</loc><lastmod>2026-11-26</lastmod></url>
-  <url><loc>https://knowyourmind.ai/privacy</loc><lastmod>2026-11-26</lastmod></url>
+  <url><loc>https://knowyourmind.ai/faq</loc><lastmod>2026-11-28</lastmod></url>
+  <url><loc>https://knowyourmind.ai/report-preview</loc><lastmod>2026-11-28</lastmod></url>
+  <url><loc>https://knowyourmind.ai/privacy</loc><lastmod>2026-11-28</lastmod></url>
   <url><loc>https://knowyourmind.ai/terms</loc><lastmod>2026-11-26</lastmod></url>
+  <url><loc>https://knowyourmind.ai/self-reflection-check-in</loc><lastmod>2026-11-28</lastmod></url>
+  <url><loc>https://knowyourmind.ai/journaling-prompts-for-overthinking</loc><lastmod>2026-11-28</lastmod></url>
 </urlset>

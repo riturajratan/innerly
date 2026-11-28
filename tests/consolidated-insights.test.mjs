@@ -131,7 +131,9 @@ test('brief summary and exact answer metrics precede compact strength and growth
   assert.ok(html.indexOf('cs-metrics')<html.indexOf('id="cs-patterns"'));
   assert.ok(html.indexOf('id="cs-patterns"')<html.indexOf('id="cs-analytics"'));
   assert.ok(html.indexOf('id="cs-analytics"')<html.indexOf('cs-guidance-details'));
-  assert.doesNotMatch(html,/cs-highlights|donut-wrap/);
+  assert.doesNotMatch(html,/donut-wrap/);
+  assert.match(html,/A strength to lean on.*A pattern to notice.*One small next step/);
+  assert.ok(html.indexOf('cs-highlights')<html.indexOf('cs-response-mix'));
   for(const category of ['support','focus','varies']){
    const count=snapshot.counts[category],percent=Math.round(count/36*100);
    assert.ok(html.includes(`${sample?'data-filter':'data-personal-group'}="${category}"`));

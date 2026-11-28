@@ -1,4 +1,4 @@
-import {createFeedbackMotion} from './feedback-motion.mjs?v=3';
+import {createFeedbackMotion} from './feedback-motion.mjs?v=4';
 const say=(l,en,hi)=>l==='hi'?hi:en;
 export const FEEDBACK_STORAGE='innerly.feedback.pending.v1';
 export function validateFeedback({name='',email='',message=''}={},l='en'){
@@ -41,9 +41,9 @@ export function feedbackMarkup(l='en'){
 }
 export function mountFeedback(){
  if(document.querySelector('#innerly-feedback'))return;
- const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./feedback.css?v=7',import.meta.url).href;document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./feedback.css?v=8',import.meta.url).href;document.head.append(css);
  const root=document.createElement('div');root.id='innerly-feedback-widget';document.body.append(root);
- let locale,launcher,dialog,form,motion,hasOpened=false,submitted=false,pendingSubmission=null,sending=false;
+ let locale,launcher,dialog,form,motion,returnFocus,hasOpened=false,submitted=false,pendingSubmission=null,sending=false;
  try{hasOpened=sessionStorage.getItem('innerly.feedback.waves-opened.v1')==='1';}catch{}
  function render(){
   const l=document.documentElement.lang==='hi'?'hi':'en';if(locale===l)return;
@@ -52,6 +52,7 @@ export function mountFeedback(){
   motion=createFeedbackMotion({dialog,launcher,surface:root.querySelector('.ifb-surface'),energy:root.querySelector('.ifb-energy')});
   if(previous){form.elements['feedback-kind'].value=previous.kind;for(const key of ['name','email','message'])form.elements[key].value=previous[key];}
   launcher.onclick=()=>{render();motion.open(!hasOpened);hasOpened=true;try{sessionStorage.setItem('innerly.feedback.waves-opened.v1','1');}catch{}};
+  dialog.addEventListener('close',()=>{returnFocus?.focus({preventScroll:true});returnFocus=null;});
   root.querySelector('.ifb-close').onclick=()=>motion.close();
   root.querySelector('[data-feedback-done]').onclick=()=>motion.close();
   dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)motion.close();}});
@@ -89,6 +90,14 @@ export function mountFeedback(){
    for(const key of ['name','email','message'])fieldError(key,'');root.querySelector('.ifb-status').textContent='';counter();form.elements.name.focus();
   };
  }
- render();new MutationObserver(()=>{if(!dialog.open)render();}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+ render();
+ document.addEventListener('click',event=>{
+  const trigger=event.target.closest('[data-open-feedback]');
+  if(!trigger||dialog.open)return;
+  render();
+  returnFocus=trigger;
+  motion.open(false,true);
+ });
+ new MutationObserver(()=>{if(!dialog.open)render();}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 }
 if(typeof document!=='undefined')mountFeedback();

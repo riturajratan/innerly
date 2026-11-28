@@ -46,10 +46,10 @@ export function createFeedbackMotion({dialog,launcher,surface,energy}){
   animations.push(energy.querySelector('.ifb-rising-thoughts').animate(ringFrames,{duration:duration*.62,easing:'linear',fill:'both'}));
   animations.push(energy.querySelector('.ifb-energy-source').animate([{opacity:1},{opacity:1,offset:.6},{opacity:0}],{duration:duration*.62,fill:'both'}));
  }
- function open(first=false){
+ function open(first=false,instant=false){
   if(phase!=='closed')return;
   surface.scrollTop=0;dialog.showModal();launcher.setAttribute('aria-expanded','true');phase='opening';dialog.dataset.motion='opening';
-  if(!motionAllowed()){settle();return;}
+  if(instant||!motionAllowed()){settle();return;}
   const duration=first?1600:1450,geometry=frames();
   const note=surface.querySelector('.ifb-note'),paper=surface.querySelector('.ifb-paper');
   const mobile=getComputedStyle(note).display==='none',spine=mobile?0:surface.querySelector('.ifb-note').getBoundingClientRect().width;

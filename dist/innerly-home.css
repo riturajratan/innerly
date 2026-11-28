@@ -254,3 +254,5 @@ body.mh-home-page{background:#fff;color:#172c50}
 .in-topic-tabs button[aria-pressed=true]{background:var(--topic-tint);border-color:var(--topic-border);color:var(--topic-ink);box-shadow:0 3px 10px color-mix(in srgb,var(--topic-border) 20%,transparent)}
 .in-topic-tabs button[aria-pressed=true] svg,.in-topic-tabs button:hover svg{color:var(--topic-ink)}
 .in-topic-tabs button:focus-visible{outline:3px solid var(--topic-ink);outline-offset:4px}
+
+.in-hero-actions a.in-secondary{display:inline-flex;align-items:center;justify-content:center;gap:9px;text-decoration:underline;text-underline-offset:4px}

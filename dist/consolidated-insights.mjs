@@ -21,6 +21,24 @@ export function consolidatedDetails(snapshot){
  return {strengths:acrossAreas(byClarity(strengths),4),attention:acrossAreas(byClarity(growth.length?growth:sometimes),4),priorities,comparison,mode:growth.length?'growth':sometimes.length?'explore':'maintain'};
 }
 
+export function reportHighlightsMarkup(snapshot,{language='en',escapeHTML:esc}){
+ const t=(en,hi)=>language==='hi'?hi:en;
+ const {strengths,attention,priorities}=consolidatedDetails(snapshot);
+ const strength=strengths[0],pattern=attention[0],step=priorities[0];
+ const cards=[
+  [t('A strength to lean on','एक मजबूती'),strength
+   ? answerInterpretation(strength,language).title
+   : t('This check-in may not capture every strength.','इस झलक में हर मजबूती नहीं दिखती।')],
+  [t('A pattern to notice','ध्यान देने लायक पैटर्न'),pattern
+   ? answerInterpretation(pattern,language).title
+   : t('Notice when your helpful habits are easiest to use.','ध्यान दें कि मददगार आदतें कब आसानी से अपना पाते हैं।')],
+  [t('One small next step','एक छोटा अगला कदम'),step
+   ? visualInsight(step,language).action
+   : t('Notice one moment you handled well this week.','इस हफ़्ते का कोई पल याद करें जिसे आपने अच्छी तरह सँभाला।')],
+ ];
+ return `<dl class="cs-highlights">${cards.map(([label,value])=>`<div><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>`;
+}
+
 // A short synthesis of all six areas. These are editorial selections by answer
 // count, not scored traits or a severity ranking. Never infer an absent group.
 export function overallReportSummary(snapshot,language='en'){

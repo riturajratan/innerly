@@ -7,6 +7,7 @@ import { clerkConfig } from '../dist/clerk-config.mjs';
 import { authenticate, HttpError, fail, jsonBody, objectFields, id, seconds, encryptReport, decryptReport, digest, rateLimit } from './security.mjs';
 import { publicPlans, billingReady, billingStatus, requireSubscription, razorpay, createSubscription, refreshSubscription, cancelSubscription, webhook } from './billing.mjs';
 import { signupWebhook } from './signup-notifications.mjs';
+import { incrementCheckinTotal, readCheckinTotals } from './checkin-metrics.mjs';
 
 const languages = new Set(['en','hi','zh','es','fr','ar','bn','pt','ru','ur','id','de','ja','mr','te','tr','ta','vi','ko','it']);
 export const CONSENT_VERSION = 'cloud-reports-v1';
@@ -63,6 +64,9 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
           consentVersion: CONSENT_VERSION, plans: publicPlans(env),
         });
         if (!env.DB) fail(503, 'database_not_configured');
+        if (request.method === 'POST' && /^\/api\/metrics\/checkin\/(start|complete)$/.test(path)) {
+          return await incrementCheckinTotal(request, env, now());
+        }
         const testimonialPhoto=path.match(/^\/api\/testimonial-photo\/([A-Za-z0-9_-]{8,100})$/);
         if(testimonialPhoto&&request.method==='GET')return await publicTestimonialPhoto(env,testimonialPhoto[1]);
         if(path==='/api/testimonials'&&request.method==='GET')return json(await publicTestimonials(env));
@@ -78,6 +82,10 @@ export function createApp({ authenticateUser = authenticate, fetcher = fetch, no
         const userId = await authenticateUser(request, env);
         const timestamp = now();
         await rateLimit(env.DB, userId, timestamp);
+        if (request.method === 'GET' && path === '/api/admin/checkin-metrics') {
+          if (!isFeedbackAdmin(env,userId)) fail(403, 'admin_required');
+          return json(await readCheckinTotals(env.DB, timestamp));
+        }
         const adminPhoto=path.match(/^\/api\/admin\/feedback-photo\/([A-Za-z0-9_-]{8,100})$/);
         if(adminPhoto&&request.method==='GET')return await adminFeedbackPhoto(env,userId,adminPhoto[1]);
         if(path==='/api/admin/feedback')return json(await feedbackAdmin(request,env,userId,timestamp));

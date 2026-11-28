@@ -1,5 +1,5 @@
 import {workbookReportPreview} from './innerly-v1-preview.mjs?v=report-4';
-import {innerlyHome} from './innerly-home.mjs?v=brand-1';
+import {innerlyHome} from './innerly-home.mjs?v=flow-1';
 import {INNERLY_V1_VERSION,questionnaireLocale} from './innerly-v1-model.mjs?v=mh-14';
 import {workbookReportMarkup,workbookSample} from './innerly-v1-views.mjs?v=brand-1';
 import {REFLECTION60_VERSION} from './reflection60-model.mjs';
@@ -39,16 +39,15 @@ export function themeMarkup(key='stress',l='en'){
 }
 export function mentalHomeMarkup({language='en'}={}){return innerlyHome({language,mission:innerlyMission[displayLanguage(language)]});}
 export function quizMarkup(answers,l='en',savedDraft=false){
- const done=completedCount(answers),percent=growthState(answers).percent,t=(key,en,hi)=>questionUI(l,key,en,hi),g=questionnaireLocale(l);
+ const done=completedCount(answers),percent=growthState(answers).percent,t=(key,en,hi)=>questionUI(l,key,en,hi);
  return `<section class="mh-checkin"><div class="mh-quiz-top"><div><p class="mh-kicker">${t('Questions','YOUR PRIVATE CHECK-IN','आपका निजी CHECK-IN')}</p><h1>${t('A little closer to yourself.','A little closer to yourself.','खुद के थोड़ा और करीब।')}</h1></div><button class="mh-link" data-action="home">${t('Explore','Back home','होम पर जाएँ')}</button></div>
  <div class="mh-progress"><div class="mh-progress-layout">${growthMarkup(answers,l)}<div class="mh-progress-summary"><strong id="mh-progress-percent">${percent}<span>%</span></strong><span>${t('complete','complete','पूरा')}</span><small id="mh-progress-label">${done} / ${QUESTION_TOTAL}</small></div></div><progress id="mh-progress" value="${done}" max="${QUESTION_TOTAL}" aria-label="${t('completed','Questions completed','पूरे हुए सवाल')}" aria-valuetext="${percent}% · ${done} / ${QUESTION_TOTAL}"></progress><div class="mh-progress-tools"><button data-action="review" class="mh-link">${t('Questions','Review answers','जवाब देखें')}</button><button data-action="break" class="mh-pause-button" ${done?'':'disabled'}>${t('Save & take a break','Save & take a break','सेव करें और विराम लें')} <span aria-hidden="true">Ⅱ</span></button></div><span class="mh-draft-status" id="mh-draft-status" role="status">${savedDraft?t('saved','Saved in this browser','इसी browser में सेव है'):''}</span></div>
- <p class="mh-flow-help">${batchCopy(l).help}</p><p class="mh-reflection-notice">${esc(g.notice)}</p>
- <p class="mh-footnote">${say(l,'When signed in, your progress and completed reports save automatically to your account. Find them in My reports.','साइन इन होने पर जवाब और पूरी reports अपने आप खाते में सेव होती हैं। My reports में खोलें।')}</p>
+ <p class="mh-flow-help">${['en','hi'].includes(l)?say(l,'Choose how often each statement describes you.','चुनें कि हर बात आप पर कितनी बार लागू होती है।'):batchCopy(l).help}</p>
  <div class="mh-question-list">${questionBank.map((q,i)=>{const reflection=true;return `<fieldset id="mh-q-${i}" class="mh-question${validQuestionResponse(answers[i],i)?' answered':''}"><legend><span class="mh-q-number">${i+1}.</span> ${esc(q.texts[l])}</legend>
  ${reflection?`<div class="mh-scale-ends" aria-hidden="true"><span>${esc(questionChoices(i,l)[0])}</span><span>${esc(questionChoices(i,l)[4])}</span></div>`:''}
  <div class="mh-options${reflection?' mh-reflection-options':q.options?' mh-context-options':''}">${questionChoices(i,l).map((text,v)=>`<label><input type="radio" name="mental-${i}" value="${v}" data-answer="${i}" ${answers[i]===v?'checked':''}><span class="mh-choice-dot" aria-hidden="true"></span><span class="mh-frequency-caption">${esc(text)}</span></label>`).join('')}</div></fieldset>`;}).join('')}</div>
  <p class="mh-form-message" id="mh-form-message" role="status"></p><div class="mh-quiz-actions"><button class="mh-secondary" data-action="unanswered">${t('Answer remaining questions →','Go to an unanswered question','बाकी सवाल पर जाएँ')} ↑</button><button class="mh-primary" data-action="finish">${t('See results','See my report','मेरी report देखें')} →</button></div>
- <p class="mh-footnote">${esc(coverageNotice(l))}</p></section>`;
+ <p class="mh-footnote">${esc(questionnaireLocale(l).notice)} ${esc(coverageNotice(l))}</p></section>`;
 }
 export function reflectionMarkup(report,l='en'){
  if(!report.reflection)return '';const scores=reflectionScores(report.reflection.answers),traits=l==='hi'?hindiTraits:reflectionTraits;

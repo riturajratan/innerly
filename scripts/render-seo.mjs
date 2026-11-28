@@ -1,3 +1,4 @@
+import {guides} from './reflection-guides.mjs';
 import {siteFooterMarkup} from './site-footer.mjs';
 import {readFile,writeFile,readdir} from 'node:fs/promises';
 import {siteHeaderMarkup} from '../dist/site-header-view.mjs';
@@ -10,6 +11,7 @@ const pages={
  'privacy.html':{path:'/privacy',title:'Privacy Policy | Know Your Mind',description:'How Know Your Mind handles on-device check-ins, optional encrypted account reports, sign-in, signup notifications and optional analytics.'},
  'terms.html':{path:'/terms',title:'Terms of Use | Know Your Mind',description:'Read the terms for Know Your Mind’s self-reflection tools, reports and accounts, including the limits of this non-diagnostic wellbeing tool.'},
 };
+for(const guide of guides)pages[guide.path.slice(1)+'.html']=guide;
 const esc=s=>s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 const shell=(heading,intro,body)=>`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${heading}</title><link rel="stylesheet" href="mental.css?v=mh-16"><link rel="stylesheet" href="site-header.css?v=layout-2"><link rel="stylesheet" href="public-pages.css?v=1"></head><body><a class="mh-skip-link" href="#main">Skip to content</a>${siteHeaderMarkup()}<main id="main" class="public-page"><a class="public-back" href="./">Know Your Mind</a><header><p class="mh-kicker">A MOMENT FOR YOUR MIND</p><h1>${heading}</h1><p class="public-intro">${intro}</p></header>${body}<aside class="public-cta"><h2>Make a little room for reflection.</h2><p>You can start without creating an account.</p><a class="mh-primary" href="./?start=1">Start my free check-in →</a><a href="./report-preview.html">Explore a sample report</a></aside></main><footer class="public-footer"></footer><script type="module" src="site-header.mjs?v=layout-2"></script><script type="module" src="feedback.mjs?v=brand-2"></script></body></html>`;
 await writeFile('dist/how-it-works.html',shell('How the check-in works.','36 questions. Six areas of everyday life. A clearer view of the responses you chose.',`
@@ -31,10 +33,13 @@ const faq=[
  ['Do I need to take the check-in every day?','No. Choose a pace that is useful to you. The chart adds a point when you save a check-in; it does not invent scores for the days in between.'],
  ['Can I delete a report?','Yes. My reports lets you delete an account report or a report on this browser. These are separate copies. PDFs or other downloads remain until you remove them from your device.'],
  ['Which languages are supported?','The questionnaire offers 20 languages. Report explanations are available in English and Hindi. Where a full report translation is unavailable, the site explains the fallback before you continue.'],
- ['What data goes to Slack or Google Analytics?','Signup alerts contain selected account details such as name, verified email, sign-in method and signup time. Questionnaire answers and report content are excluded. Optional Google Analytics measures public-page visits only, after you allow analytics. It does not receive your answers, reports, name, email or account ID.'],
+ ['What data goes to Slack or Google Analytics?','Signup alerts contain selected account details such as name, verified email, sign-in method and signup time. Questionnaire answers and report content are excluded. After you allow analytics, Google Analytics measures public-page visits and Know Your Mind counts daily check-in starts and completions separately. It does not receive your answers, reports, name, email or account ID.'],
  ['How do I change my analytics choice?','Use Analytics preferences in the footer. Declining analytics does not stop you from using the check-in or saving reports.'],
 ];
 await writeFile('dist/faq.html',shell('Your questions, answered.','A guide to your check-in, saved reports and privacy.',`<section class="public-faq">${faq.map(([q,a])=>`<details><summary>${q}</summary><p>${a}</p></details>`).join('')}</section><p>Read more in <a href="./how-it-works.html">How it works</a>, our <a href="./privacy.html">Privacy Policy</a> and <a href="./terms.html">Terms of Use</a>.</p>`));
+for(const guide of guides){
+ await writeFile('dist'+guide.path+'.html',shell(guide.heading,guide.intro,guide.body));
+}
 for(const [file,page] of Object.entries(pages)){
  let html=await readFile('dist/'+file,'utf8');
  html=html.replace(/<title>[\s\S]*?<\/title>/i,'').replace(/<meta\b[^>]*(?:name|property)=["'](?:description|robots|og:[^"']*|twitter:[^"']*)["'][^>]*>/gi,'').replace(/<link\b[^>]*rel=["'](?:canonical|icon|apple-touch-icon)["'][^>]*>/gi,'');
@@ -45,12 +50,12 @@ for(const [file,page] of Object.entries(pages)){
  {'@type':'WebApplication',name:'Know Your Mind',url:base+'/',applicationCategory:'HealthApplication',operatingSystem:'Web',isAccessibleForFree:true,description:'A free 36-question self-reflection check-in. Not a clinical test or diagnosis.'}
  ]}:null;
  if(schema)html=html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g,'');
- const metadata=`<!-- SEO START --><title>${esc(page.title)}</title><meta name="description" content="${esc(page.description)}"><link rel="canonical" href="${base+page.path}"><meta name="robots" content="index,follow"><meta property="og:site_name" content="Know Your Mind"><meta property="og:type" content="website"><meta property="og:title" content="${esc(page.title)}"><meta property="og:description" content="${esc(page.description)}"><meta property="og:url" content="${base+page.path}"><meta property="og:image" content="${base}/assets/knowyourmind-social-cover.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Know Your Mind — A moment for your mind"><meta name="twitter:card" content="summary_large_image"><link rel="icon" type="image/png" sizes="96x96" href="assets/knowyourmind-favicon-96.png"><link rel="apple-touch-icon" sizes="512x512" href="assets/knowyourmind-logo-512.png">${schema?`<script type="application/ld+json">${JSON.stringify(schema)}</script>`:''}<link rel="stylesheet" href="public-pages.css?v=1"><link rel="stylesheet" href="analytics.css?v=1"><!-- SEO END -->`;
+ const metadata=`<!-- SEO START --><title>${esc(page.title)}</title><meta name="description" content="${esc(page.description)}"><link rel="canonical" href="${base+page.path}"><meta name="robots" content="index,follow"><meta property="og:site_name" content="Know Your Mind"><meta property="og:type" content="website"><meta property="og:title" content="${esc(page.title)}"><meta property="og:description" content="${esc(page.description)}"><meta property="og:url" content="${base+page.path}"><meta property="og:image" content="${base}/assets/knowyourmind-social-cover.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Know Your Mind — A moment for your mind"><meta name="twitter:card" content="summary_large_image"><link rel="icon" type="image/png" sizes="96x96" href="assets/knowyourmind-favicon-96.png"><link rel="apple-touch-icon" sizes="512x512" href="assets/knowyourmind-logo-512.png">${schema?`<script type="application/ld+json">${JSON.stringify(schema)}</script>`:''}<link rel="stylesheet" href="public-pages.css?v=1"><link rel="stylesheet" href="analytics.css?v=2"><!-- SEO END -->`;
  html=html.replace('</head>',metadata+'</head>');
  html=html.replace(/<footer\b[^>]*>[\s\S]*?<\/footer>/,siteFooterMarkup({app:file==='index.html'}));
  html=html.replace(/<link rel="stylesheet" href="site-footer.css[^"]*">/g,'').replace('</head>','<link rel="stylesheet" href="site-footer.css?v=1"></head>');
- html=html.replace(/<script type="module" src="\/?analytics\.mjs\?v=1"><\/script>/g,'');
- if(file!=='index.html')html=html.replace('</body>','<script type="module" src="analytics.mjs?v=1"></script></body>');
+ html=html.replace(/<script type="module" src="\/?analytics\.mjs\?v=\d+"><\/script>/g,'');
+ if(file!=='index.html')html=html.replace('</body>','<script type="module" src="analytics.mjs?v=2"></script></body>');
  await writeFile('dist/'+file,html.replace(/[ \t]+$/gm,''));
 }
 // Keep legacy experiments, private account controls and secondary demos out of search.
@@ -58,5 +63,5 @@ for(const file of await readdir('dist')){
  if(!file.endsWith('.html')||pages[file]||file==='admin.html')continue;
  let html=await readFile('dist/'+file,'utf8');html=html.replace(/<meta\b[^>]*name=["']robots["'][^>]*>/gi,'').replace('</head>','<meta name="robots" content="noindex,follow"></head>');await writeFile('dist/'+file,html.replace(/[ \t]+$/gm,''));
 }
-await writeFile('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${Object.values(pages).map(page=>`  <url><loc>${base+page.path}</loc><lastmod>2026-11-26</lastmod></url>`).join('\n')}\n</urlset>\n`);
+await writeFile('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${Object.values(pages).map(page=>`  <url><loc>${base+page.path}</loc><lastmod>${['/how-it-works','/terms'].includes(page.path)?'2026-11-26':'2026-11-28'}</lastmod></url>`).join('\n')}\n</urlset>\n`);
 console.log('Rendered public information pages, canonical metadata, site identity and sitemap.');
