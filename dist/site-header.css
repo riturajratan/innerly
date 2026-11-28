@@ -20,7 +20,7 @@ body .innerly-header.innerly-header :is(a,button,select):focus-visible{outline:3
 html{scroll-padding-top:calc(var(--site-header-height,88px) + 16px)}
 @media(max-width:920px){
  body .innerly-header.innerly-header{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'brand tools' 'nav nav';gap:8px 10px;min-height:120px;padding:12px 16px}
- body .innerly-header.innerly-header .innerly-brand{grid-area:brand;font-size:19px;letter-spacing:-.5px;gap:5px}
+ body .innerly-header.innerly-header .innerly-brand{grid-area:brand;font-size:clamp(16px,4.5vw,19px);letter-spacing:-.5px;gap:5px;white-space:nowrap}
  body .innerly-header.innerly-header .innerly-brand img{width:32px;height:32px}
  body .innerly-header.innerly-header .innerly-header-tools{grid-area:tools;gap:6px}
  body .innerly-header.innerly-header select{max-width:116px;font-size:16px;padding:9px 8px}
@@ -35,5 +35,3 @@ body.mh-large main:not(.report-main):not(#app)>:is(p,ul,ol),body.mh-large .legal
 body.mh-large .report-main :is(.area-caption,.insight p,.plan-copy>p,.fine-print,.qe-panel-heading>p){font-size:17px;line-height:1.8}
 body.mh-large .report-main :is(.qe-question-title,.qe-position-reading>span>b){font-size:20px}
 @media(max-width:920px){body .site-header.innerly-header{grid-template-areas:'brand brand' 'nav nav' 'tools tools'}body .site-header.innerly-header nav{justify-content:center}body .site-header.innerly-header .innerly-brand{justify-self:center}body .site-header.innerly-header .innerly-header-tools{justify-content:center}body .site-header.innerly-header .reading-tools{display:flex;gap:6px}}
-
-@media(max-width:920px){body .innerly-header.innerly-header .innerly-brand>span{max-width:6em;white-space:normal}body .innerly-header.innerly-header .innerly-brand{white-space:normal}}
